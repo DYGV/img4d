@@ -7,6 +7,7 @@ import std.stdio,
        std.range;
 import std.file : read, exists;
 import std.digest.crc : CRC32,crc32Of;
+
 void main(){}
 
 struct PNG_Header {
@@ -39,8 +40,9 @@ private PNG_Header read_IHDR(ref ubyte[] header,ref int idx){
 }
 
 int read_data_chunk_len(ref ubyte[] data,ref int idx){
-  return data[idx .. idx+4].peek!int();
+    return data[idx .. idx+4].peek!int();
 }
+
 string  read_chunk_type(ref ubyte[] data,int type_idx){
     return cast(string)data[type_idx .. type_idx+4];
 }
@@ -54,8 +56,8 @@ ubyte[] read_idat(ref ubyte[]data,int idx,int length){
 }
 
 void crc_check(ubyte[]crc, in ubyte[]chunk){
-  reverse(crc[]);
-  if (crc != crc32Of(chunk)){
+    reverse(crc[]);
+    if (crc != crc32Of(chunk)){
         throw new Exception("invalid");
     }
 }
@@ -65,7 +67,7 @@ auto inverse_filtering(ref ubyte[] data){
     data.remove(0); // => actual data 
     switch(type){
         case 0: // None
-          break;
+            break;
         case 1: // Sub
             break;
         case 2: // Up
@@ -136,8 +138,7 @@ auto parse(string filename){
 
             default:  // except for IHDR, IDAT, IEND
                 writeln(chunk_type);
-                idx += length+4;
-                
+                idx += length+4;             
         }
     }
 }
