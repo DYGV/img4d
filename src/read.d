@@ -7,7 +7,6 @@ import std.stdio,
        std.range;
 import std.file : read, exists;
 import std.digest.crc : CRC32,crc32Of;
-
 void main(){}
 
 struct PNG_Header {
@@ -39,15 +38,14 @@ private PNG_Header read_IHDR(ref ubyte[] header,ref int idx){
     return IHDR;
 }
 
-int read_data_chunk_len(ref ubyte[] data,ref int idx){
-    return data[idx .. idx+4].peek!int();
+private int read_data_chunk_len(ref ubyte[] data, ref int idx){
+  return data[idx .. idx+4].peek!int();
 }
-
-string  read_chunk_type(ref ubyte[] data,int type_idx){
+private string read_chunk_type(ref ubyte[] data,in int type_idx){
     return cast(string)data[type_idx .. type_idx+4];
 }
 
-ubyte[] read_idat(ref ubyte[]data,int idx,int length){
+private ubyte[] read_idat(ref ubyte[]data,in int idx,in int length){
     ubyte[] data_crc = [0x49, 0x44, 0x41, 0x54];
     data_crc ~= data[idx .. length];
     ubyte[] crc = data[length .. length+4];
@@ -55,17 +53,26 @@ ubyte[] read_idat(ref ubyte[]data,int idx,int length){
     return data[idx .. length];
 }
 
-void crc_check(ubyte[]crc, in ubyte[]chunk){
-    reverse(crc[]);
-    if (crc != crc32Of(chunk)){
+private void crc_check(ubyte[]crc, in ubyte[]chunk){
+  reverse(crc[]);
+  if (crc != crc32Of(chunk)){
         throw new Exception("invalid");
     }
 }
 
 auto inverse_filtering(ref ubyte[] data){
+    int[] actual_data;  
     int type = data[0];
-    data.remove(0); // => actual data 
-    switch(type){
+    
+    // Sub 
+    data.remove(0); 
+    data[0] = 0;
+    auto chunks = chunks(data, 2);
+    chunks.each!(a => actual_data ~= a.sum < 256 ? a.sum : a.sum - 256);
+    //writeln(actual_data);
+
+    /*
+       switch(type){
         case 0: // None
             break;
         case 1: // Sub
@@ -78,7 +85,7 @@ auto inverse_filtering(ref ubyte[] data){
             break;
         default:
             break;
-    }
+    } */
 } 
 
 auto parse(string filename){
@@ -138,7 +145,8 @@ auto parse(string filename){
 
             default:  // except for IHDR, IDAT, IEND
                 writeln(chunk_type);
-                idx += length+4;             
+                idx += length+4;
+                
         }
     }
 }
