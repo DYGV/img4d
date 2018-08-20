@@ -7,6 +7,7 @@ import std.stdio,
        std.range;
 import std.file : read, exists;
 import std.digest.crc : CRC32,crc32Of;
+
 void main(){}
 
 struct PNG_Header {
@@ -21,7 +22,7 @@ struct PNG_Header {
     ubyte[] crc; 
 }
 
-private PNG_Header read_IHDR(ref ubyte[] header,ref int idx){ 
+private  PNG_Header read_IHDR(ref ubyte[] header,ref int idx){ 
     PNG_Header IHDR = {
         data_crc           : header[idx-4 .. idx+13],
         width              : header[idx .. idx+=4].peek!int(),
@@ -41,6 +42,7 @@ private PNG_Header read_IHDR(ref ubyte[] header,ref int idx){
 private int read_data_chunk_len(ref ubyte[] data, ref int idx){
   return data[idx .. idx+4].peek!int();
 }
+
 private string read_chunk_type(ref ubyte[] data,in int type_idx){
     return cast(string)data[type_idx .. type_idx+4];
 }
@@ -61,31 +63,31 @@ private void crc_check(ubyte[]crc, in ubyte[]chunk){
 }
 
 auto inverse_filtering(ref ubyte[] data){
-    int[] actual_data;  
+    int[] actual_data;
     int type = data[0];
-    
-    // Sub 
     data.remove(0); 
-    data[0] = 0;
-    auto chunks = chunks(data, 2);
-    chunks.each!(a => actual_data ~= a.sum < 256 ? a.sum : a.sum - 256);
-    //writeln(actual_data);
-
-    /*
-       switch(type){
+    
+    switch(type){
         case 0: // None
-            break;
-        case 1: // Sub
+            data.each!(a => actual_data ~= a );
+            return actual_data;
+
+      /*  case 1: // Sub
             break;
         case 2: // Up
             break;
         case 3: // Average
             break;
         case 4: // Paeth
-            break;
+            break;  */
+        
+        // Sub filter
         default:
-            break;
-    } */
+            data[0] = 0;
+            auto chunks = chunks(data, 2);
+            chunks.each!(a => actual_data ~= a.sum < 256 ? a.sum : a.sum - 256);
+            return actual_data;
+    }
 } 
 
 auto parse(string filename){
@@ -99,6 +101,8 @@ auto parse(string filename){
     string chunk_type;
     ubyte[] idat, unc_idat;
     int img_height;
+    int [] actual_data;
+    PNG_Header info;
 
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");
@@ -107,11 +111,11 @@ auto parse(string filename){
     while (idx >= 0){
         length = read_data_chunk_len(data, idx);
         chunk_type = read_chunk_type(data, idx+length_size);
-        idx+=8;
+        idx += 8;
         switch(chunk_type){
             case "IHDR":
                 writeln("In IHDR");
-                PNG_Header info = read_IHDR(data, idx);
+                info = read_IHDR(data, idx);
                 writefln("Width  %8d\nHeight  %7d",
                           info.width,
                           info.height);
@@ -119,7 +123,6 @@ auto parse(string filename){
                           info.bit_depth, 
                           info.color_type, 
                           info.compression_method);
-                img_height = info.height;
                 break;
             
             case "IDAT":
@@ -128,14 +131,14 @@ auto parse(string filename){
                 idx+=length+4;
                 UnCompress uc = new UnCompress(HeaderFormat.deflate);
                 unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
-                if(unc_idat.length % img_height!=0)
+                if(unc_idat.length % info.height!=0)
                     throw new Exception("there is something wrong with length of uncompressed idat");
-                int bpp = unc_idat.length / img_height;
+                int bpp = unc_idat.length / info.height;
                 auto chunks = chunks(unc_idat, bpp);
                 write("filter type method => ");
                 chunks.each!(a => write(a.front,","));  // filter method per line  
-                chunks.each!(a => a.inverse_filtering);
-                writeln();
+                chunks.each!(a =>  actual_data ~= a.inverse_filtering);
+                //writeln(actual_data);
                 break;
           
             case "IEND": 
@@ -152,7 +155,7 @@ auto parse(string filename){
 }
 
 unittest{
-   parse("../png_img/lena.png");
+   parse("../png_img/67.png");
 }
 
 
