@@ -94,6 +94,9 @@ auto parse(string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[] data = cast(ubyte[]) read(filename);
+    string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
+                                "iTXt","bKGD","pHYs","sBIT","sPLT","hIST","tIME",
+                                "fRAc","gIFg","gIFt","gIFx","oFFs","pCAL","sCAL"];
     int idx = 0;
     int sig_size = 8;
     int length_size = 4;
@@ -138,6 +141,7 @@ auto parse(string filename){
                 write("filter type method => ");
                 chunks.each!(a => write(a.front,","));  // filter method per line  
                 chunks.each!(a =>  actual_data ~= a.inverse_filtering);
+                writeln();
                 //writeln(actual_data);
                 break;
           
@@ -147,6 +151,8 @@ auto parse(string filename){
                 break;
 
             default:  // except for IHDR, IDAT, IEND
+                if (!ancillary_chunks.canFind(chunk_type))
+                    throw new Exception("Invalid png format");
                 writeln(chunk_type);
                 idx += length+4;
                 
@@ -155,7 +161,7 @@ auto parse(string filename){
 }
 
 unittest{
-   parse("../png_img/67.png");
+   parse("../png_img/lena.png");
 }
 
 
