@@ -7,7 +7,7 @@ import std.stdio,
        std.range;
 import std.file : read, exists;
 import std.digest.crc : CRC32,crc32Of;
-
+import std.range.primitives;
 void main(){}
 
 struct PNG_Header {
@@ -64,6 +64,7 @@ private void crc_check(ubyte[]crc, in ubyte[]chunk){
 
 auto inverse_filtering(ref ubyte[] data){
     int[] actual_data;
+    int[][] arr_rgb;
     int type = data[0];
     data.remove(0); 
     
@@ -83,10 +84,14 @@ auto inverse_filtering(ref ubyte[] data){
         
         // Sub filter
         default:
-            data[0] = 0;
-            auto chunks = chunks(data, 2);
-            chunks.each!(a => actual_data ~= a.sum < 256 ? a.sum : a.sum - 256);
-            return actual_data;
+            auto chunk = chunks(data, 3);
+            chunk.front.walkLength.iota
+                .map!(i => transversal(chunk, i))
+                .each!(arr => arr_rgb ~= chain(arr).cumulativeFold!
+                "a + b < 256 ?  a + b : a + b - 256".array);
+            
+            return arr_rgb.front.walkLength.iota
+                      .map!(i => transversal(arr_rgb,  i)).join;
     }
 } 
 
@@ -95,7 +100,7 @@ auto parse(string filename){
         throw new Exception("Not found the file.");
     ubyte[] data = cast(ubyte[]) read(filename);
     string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
-                                "iTXt","bKGD","pHYs","sBIT","sPLT","hIST","tIME",
+                                "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
                                 "fRAc","gIFg","gIFt","gIFx","oFFs","pCAL","sCAL"];
     int idx = 0;
     int sig_size = 8;
@@ -104,7 +109,7 @@ auto parse(string filename){
     string chunk_type;
     ubyte[] idat, unc_idat;
     int img_height;
-    int [] actual_data;
+    int [][] actual_data;
     PNG_Header info;
 
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
@@ -142,7 +147,6 @@ auto parse(string filename){
                 chunks.each!(a => write(a.front,","));  // filter method per line  
                 chunks.each!(a =>  actual_data ~= a.inverse_filtering);
                 writeln();
-                //writeln(actual_data);
                 break;
           
             case "IEND": 
@@ -151,17 +155,23 @@ auto parse(string filename){
                 break;
 
             default:  // except for IHDR, IDAT, IEND
-                if (!ancillary_chunks.canFind(chunk_type))
-                    throw new Exception("Invalid png format");
-                writeln(chunk_type);
-                idx += length+4;
-                
+                  if (!ancillary_chunks.canFind(chunk_type))
+                      throw new Exception("Invalid png format"); 
+                  writeln(chunk_type);
+                  idx += length+4;
         }
     }
 }
 
 unittest{
-   parse("../png_img/lena.png");
+    ubyte[] IHDR_hex = [0x49, 0x48, 0x44, 0x52];
+    ubyte[] IDAT_hex = [0x49, 0x44, 0x41, 0x54];
+    ubyte[] IEND_hex = [0x49, 0x45, 0x4E, 0x44];
+    assert(read_chunk_type(IHDR_hex, 0) == "IHDR");
+    assert(read_chunk_type(IDAT_hex, 0) == "IDAT");
+    assert(read_chunk_type(IEND_hex, 0) == "IEND");
+
+    parse("../png_img/lena.png");
 }
 
 
