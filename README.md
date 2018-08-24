@@ -12,7 +12,7 @@
 ↑ なんとなく三角形だがなぜか二値化されたようになっている  
   
 ![lena](https://user-images.githubusercontent.com/8480644/44565484-4beaff80-a7a3-11e8-98f4-7abe6a0707b0.png)  
-↑ NoneとSubと帽子がなんとなく表現されているのがわかるだけ
+↑ 帽子がなんとなく表現されているのがわかるだけ
 
 
 
