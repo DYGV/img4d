@@ -7,12 +7,6 @@
 - 逆フィルタリング処理  
 - DIBオブジェクト作成  
 - ウィンドウに画像表示  
-## 現状  (NoneとSubフィルターだけを適応)   
-![tri](https://user-images.githubusercontent.com/8480644/44565390-d54e0200-a7a2-11e8-9e86-145ce42987fc.png)  
-↑ なんとなく三角形だがなぜか二値化されたようになっている  
-  
-![lena](https://user-images.githubusercontent.com/8480644/44565484-4beaff80-a7a3-11e8-98f4-7abe6a0707b0.png)  
-↑ 帽子がなんとなく表現されているのがわかるだけ
-
-
-
+## 現状  
+[**その１**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/001.md)  
+[**その２**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/002.md) (最新)  
