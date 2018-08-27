@@ -66,7 +66,7 @@ private void crc_check(ubyte[]crc, in ubyte[]chunk){
     }
 }
 
-auto inverse_filtering(ref ubyte[] data, int color_type = 0){
+auto inverse_filtering(ref ubyte[] data){
     int[] actual_data;
     int[][] arr_rgb;
     int need_to_fill_num; 
