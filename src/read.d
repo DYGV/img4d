@@ -8,6 +8,10 @@ import std.stdio,
 import std.file : read, exists;
 import std.digest.crc : CRC32,crc32Of;
 import std.range.primitives;
+import std.algorithm.mutation;
+
+int length_per_pixel;
+
 void main(){}
 
 struct PNG_Header {
@@ -34,7 +38,7 @@ private  PNG_Header read_IHDR(ref ubyte[] header,ref int idx){
         interlace_method   : header[idx+=1],
         crc                : header[idx+=1 .. idx+=4],
     };
-      
+    length_per_pixel = IHDR.color_type == 6 ? 4 : 3;  
     crc_check(IHDR.crc, IHDR.data_crc);
     return IHDR;
 }
@@ -62,11 +66,19 @@ private void crc_check(ubyte[]crc, in ubyte[]chunk){
     }
 }
 
-auto inverse_filtering(ref ubyte[] data){
+auto inverse_filtering(ref ubyte[] data, int color_type = 0){
     int[] actual_data;
     int[][] arr_rgb;
+    int need_to_fill_num; 
     int type = data[0];
-    data.remove(0); 
+   
+    data.remove(0);
+    need_to_fill_num = data.length % length_per_pixel;
+
+    if(need_to_fill_num != 0){
+        foreach(i; need_to_fill_num .. length_per_pixel)
+            data ~= 0;
+    }
     
     switch(type){
         case 0: // None
@@ -84,14 +96,15 @@ auto inverse_filtering(ref ubyte[] data){
         
         // Sub filter
         default:
-            auto chunk = chunks(data, 3);
+            auto chunk = chunks(data, length_per_pixel);
             chunk.front.walkLength.iota
                 .map!(i => transversal(chunk, i))
                 .each!(arr => arr_rgb ~= chain(arr).cumulativeFold!
                 "a + b < 256 ?  a + b : a + b - 256".array);
             
             return arr_rgb.front.walkLength.iota
-                      .map!(i => transversal(arr_rgb,  i)).join;
+                      .map!(i => transversal(arr_rgb, i)).join;
+          
     }
 } 
 
@@ -105,11 +118,13 @@ auto parse(string filename){
     int idx = 0;
     int sig_size = 8;
     int length_size = 4;
+    int rgb=void;
+
     int length;
     string chunk_type;
     ubyte[] idat, unc_idat;
     int img_height;
-    int [][] actual_data;
+    int [][][] actual_data;
     PNG_Header info;
 
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
@@ -145,8 +160,8 @@ auto parse(string filename){
                 auto chunks = chunks(unc_idat, bpp);
                 write("filter type method => ");
                 chunks.each!(a => write(a.front,","));  // filter method per line  
-                chunks.each!(a =>  actual_data ~= a.inverse_filtering);
-                writeln();
+                
+                chunks.each!(a => actual_data ~= inverse_filtering(a).chunks(length_per_pixel).array);
                 break;
           
             case "IEND": 
@@ -173,5 +188,4 @@ unittest{
 
     parse("../png_img/lena.png");
 }
-
 
