@@ -9,4 +9,5 @@
 - ウィンドウに画像表示  
 ## 現状  
 [**その１**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/001.md)  
-[**その２**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/002.md) (最新)  
+[**その２**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/002.md)    
+[**その３**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/003.md) (最新)
