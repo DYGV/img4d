@@ -103,14 +103,26 @@ auto inverse_filtering(ref ubyte[][] data){
                   break;
 
               case 3: // Average
-                  int[] up_pixel = actual_data.back;
-                  foreach(idx,elem; up_pixel){
-                  temp_array ~= idx == 0 ?
-                                (elem/2) + scanline_data[idx] : 
-                                scanline_data[idx]+((scanline_data[idx-1] + elem)/2);
-                  }
-                  actual_data ~= [temp_array.map!(n =>  n < 256 ? n : n - 256).array];
-                break;
+                  int [] actual_data_back = actual_data.back;
+                  auto up = chunks(actual_data_back, length_per_pixel);
+                  auto current = chunks(scanline_data, length_per_pixel);
+                  auto up_pixel = *cast(int[]*)&up;
+                  scanline_data.popFrontN(length_per_pixel);
+              
+                  up[0][].each!((n,a)=> 
+                      temp_array ~=
+                          (a/2) + current[0][n]  < 256 ?  
+                          (a/2) + current[0][n] : 
+                          (a/2) + current[0][n] - 256 );
+               
+                  up_pixel[length_per_pixel .. $].each!((o,n)=> 
+                      temp_array ~= 
+                          (((temp_array[o]+n)/2)+scanline_data[o]) < 256 ?
+                          ((temp_array[o]+n)/2)+scanline_data[o] :
+                          ((temp_array[o]+n)/2)+scanline_data[o] - 256);
+                  actual_data ~= [temp_array];
+              
+                  break;
 
               /*case 4: // Paeth
                 break;  */      
