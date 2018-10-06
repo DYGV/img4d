@@ -5,7 +5,8 @@ import std.stdio,
        std.zlib,
        std.conv,
        std.algorithm,
-       std.range;
+       std.range,
+       std.math;
 import std.file : read, exists;
 import std.digest.crc : CRC32,crc32Of;
 import std.range.primitives;
@@ -65,6 +66,20 @@ private void crc_check(ubyte[]crc, in ubyte[]chunk){
     }
 }
 
+int PaethPredictor(int left, int upper, int upper_left)
+{
+    int paeth = left + upper - upper_left;
+    int paeth_left = abs(paeth - left);    
+    int paeth_upper = abs(paeth - upper);    
+    int paeth_upper_left = abs(paeth - upper_left);
+
+    if (paeth_left <= paeth_upper && paeth_left <= paeth_upper_left)
+        return left;
+    if (paeth_upper <= paeth_upper_left)
+        return upper;   
+    return upper_left;
+}
+
 //private auto normalize_pixel_value(int [] value){ return value.map!(n => n < 256 ? n : n - 256).array; }
 
 auto inverse_filtering(ref ubyte[][] data){
@@ -77,7 +92,8 @@ auto inverse_filtering(ref ubyte[][] data){
     data.each!(sc => arr_rgb ~= [sc.remove(0).chunks(length_per_pixel).array]);
 	
     foreach(idx,sc_data; arr_rgb){
-        int[] temp;     
+        int[] temp;
+        int[] predictor;
         int[] actual_data_back;
 
         switch(filtering_type[idx]){           
@@ -86,7 +102,7 @@ auto inverse_filtering(ref ubyte[][] data){
             	actual_data ~= [temp.array]; 	
             	break;
             
-            case 1, 4:
+            case 1:
                 actual_data ~= [sc_data.front.walkLength.iota
                                 .map!(i => transversal(sc_data, i).chain.cumulativeFold!"a + b < 256 ?  a + b : a + b - 256")]
                                 .join.transposed.join;
@@ -119,6 +135,17 @@ auto inverse_filtering(ref ubyte[][] data){
                   	
             	actual_data ~= [temp];
             	break;
+            case 4:
+                predictor ~= actual_data.back[0 .. length_per_pixel];
+                actual_data.back[length_per_pixel .. $].each!((idx, a) => 
+                      predictor ~= PaethPredictor(predictor[idx], a, actual_data.back[idx]));
+                sc_data.join.each!((idx,a) =>  
+                    (a + predictor[idx]) < 256 
+                    ? temp ~= (a + predictor[idx]) 
+                    : temp ~= (a + predictor[idx]) - 256);
+                actual_data ~= [temp];  
+                break;
+
   	    default:
                 break;
         }       
