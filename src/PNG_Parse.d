@@ -1,4 +1,4 @@
-module PNG_Parser;
+module PNG_Parse;
 import std.stdio,
        std.array,
        std.bitmanip,

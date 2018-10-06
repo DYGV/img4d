@@ -1,4 +1,4 @@
-import PNG_Parser;
+import PNG_Parse;
 import std.stdio,
        std.range,
        std.algorithm.iteration;
