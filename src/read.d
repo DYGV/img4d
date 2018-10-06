@@ -1,3 +1,4 @@
+module PNG_Parser;
 import std.stdio,
        std.array,
        std.bitmanip,
@@ -11,8 +12,6 @@ import std.range.primitives;
 import std.algorithm.mutation;
 
 int length_per_pixel;
-
-void main(){}
 
 struct PNG_Header {
     ubyte[] data_crc;
@@ -66,73 +65,65 @@ private void crc_check(ubyte[]crc, in ubyte[]chunk){
     }
 }
 
+//private auto normalize_pixel_value(int [] value){ return value.map!(n => n < 256 ? n : n - 256).array; }
+
 auto inverse_filtering(ref ubyte[][] data){
+    ubyte[][][] arr_rgb;  
+    int[][][] comp_data;
+    int[] filtering_type;
     int[][] actual_data;
-    int[][][] kk;
+    
+    data.each!(sc => filtering_type ~= sc.front);
+    data.each!(sc => arr_rgb ~= [sc.remove(0).chunks(length_per_pixel).array]);
+	
+    foreach(idx,sc_data; arr_rgb){
+        int[] temp;     
+        int[] actual_data_back;
 
-    foreach(scanline_data; data){
-        int[][] arr_rgb;
-        int[] temp_array;
-        int type = scanline_data[0];   
-        scanline_data.popFrontN(1);
-
-        switch(type){
-            case 0: // None
-                scanline_data.each!(a => temp_array ~= a);  
-                actual_data ~= [temp_array];
-                break;
-
-             case 1, 4: // Sub 
-                  auto chunk = chunks(scanline_data, length_per_pixel);
-                  chunk.front.walkLength.iota
-                      .map!(i => transversal(chunk, i))
-                      .each!(arr => arr_rgb ~= chain(arr).cumulativeFold!
-                      "a + b < 256 ?  a + b : a + b - 256".array);
+        switch(filtering_type[idx]){           
+            case 0:
+                sc_data.each!(a => a.each!(b => temp~= b));	
+            	actual_data ~= [temp.array]; 	
+            	break;
             
-                  actual_data ~= arr_rgb.front.walkLength.iota
-                        .map!(i => transversal(arr_rgb, i)).join;
-                  break;
+            case 1, 4:
+                actual_data ~= [sc_data.front.walkLength.iota
+                                .map!(i => transversal(sc_data, i).chain.cumulativeFold!"a + b < 256 ?  a + b : a + b - 256")]
+                                .join.transposed.join;
+            	break;
+            
+            case 2:
+            	int[] up_pixel = actual_data.back;
+                sc_data.each!(a => a.each!(b => temp~= b));
+            
+                actual_data ~=  [up_pixel,temp].front.walkLength.iota
+                      		.map!(i => transversal([up_pixel,temp], i).sum)
+                      	        .map!(n => n < 256 ? n : n - 256).array;
+                break;
+	    
+            case 3:
+                actual_data_back = actual_data.back;
+                auto up = chunks(actual_data_back, length_per_pixel);
+                auto current = chunks(sc_data, length_per_pixel);
+                int[] up_pixel = *cast(int[]*)&up;
+            	sc_data.popFront;            		
+            	auto sc = sc_data.join;
+                up[0].each!((idx,n) =>temp ~= ((n/2) + current[0][0][idx]) < 256 
+                                ? ((n/2) + current[0][0][idx])
+                       		: ((n/2) + current[0][0][idx]) - 256);
 
-              case 2: // Up                  
-                  int[] up_pixel = actual_data.back;
-                  scanline_data.each!(a => temp_array ~= a);
-
-                  actual_data ~=  [up_pixel,temp_array].front.walkLength.iota
-                      .map!(i => transversal([up_pixel,temp_array], i).sum)
-                      .map!(n => n < 256 ? n : n - 256).array;
-                  break;
-
-              case 3: // Average
-                  int [] actual_data_back = actual_data.back;
-                  auto up = chunks(actual_data_back, length_per_pixel);
-                  auto current = chunks(scanline_data, length_per_pixel);
-                  auto up_pixel = *cast(int[]*)&up;
-                  scanline_data.popFrontN(length_per_pixel);
-              
-                  up[0][].each!((n,a)=> 
-                      temp_array ~=
-                          (a/2) + current[0][n]  < 256 ?  
-                          (a/2) + current[0][n] : 
-                          (a/2) + current[0][n] - 256 );
-               
-                  up_pixel[length_per_pixel .. $].each!((o,n)=> 
-                      temp_array ~= 
-                          (((temp_array[o]+n)/2)+scanline_data[o]) < 256 ?
-                          ((temp_array[o]+n)/2)+scanline_data[o] :
-                          ((temp_array[o]+n)/2)+scanline_data[o] - 256);
-                  actual_data ~= [temp_array];
-              
-                  break;
-
-              /*case 4: // Paeth
-                break;  */      
-
-              default:
-                  break;
-        }
-    }   
-    actual_data.each!(n  => kk~= n.chunks(length_per_pixel).array);
-    return kk;
+                up_pixel[length_per_pixel .. $].each!((o,n)=>  
+                                      temp ~= (((temp[o] + n)/2) + sc[o]) < 256
+                                ? ((temp[o] + n) / 2) + sc[o]
+                                : (((temp[o] + n) / 2) + sc[o]) - 256);
+                  	
+            	actual_data ~= [temp];
+            	break;
+  	    default:
+                break;
+        }       
+    }
+    return actual_data;
 }
  
 
@@ -146,14 +137,15 @@ auto parse(string filename){
     int idx = 0;
     int sig_size = 8;
     int length_size = 4;
-    int rgb = void;
 
     int length;
-    string chunk_type;
-    ubyte[] idat; 
-    ubyte[]unc_idat;
     int img_height;
-    int[][][] actual_data;
+    string chunk_type;
+    int[][] actual_data;
+    ubyte[] idat; 
+
+    ubyte[]unc_idat;
+
     PNG_Header info;
 
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
@@ -183,11 +175,11 @@ auto parse(string filename){
                 idx+=length+4;
                 UnCompress uc = new UnCompress(HeaderFormat.deflate);
                 unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
-                int pixel_per_line = unc_idat.length / info.height;
-                auto  chunks =chunks(unc_idat, pixel_per_line).array;
+                if(unc_idat.length % info.height!=0)
+                    throw new Exception("there is something wrong with length of uncompressed idat");
+                int bpp = unc_idat.length / info.height;
+                auto  chunks =chunks(unc_idat, bpp).array;
                 ubyte[][] unc_chunks= *cast(ubyte[][]*)&chunks;
-                write("filter type method => ");
-                chunks.each!(a => write(a.front,","));  // filter method per line 
                 actual_data = inverse_filtering(unc_chunks);
                 break;
           
@@ -203,16 +195,5 @@ auto parse(string filename){
                   idx += length+4;
         }
     }
+        return actual_data; 
 }
-
-unittest{
-    ubyte[] IHDR_hex = [0x49, 0x48, 0x44, 0x52];
-    ubyte[] IDAT_hex = [0x49, 0x44, 0x41, 0x54];
-    ubyte[] IEND_hex = [0x49, 0x45, 0x4E, 0x44];
-    assert(read_chunk_type(IHDR_hex, 0) == "IHDR");
-    assert(read_chunk_type(IDAT_hex, 0) == "IDAT");
-    assert(read_chunk_type(IEND_hex, 0) == "IEND");
-
-    parse("../png_img/lena.png");
-}
-
