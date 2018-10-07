@@ -10,4 +10,5 @@
 ## åªèÛ  
 [**ÇªÇÃÇP**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/001.md)  
 [**ÇªÇÃÇQ**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/002.md)    
-[**ÇªÇÃÇR**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/003.md) (ç≈êV)
+[**ÇªÇÃÇR**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/003.md)  
+[**ÇªÇÃÇS**](https://github.com/DYGV/PNG_decoder/tree/master/improvement/004.md) (ç≈êV)
