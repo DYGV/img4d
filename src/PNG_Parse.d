@@ -135,6 +135,7 @@ auto inverse_filtering(ref ubyte[][] data){
                   	
             	actual_data ~= [temp];
             	break;
+
             case 4:
                 predictor ~= actual_data.back[0 .. length_per_pixel];
                 actual_data.back[length_per_pixel .. $].each!((idx, a) => 
