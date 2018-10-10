@@ -71,8 +71,7 @@ int PaethPredictor(int left, int upper, int upper_left)
     int paeth = left + upper - upper_left;
     int paeth_left = abs(paeth - left);    
     int paeth_upper = abs(paeth - upper);    
-    int paeth_upper_left = abs(paeth - upper_left);
-
+    int paeth_upper_left = abs(paeth - upper_left);    
     if (paeth_left <= paeth_upper && paeth_left <= paeth_upper_left)
         return left;
     if (paeth_upper <= paeth_upper_left)
@@ -99,7 +98,8 @@ auto inverse_filtering(ref ubyte[][] data){
         switch(filtering_type[idx]){           
             case 0:
                 sc_data.each!(a => a.each!(b => temp~= b));	
-            	actual_data ~= [temp.array]; 	
+            	actual_data ~= [temp.array];
+                
             	break;
             
             case 1:
@@ -132,21 +132,20 @@ auto inverse_filtering(ref ubyte[][] data){
                                       temp ~= (((temp[o] + n)/2) + sc[o]) < 256
                                 ? ((temp[o] + n) / 2) + sc[o]
                                 : (((temp[o] + n) / 2) + sc[o]) - 256);
-                  	
+                      
             	actual_data ~= [temp];
-            	break;
-
+                            	break;
             case 4:
-                predictor ~= actual_data.back[0 .. length_per_pixel];
+                predictor = actual_data.back[0 .. length_per_pixel];
+                
                 actual_data.back[length_per_pixel .. $].each!((idx, a) => 
                       predictor ~= PaethPredictor(predictor[idx], a, actual_data.back[idx]));
-                sc_data.join.each!((idx,a) =>  
+                sc_data.join.each!((idx,a) => temp ~= 
                     (a + predictor[idx]) < 256 
-                    ? temp ~= (a + predictor[idx]) 
-                    : temp ~= (a + predictor[idx]) - 256);
-                actual_data ~= [temp];  
+                    ? a + predictor[idx] 
+                    : a + predictor[idx] - 256);
+                actual_data ~= [temp];
                 break;
-
   	    default:
                 break;
         }       
@@ -224,4 +223,24 @@ auto parse(string filename){
         }
     }
         return actual_data; 
+}
+
+auto to_grayscale(ref int[][][] color){
+    if (color[0][0].length != 3)
+        throw new Exception("invalid format.");
+    double[][] temp;
+    double[][] gray;
+    double[] arr = [0.3, 0.59, 0.11];
+
+    alias to_double = map!(to!double);
+    
+    color.each!(a=> a.transposed
+          .each!((idx,b)=> temp ~= to_double(b)
+          .map!(h => h*=arr[idx]).array));
+    
+    temp.chunks(3)
+          .map!(v => v.transposed)
+          .each!(h => gray ~= h.map!(n => n.sum).array);
+    
+    return gray;
 }

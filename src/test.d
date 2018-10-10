@@ -10,6 +10,12 @@ int main(){
     auto rgb_file = File("rgb_lena.txt","w");
     rgb_file.writeln(actual_data);
 
+  /*
+     covert to grayscale
+   */
+    auto gray = to_grayscale(actual_data);
+    auto gray_file = File("gray_lena.txt","w");
+    gray_file.writeln(gray);
     return 0;
 }
 
