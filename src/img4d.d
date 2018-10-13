@@ -60,10 +60,11 @@ private ubyte[] read_idat(ref ubyte[]data,in int idx,in int length){
 }
 
 private void crc_check(ubyte[]crc, in ubyte[]chunk){
-  reverse(crc[]);
-  if (crc != crc32Of(chunk)){
-        throw new Exception("invalid");
+    reverse(crc[]);
+    if (crc != crc32Of(chunk)){
+          throw new Exception("invalid");
     }
+
 }
 
 int PaethPredictor(int left, int upper, int upper_left)
@@ -79,7 +80,7 @@ int PaethPredictor(int left, int upper, int upper_left)
     return upper_left;
 }
 
-//private auto normalize_pixel_value(int [] value){ return value.map!(n => n < 256 ? n : n - 256).array; }
+private int normalize_pixel_value(int value){ return value < 256 ? value : value - 256; }
 
 auto inverse_filtering(ref ubyte[][] data){
     ubyte[][][] arr_rgb;  
@@ -124,32 +125,28 @@ auto inverse_filtering(ref ubyte[][] data){
                 int[] up_pixel = *cast(int[]*)&up;
             	sc_data.popFront;            		
             	auto sc = sc_data.join;
-                up[0].each!((idx,n) =>temp ~= ((n/2) + current[0][0][idx]) < 256 
-                                ? ((n/2) + current[0][0][idx])
-                       		: ((n/2) + current[0][0][idx]) - 256);
+                up[0].each!((idx,n) =>temp ~= ((n/2) + current[0][0][idx]).normalize_pixel_value);
 
                 up_pixel[length_per_pixel .. $].each!((o,n)=>  
-                                      temp ~= (((temp[o] + n)/2) + sc[o]) < 256
-                                ? ((temp[o] + n) / 2) + sc[o]
-                                : (((temp[o] + n) / 2) + sc[o]) - 256);
-                      
-            	actual_data ~= [temp];
-                            	break;
+                                temp ~= (((temp[o] + n)/2) + sc[o]).normalize_pixel_value);
+
+                actual_data ~= [temp];
+                break;
+
             case 4:
                 auto joined = sc_data.join;
+
                 actual_data.back[0 .. length_per_pixel]
-                                .each!((idx,a) => temp ~= (a + joined[idx]) <256
-                                ? a+ joined[idx]
-                                : a+ joined[idx] - 256);
+                                .each!((idx,a) => temp ~= (a + joined[idx]).normalize_pixel_value);
                 
-                actual_data.back[length_per_pixel .. $].each!((idx, a) => 
-                                temp ~= (PaethPredictor(temp[idx], a, actual_data.back[idx])+joined[idx + length_per_pixel]) < 256
-                                ? (PaethPredictor(temp[idx], a, actual_data.back[idx])+joined[idx + length_per_pixel])
-                                : (PaethPredictor(temp[idx], a, actual_data.back[idx])+joined[idx + length_per_pixel]) - 256);
+                actual_data.back[length_per_pixel .. $]
+                                .each!((idx, a) => 
+                                temp ~= (PaethPredictor(temp[idx], a, actual_data.back[idx]) 
+                                + joined[idx + length_per_pixel]).normalize_pixel_value);
             
                 actual_data ~= [temp];
-
                 break;
+
   	    default:
                 break;
         }       
