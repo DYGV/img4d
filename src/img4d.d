@@ -136,15 +136,19 @@ auto inverse_filtering(ref ubyte[][] data){
             	actual_data ~= [temp];
                             	break;
             case 4:
-                predictor = actual_data.back[0 .. length_per_pixel];
+                auto joined = sc_data.join;
+                actual_data.back[0 .. length_per_pixel]
+                                .each!((idx,a) => temp ~= (a + joined[idx]) <256
+                                ? a+ joined[idx]
+                                : a+ joined[idx] - 256);
                 
                 actual_data.back[length_per_pixel .. $].each!((idx, a) => 
-                      predictor ~= PaethPredictor(predictor[idx], a, actual_data.back[idx]));
-                sc_data.join.each!((idx,a) => temp ~= 
-                    (a + predictor[idx]) < 256 
-                    ? a + predictor[idx] 
-                    : a + predictor[idx] - 256);
+                                temp ~= (PaethPredictor(temp[idx], a, actual_data.back[idx])+joined[idx+3]) < 256
+                                ? (PaethPredictor(temp[idx], a, actual_data.back[idx])+joined[idx + length_per_pixel])
+                                : (PaethPredictor(temp[idx], a, actual_data.back[idx])+joined[idx + length_per_pixel]) - 256);
+            
                 actual_data ~= [temp];
+
                 break;
   	    default:
                 break;
