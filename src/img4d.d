@@ -200,8 +200,6 @@ auto parse(string filename){
                 idx+=length+4;
                 UnCompress uc = new UnCompress(HeaderFormat.deflate);
                 unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
-                if(unc_idat.length % info.height!=0)
-                    throw new Exception("there is something wrong with length of uncompressed idat");
                 int num_scanline = unc_idat.length / info.height;
                 auto chunks =chunks(unc_idat, num_scanline).array;
                 ubyte[][] unc_chunks= *cast(ubyte[][]*)&chunks;
