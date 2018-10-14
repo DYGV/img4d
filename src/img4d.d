@@ -110,10 +110,8 @@ auto inverse_filtering(ref ubyte[][] data){
             	break;
             
             case 2:
-            	int[] up_pixel = actual_data.back;
-                
                 sc_data.each!(a => a.each!(b => temp~= b));
-                actual_data ~= [(temp[] += up_pixel[]).map!(a => a.normalize_pixel_value).array];
+                actual_data ~= [(temp[] += actual_data.back[]).map!(a => a.normalize_pixel_value).array];
 
                 break;
 	    
