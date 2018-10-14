@@ -98,7 +98,7 @@ auto inverse_filtering(ref ubyte[][] data){
 
         switch(filtering_type[idx]){           
             case 0:
-                sc_data.each!(a => a.each!(b => temp~= b));	
+                sc_data.each!(a => a.each!(b => temp ~= b));	
             	actual_data ~= [temp.array];
                 
             	break;
@@ -111,11 +111,10 @@ auto inverse_filtering(ref ubyte[][] data){
             
             case 2:
             	int[] up_pixel = actual_data.back;
+                
                 sc_data.each!(a => a.each!(b => temp~= b));
-            
-                actual_data ~=  [up_pixel,temp].front.walkLength.iota
-                      		.map!(i => transversal([up_pixel,temp], i).sum)
-                      	        .map!(n => n < 256 ? n : n - 256).array;
+                actual_data ~= [(temp[] += up_pixel[]).map!(a => a.normalize_pixel_value).array];
+
                 break;
 	    
             case 3:
