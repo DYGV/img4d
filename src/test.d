@@ -16,6 +16,14 @@ int main(){
     auto gray = to_grayscale(actual_data);
     auto gray_file = File("../png_img/gray_lena.txt","w");
     gray_file.writeln(gray);
+
+  /*
+     convert to binary image
+   */
+    auto bin = to_binary(gray);
+    auto bin_file = File("../png_img/bin_lena.txt","w");
+    bin_file.writeln(bin);
+
     return 0;
 }
 

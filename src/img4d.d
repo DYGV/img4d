@@ -240,3 +240,10 @@ auto to_grayscale(ref int[][][] color){
     
     return gray;
 }
+
+int[][] to_binary(double[][] gray, double threshold=127){
+  /* Simple thresholding */
+  int[][] bin;
+  gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
+  return bin;
+}
