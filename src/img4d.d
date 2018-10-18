@@ -247,3 +247,28 @@ int[][] to_binary(double[][] gray, double threshold=127){
   gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
   return bin;
 }
+double to_adaptive_binary(double [][] gray){
+    int image_h = gray.length.to!int;
+    int image_w = gray[0].length.to!int;
+    int vicinity_h = 3;
+    int vicinity_w = 3;
+    int h = vicinity_h / 2;
+    int w = vicinity_w / 2;
+    double[][]  output;
+   
+    gray.each!((idx,a)=> output~= a.array);
+    output.each!(a=> fill(a,0));
+    
+    foreach(i; h .. image_h-h){
+        foreach(j;  w .. image_w-w){
+            int t = 0;
+            foreach(m; 0 .. vicinity_h){
+                foreach(n; 0 .. vicinity_w){      
+                    t += gray[i-h+m][j-w+n];
+                }
+            }
+    if((t/(vicinity_h*vicinity_w)) < gray[i][j]) output[i][j] = 255;
+     }        
+   }
+    return output;
+}

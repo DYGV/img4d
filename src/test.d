@@ -24,6 +24,13 @@ int main(){
     auto bin_file = File("../png_img/bin_lena.txt","w");
     bin_file.writeln(bin);
 
+  /*
+     convert ot binary image by adaptive threshoding
+   */
+    auto bin_adaptive = to_adaptive_binary(gray);
+    auto bin_adaptive_file = File("../png_img/bin_adaptive_lena.txt","w");
+    bin_adaptive_file.writeln(bin_adaptive);
+
     return 0;
 }
 
