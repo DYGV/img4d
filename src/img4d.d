@@ -247,7 +247,7 @@ int[][] to_binary(double[][] gray, double threshold=127){
   gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
   return bin;
 }
-double to_adaptive_binary(double [][] gray){
+double[][] to_adaptive_binary(double [][] gray){
     int image_h = gray.length.to!int;
     int image_w = gray[0].length.to!int;
     int vicinity_h = 3;
