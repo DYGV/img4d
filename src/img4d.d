@@ -286,3 +286,17 @@ int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
     return output;
 }
 
+double[][] differ(ref double[][] origin, ref double[][] target){
+    double[][] diff;
+    origin.each!((idx,a) => diff ~=  (target[idx][] -= a[]).map!(b => abs(b)).array);
+
+    return diff;
+}
+
+int[][] mask(ref int[][][] color_target, ref int[][] gray){
+    int[][] masked;
+    masked.length = gray.length;
+    gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? color_target[idx][edx] : [0, 0, 0]));
+  
+    return masked;
+}
