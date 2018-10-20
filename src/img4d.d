@@ -241,7 +241,7 @@ auto to_grayscale(ref int[][][] color){
     return gray;
 }
 
-int[][] to_binary(double[][] gray, double threshold=127){
+int[][] to_binary(ref double[][] gray, double threshold=127){
   /* Simple thresholding */
 
   int[][] bin;
