@@ -316,14 +316,14 @@ float[][] differential(double[][] array, double[][] filter = [[-1, 0, -1],[-2, 0
 return output;
 }
 
-double[][] gradient(double[][] gradient_x, double[][] gradient_y){
+double[][] gradient(double[][] gradient_x, double[][] gradient_y, bool approximation = false){
     int image_h = gradient_x.length.to!int;
     int image_w = gradient_x[0].length.to!int;
     double[][] output = minimallyInitializedArray!(double[][])(image_h, image_w);
     double theta;
     foreach(h; 0 .. image_h){
         foreach(w; 0 .. image_w){
-            theta = (atan2(gradient_x[h][w], gradient_y[h][w]) * 180) /PI;
+            theta = (atan2(gradient_x[h][w], gradient_y[h][w]) * 180) / PI;
 
             if(approximation){
                 if(theta >= -22.5  && theta < 22.5)   theta = 0;
