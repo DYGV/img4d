@@ -259,9 +259,8 @@ int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
     int vicinity_w = 3;
     int h = vicinity_h / 2;
     int w = vicinity_w / 2;
-    int[][]  output;
-   
-    array.each!((idx,a)=> output~= a.to!(int[]).array);
+    
+    int[][] output = minimallyInitializedArray!(int[][])(image_h, image_w);
     output.each!(a=> fill(a,0));
     
     foreach(i; h .. image_h-h){
@@ -298,9 +297,8 @@ float[][] differential(double[][] array, double[][] filter = [[-1, 0, -1],[-2, 0
     int vicinity_w = 3;
     int h = vicinity_h / 2;
     int w = vicinity_w / 2;
-    float[][]  output;
 
-    array.each!((idx,a)=> output~= a.to!(float[]).array);
+    float[][]  output = minimallyInitializedArray!(float[][])(image_h, image_w);
     output.each!(a=> fill(a,0));
     foreach(i; h .. image_h-h){
         foreach(j;  w .. image_w-w){
