@@ -222,8 +222,11 @@ auto parse(string filename){
 }
 
 auto to_grayscale(ref int[][][] color){
-    if (color[0][0].length != 3)
-        throw new Exception("invalid format.");
+    ulong input_len = color[0][0].length; 
+    if (input_len != 3 && input_len != 4) throw new Exception("invalid format.");
+    if (input_len == 4)
+        color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
+    
     double[][] temp;
     double[][] gray;
     double[] arr = [0.3, 0.59, 0.11];
