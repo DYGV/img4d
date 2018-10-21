@@ -316,6 +316,16 @@ float[][] differential(double[][] array, double[][] filter = [[-1, 0, -1],[-2, 0
 return output;
 }
 
+double[][] gradient_x(double[][] gradient_x, double[][] gradient_y){
+    int image_h = gradient_x.length.to!int;
+    int image_w = gradient_x[0].length.to!int;
+    double[][] theta = minimallyInitializedArray!(double[][])(image_h, image_w);
+
+    theta.each!((idx,a) =>a.each!((edx,b)=>theta[idx][edx] = atan2(gradient_x[idx][edx], gradient_x[idx][edx])));
+    return theta;
+
+}
+
 double[][] differ(ref double[][] origin, ref double[][] target){
     double[][] diff;
     origin.each!((idx,a) => diff ~=  (target[idx][] -= a[]).map!(b => abs(b)).array);
