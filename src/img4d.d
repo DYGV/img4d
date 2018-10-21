@@ -245,7 +245,7 @@ auto to_grayscale(ref int[][][] color){
 }
 
 int[][] to_binary(ref double[][] gray, double threshold=127){
-  /* Simple thresholding */
+  // Simple thresholding 
 
   int[][] bin;
   gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
@@ -291,7 +291,7 @@ int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
 
 float[][] differential(double[][] array, double[][] filter = [[-1, 0, -1],[-2, 0, 2],[-1, 0, 1]],
                                             double[][] v_filter= [[-1, -2, -1],[0, 0, 0],[1, 2, 1]]){
-    // default  filter of filter is sobel
+    // filter of default argument is sobel
     int image_h = array.length.to!int;
     int image_w = array[0].length.to!int;
     int vicinity_h = 3;
