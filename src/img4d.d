@@ -316,7 +316,7 @@ float[][] differential(double[][] array, double[][] filter = [[-1, 0, -1],[-2, 0
 return output;
 }
 
-double[][] gradient_x(double[][] gradient_x, double[][] gradient_y){
+double[][] gradient(double[][] gradient_x, double[][] gradient_y){
     int image_h = gradient_x.length.to!int;
     int image_w = gradient_x[0].length.to!int;
     double[][] theta = minimallyInitializedArray!(double[][])(image_h, image_w);
