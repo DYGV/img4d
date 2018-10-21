@@ -323,7 +323,7 @@ double[][] gradient(double[][] gradient_x, double[][] gradient_y){
     double theta;
     foreach(h; 0 .. image_h){
         foreach(w; 0 .. image_w){
-            theta = (atan2(gradient_x[h][w], gradient_y[h][w])*180)/PI;
+            theta = (atan2(gradient_x[h][w], gradient_y[h][w]) * 180) /PI;
 
             if(approximation){
                 if(theta >= -22.5  && theta < 22.5)   theta = 0;
@@ -331,8 +331,8 @@ double[][] gradient(double[][] gradient_x, double[][] gradient_y){
                 if(theta >= -180   && theta < -157.5) theta = 0; 
                 if(theta >=  22.5  && theta < 67.5)   theta = 45;
                 if(theta >= -157.5 && theta < -112.5) theta = 45;
-                if(theta >=  67.5 && theta < 112.5)   theta = 90;
-                if(theta >= -112.5  && theta < -67.5) theta = 90;
+                if(theta >=  67.5  && theta < 112.5)  theta = 90;
+                if(theta >= -112.5 && theta < -67.5)  theta = 90;
                 if(theta >=  112.5 && theta < 157.5)  theta = 135;
                 if(theta >= -67.5  && theta < -22.5)  theta = 135;
             }
