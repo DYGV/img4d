@@ -186,6 +186,12 @@ auto parse(ref PNG_Header info, string filename){
             case "IDAT":
                 idat = read_idat(data, idx, idx+length);
                 idx+=length+4;
+                if(info.color_type == 0 || info.color_type == 4){
+                  length_per_pixel = info.width; 
+                  auto chunks =chunks(idat, info.width).array.to!(int[][]);
+                  actual_data ~= chunks;
+                  break;
+                }
                 UnCompress uc = new UnCompress(HeaderFormat.deflate);
                 unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
                 int num_scanline = unc_idat.length / info.height;
