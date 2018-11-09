@@ -152,7 +152,7 @@ auto inverse_filtering(ref ubyte[][] data){
 }
  
 
-auto parse(string filename){
+auto parse(ref PNG_Header info, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[] data = cast(ubyte[]) read(filename);
@@ -168,10 +168,7 @@ auto parse(string filename){
     string chunk_type;
     int[][] actual_data;
     ubyte[] idat; 
-
     ubyte[]unc_idat;
-
-    PNG_Header info;
 
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");
@@ -185,13 +182,6 @@ auto parse(string filename){
             case "IHDR":
                 writeln("In IHDR");
                 info = read_IHDR(data, idx);
-                writefln("Width  %8d\nHeight  %7d",
-                          info.width,
-                          info.height);
-                writefln("Bit Depth  %4d\nColor Type  %3d",
-                          info.bit_depth, 
-                          info.color_type, 
-                          info.compression_method);
                 break;
             
             case "IDAT":

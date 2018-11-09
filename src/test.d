@@ -3,10 +3,20 @@ import std.stdio,
        std.range,
        std.algorithm.iteration;
 int main(){
+    PNG_Header png;
     int[][][] actual_data;
-    auto parsed_data = parse("../png_img/lena.png");
-    if(parsed_data.length != 0)
-        parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
+    auto parsed_data = parse(png, "../png_img/lena.png");
+    parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
+    
+    writefln("Width  %8d\nHeight  %7d",
+          png.width,
+          png.height);
+    writefln("Bit Depth  %4d\nColor Type  %3d",
+          png.bit_depth, 
+          png.color_type, 
+          png.compression_method);
+    
+
     // auto rgb_file = File("../png_img/rgb_lena.txt","w");
     // rgb_file.writeln(actual_data);
 
