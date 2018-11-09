@@ -180,12 +180,10 @@ auto parse(ref PNG_Header info, string filename){
         idx += 8;
         switch(chunk_type){
             case "IHDR":
-                writeln("In IHDR");
                 info = read_IHDR(data, idx);
                 break;
             
             case "IDAT":
-                writeln("In IDAT");
                 idat = read_idat(data, idx, idx+length);
                 idx+=length+4;
                 UnCompress uc = new UnCompress(HeaderFormat.deflate);
@@ -197,14 +195,13 @@ auto parse(ref PNG_Header info, string filename){
                 break;
           
             case "IEND": 
-                writeln("In IEND");
                 idx = -1; // To end while() loop
                 break;
 
             default:  // except for IHDR, IDAT, IEND
                   if (!ancillary_chunks.canFind(chunk_type))
                       throw new Exception("Invalid png format"); 
-                  writeln(chunk_type);
+                  //writeln(chunk_type);
                   idx += length+4;
         }
     }
