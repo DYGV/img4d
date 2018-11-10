@@ -13,7 +13,7 @@ import std.stdio,
        std.range,
        std.math;
 
-private static PNG_Header read_IHDR(ref ubyte[] header,ref int idx){ 
+private static PNG_Header read_IHDR(ref ubyte[] header, ref int idx){ 
     PNG_Header IHDR = {
         data_crc           : header[idx-4 .. idx+13],
         width              : header[idx .. idx+=4].peek!int(),
@@ -35,11 +35,11 @@ private static int read_data_chunk_len(ref ubyte[] data, ref int idx){
   return data[idx .. idx+4].peek!int();
 }
 
-private static string read_chunk_type(ref ubyte[] data,in int type_idx){
+private static string read_chunk_type(ref ubyte[] data, in int type_idx){
     return cast(string)data[type_idx .. type_idx+4];
 }
 
-private static ubyte[] read_idat(ref ubyte[]data,in int idx,in int length){
+private static ubyte[] read_idat(ref ubyte[] data,in int idx, in int length){
     ubyte[] data_crc = [0x49, 0x44, 0x41, 0x54];
     data_crc ~= data[idx .. length];
     ubyte[] crc = data[length .. length+4];
@@ -47,7 +47,7 @@ private static ubyte[] read_idat(ref ubyte[]data,in int idx,in int length){
     return data[idx .. length];
 }
 
-private void crc_check(ubyte[]crc, in ubyte[]chunk){
+private void crc_check(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
     if (crc != crc32Of(chunk)){
           throw new Exception("invalid");
@@ -79,7 +79,7 @@ private static int[][] inverse_filtering(ref ubyte[][] data){
     data.each!(sc => filtering_type ~= sc.front);
     data.each!(sc => arr_rgb ~= [sc.remove(0).chunks(length_per_pixel).array]);
 	
-    foreach(idx,sc_data; arr_rgb){
+    foreach(idx, sc_data; arr_rgb){
         int[] temp;
         int[] predictor;
         int[] actual_data_back;
@@ -98,7 +98,7 @@ private static int[][] inverse_filtering(ref ubyte[][] data){
             	break;
             
             case 2:
-                sc_data.each!(a => a.each!(b => temp~= b));
+                sc_data.each!(a => a.each!(b => temp ~= b));
                 actual_data ~= [(temp[] += actual_data.back[]).map!(a => a.normalize_pixel_value).array];
 
                 break;
@@ -149,14 +149,10 @@ public int[][] parse(ref PNG_Header info, string filename){
     int sig_size = 8;
     int length_size = 4;
 
-    int length;
-    int img_height;
+    int length, img_height;
     string chunk_type;
-
-
     int[][] actual_data;
-    ubyte[] idat; 
-    ubyte[]unc_idat;
+    ubyte[] idat, unc_idat;
 
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");

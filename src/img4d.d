@@ -25,10 +25,10 @@ struct PNG_Header {
     ubyte[] crc; 
 }
 
-auto decode(ref PNG_Header info ,string filename){
-  if(!exists(filename))
+auto decode(ref PNG_Header info, string filename){
+    if(!exists(filename))
         throw new Exception("Not found the file.");
-  return parse(info, filename);
+    return parse(info, filename);
 }
 
 auto to_grayscale(ref int[][][] color){
@@ -37,8 +37,7 @@ auto to_grayscale(ref int[][][] color){
     if (input_len == 4)
         color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
     
-    double[][] temp;
-    double[][] gray;
+    double[][] temp, gray;
     double[] arr = [0.3, 0.59, 0.11];
 
     alias to_double = map!(to!double);
