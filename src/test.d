@@ -5,7 +5,7 @@ import std.stdio,
 int main(){
     PNG_Header png;
     int[][][] actual_data;
-    auto parsed_data = parse(png, "../png_img/lena.png");
+    auto parsed_data = decode(png, "../png_img/lena.png");
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
     
     writefln("Width  %8d\nHeight  %7d",
@@ -43,8 +43,8 @@ int main(){
   
 
     auto median = to_binarize_elucidate(bin_adaptive, "median");
-    auto median_filter_file = File("../png_img/median_filter_lena.txt","w");
-    median.each!(a => median_filter_file.writeln(a));
+    //auto median_filter_file = File("../png_img/median_filter_lena.txt","w");
+    //median.each!(a => median_filter_file.writeln(a));
     
     return 0;
 }
