@@ -27,6 +27,14 @@ ubyte[] make_IHDR(ref PNG_Header info){
     return sig ~ IHDR; 
 }
 
+ubyte[] make_IDAT(int[][][] color){
+    throw new Exception("Not implemented.");
+}
+
+ubyte[] make_ancillary(){
+    throw new Exception("Not implemented.");
+}
+
 ubyte[] make_IEND(){
     ubyte[] chunks_IEND = [0x0,0x0,0x0,0x0, 0x49 ,0x45 ,0x4E ,0x44];
     ubyte[] IEND =  chunks_IEND ~ chunk_maker(chunks_IEND);
