@@ -3,18 +3,39 @@ import std.stdio,
        std.range,
        std.algorithm.iteration;
 int main(){
-    PNG_Header png;
+        PNG_Header before_encode;
     int[][][] actual_data;
-    auto parsed_data = decode(png, "../png_img/lena.png");
+
+    // start decode
+    auto parsed_data = decode(before_encode, "../png_img/lena.png");
+    if(parsed_data.length != 0) 
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
-    
+
     writefln("Width  %8d\nHeight  %7d",
-          png.width,
-          png.height);
+          before_encode.width,
+          before_encode.height);
+    writefln("Bit Depth  %4d\nColor Type  %3d\n",
+          before_encode.bit_depth, 
+          before_encode.color_type, 
+          before_encode.compression_method);
+
+    // start encode
+    ubyte[] encoded_data = before_encode.encode;
+    auto file = File("../png_img/encoded_lena.png","w");
+    file.rawWrite(encoded_data);
+
+    PNG_Header after_encode;
+    
+    //read encoded file
+    auto encoded_data_to_decode = decode(after_encode, "../png_img/encoded_lena.png");
+ writefln("Width  %8d\nHeight  %7d",
+          after_encode.width,
+          after_encode.height);
     writefln("Bit Depth  %4d\nColor Type  %3d",
-          png.bit_depth, 
-          png.color_type, 
-          png.compression_method);
+          after_encode.bit_depth, 
+          after_encode.color_type, 
+          after_encode.compression_method);
+
     
 
     // auto rgb_file = File("../png_img/rgb_lena.txt","w");

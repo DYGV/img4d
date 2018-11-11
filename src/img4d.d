@@ -1,5 +1,5 @@
 module img4d;
-import img4d_decode;
+import img4d_decode,img4d_encode;
 import std.stdio,
        std.array,
        std.bitmanip,
@@ -29,6 +29,10 @@ auto decode(ref PNG_Header info, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     return parse(info, filename);
+}
+
+ubyte[] encode(ref PNG_Header info){
+    return process(info);
 }
 
 auto to_grayscale(ref int[][][] color){
