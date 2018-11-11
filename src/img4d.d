@@ -32,7 +32,8 @@ auto decode(ref PNG_Header info, string filename){
 }
 
 ubyte[] encode(ref PNG_Header info){
-    return process(info);
+    ubyte[] data = info.make_IHDR ~ make_IEND;
+    return data;
 }
 
 auto to_grayscale(ref int[][][] color){
