@@ -3,7 +3,7 @@ import std.stdio,
        std.range,
        std.algorithm.iteration;
 int main(){
-        PNG_Header before_encode;
+    PNG_Header before_encode;
     int[][][] actual_data;
 
     // start decode
