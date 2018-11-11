@@ -4,7 +4,6 @@ import std.stdio,
        std.array,
        std.bitmanip,
        std.conv,
-       std.math,
        std.digest.crc;
 
 ubyte[] make_IHDR(ref PNG_Header info){

@@ -44,7 +44,7 @@ int main(){
   /*
      covert to grayscale
    */
-    auto gray = to_grayscale(actual_data);
+    auto gray = rgb_to_grayscale(actual_data);
     // auto gray_file = File("../png_img/gray_lena.txt","w");
     // gray_file.writeln(gray);
 
