@@ -49,7 +49,7 @@ private static ubyte[] read_idat(ubyte[] data,in int idx, in int length){
 
 private void crc_check(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
-    if (crc != crc32Of(chunk)){
+    if (crc != crc32Of(chunk) && reverse(crc[]) != crc32Of(chunk)){
           throw new Exception("invalid");
     }
 
@@ -191,7 +191,8 @@ public int[][] parse(ref PNG_Header info, string filename){
                   idx += length+4;
         }
     }
-
+    if(unc_idat.length == 0) return actual_data;
+    
     int num_scanline = unc_idat.length / info.height;
     auto chunks =chunks(unc_idat, num_scanline).array;
     unc_chunks = (*cast(ubyte[][]*)&chunks).array;
