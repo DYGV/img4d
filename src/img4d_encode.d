@@ -31,15 +31,16 @@ ubyte[] make_IHDR(ref PNG_Header info){
     return sig ~ IHDR; 
 }
 
-ubyte[] make_IDAT(int[][] color){
+ubyte[] make_IDAT(in int[][] color){
     Compress cmps = new Compress(HeaderFormat.deflate);
     ubyte[] before_cmps_data;
-    ubyte[][] ubyte_color;
+    ubyte[][] ubyte_color = minimallyInitializedArray!(ubyte[][])(color.length,color[0].length);
+
     ubyte filter_type = 0;
     ubyte[] chunks_type = [0x49,0x44,0x41,0x54];
     ubyte[] body_len_IDAT = [0x0,0x0,0x0,0x0];
 
-    ubyte_color = *cast(ubyte[][]*)&color;
+    color.each!((idx,a)=> a.each!((edx,b)=>ubyte_color[idx][edx]=b.to!ubyte));
     ubyte_color.each!(a => before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
     
     ubyte[] idat_data = cast(ubyte[])cmps.compress(before_cmps_data.dup);

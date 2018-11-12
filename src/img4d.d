@@ -33,8 +33,9 @@ auto decode(ref PNG_Header info, string filename){
     return parse(info, filename);
 }
 
-ubyte[] encode(ref PNG_Header info){
-    ubyte[] data = info.make_IHDR ~ make_IEND;
+ubyte[] encode(ref PNG_Header info, in int[][] color){
+    if(color == null) throw new Exception("null reference exception");
+    ubyte[] data = info.make_IHDR ~ color.make_IDAT ~ make_IEND;
     return data;
 }
 
