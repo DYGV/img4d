@@ -20,7 +20,7 @@ int main(){
           before_encode.compression_method);
 
     // start encode
-    ubyte[] encoded_data = before_encode.encode;
+    ubyte[] encoded_data = before_encode.encode(parsed_data); // probably,a strange image is created in current implemention
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encoded_data);
 
@@ -28,7 +28,7 @@ int main(){
     
     //read encoded file
     auto encoded_data_to_decode = decode(after_encode, "../png_img/encoded_lena.png");
- writefln("Width  %8d\nHeight  %7d",
+    writefln("Width  %8d\nHeight  %7d",
           after_encode.width,
           after_encode.height);
     writefln("Bit Depth  %4d\nColor Type  %3d",

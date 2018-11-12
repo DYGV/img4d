@@ -4,7 +4,11 @@ import std.stdio,
        std.array,
        std.bitmanip,
        std.conv,
-       std.digest.crc;
+       std.zlib,
+       std.digest,
+       std.digest.crc,
+       std.range,
+       std.algorithm;
 
 ubyte[] make_IHDR(ref PNG_Header info){
     ubyte depth = info.bit_depth.to!ubyte;
@@ -27,8 +31,24 @@ ubyte[] make_IHDR(ref PNG_Header info){
     return sig ~ IHDR; 
 }
 
-ubyte[] make_IDAT(int[][][] color){
-    throw new Exception("Not implemented.");
+ubyte[] make_IDAT(int[][] color){
+    Compress cmps = new Compress(HeaderFormat.deflate);
+    ubyte[] before_cmps_data;
+    ubyte[][] ubyte_color;
+    ubyte filter_type = 0;
+    ubyte[] chunks_type = [0x49,0x44,0x41,0x54];
+    ubyte[] body_len_IDAT = [0x0,0x0,0x0,0x0];
+
+    ubyte_color = *cast(ubyte[][]*)&color;
+    ubyte_color.each!(a => before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
+    
+    ubyte[] idat_data = cast(ubyte[])cmps.compress(before_cmps_data.dup);
+    uint chunk_size = idat_data.length;
+    body_len_IDAT[0 .. 4].append!uint(chunk_size);
+    ubyte[] chunk_data = chunks_type ~ idat_data;
+    
+    ubyte[] IDAT = body_len_IDAT ~ chunk_data ~ chunk_maker(chunk_data);   
+    return IDAT;
 }
 
 ubyte[] make_ancillary(){
