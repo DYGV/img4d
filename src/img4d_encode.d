@@ -18,8 +18,8 @@ ubyte[] make_IHDR(ref PNG_Header info){
     ubyte adam7 = info.interlace_method.to!ubyte;
     
     ubyte[] sig = [0x89, 0x50, 0x4E,0x47, 0x0D, 0x0A, 0x1A, 0x0A];  
-    ubyte[] body_len_IHDR = [0x0,0x0,0x0,0x0D];
-    ubyte[] chunks_IHDR = [0x49 ,0x48, 0x44, 0x52, // "IHDR"
+    ubyte[] body_len_IHDR = [0x0, 0x0, 0x0, 0x0D];
+    ubyte[] chunks_IHDR = [0x49, 0x48, 0x44, 0x52, // "IHDR"
                           0x0, 0x0, 0x0, 0x00, // width
                           0x0, 0x0, 0x0, 0x00, // height
                           depth, colorType, 
@@ -30,39 +30,46 @@ ubyte[] make_IHDR(ref PNG_Header info){
     ubyte[] IHDR = body_len_IHDR ~ chunks_IHDR ~ chunk_maker(chunks_IHDR);
     return sig ~ IHDR; 
 }
+ubyte[] make_IDAT(int[][] color, bool gray_scale = false){
+    if(color == null) throw new Exception("null reference exception");
 
-ubyte[] make_IDAT(in int[][] color){
     Compress cmps = new Compress(HeaderFormat.deflate);
-    ubyte[] before_cmps_data;
-    ubyte[][] ubyte_color = minimallyInitializedArray!(ubyte[][])(color.length,color[0].length);
-
+    ubyte[] before_cmps_data, idat_data, chunk_data, IDAT; 
     ubyte filter_type = 0;
-    ubyte[] chunks_type = [0x49,0x44,0x41,0x54];
-    ubyte[] body_len_IDAT = [0x0,0x0,0x0,0x0];
+    uint chunk_size;
+    ubyte[][] ubyte_color = minimallyInitializedArray!(ubyte[][])(color.length,color[0].length);
+    ubyte[] chunks_type = [0x49, 0x44, 0x41, 0x54];
+    ubyte[] body_len_IDAT = [0x0, 0x0, 0x0, 0x0];
 
-    color.each!((idx,a)=> a.each!((edx,b)=>ubyte_color[idx][edx]=b.to!ubyte));
-    ubyte_color.each!(a => before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
+    color.each!((idx,a)=> ubyte_color[idx] =  a.to!(ubyte[]));
+    ubyte_color.each!(a =>  before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
     
-    ubyte[] idat_data = cast(ubyte[])cmps.compress(before_cmps_data.dup);
-    uint chunk_size = idat_data.length;
+    (cast(ubyte[])cmps.compress(before_cmps_data)).each!(a =>idat_data ~= a);
+    (cast(ubyte[])cmps.flush()).each!(a => idat_data ~= a);
+
+    chunk_size = idat_data.length;
     body_len_IDAT[0 .. 4].append!uint(chunk_size);
-    ubyte[] chunk_data = chunks_type ~ idat_data;
     
-    ubyte[] IDAT = body_len_IDAT ~ chunk_data ~ chunk_maker(chunk_data);   
+    chunk_data = chunks_type ~ idat_data;
+    IDAT = body_len_IDAT ~ chunk_data ~ chunk_maker(chunk_data);   
     return IDAT;
 }
+
 
 ubyte[] make_ancillary(){
     throw new Exception("Not implemented.");
 }
 
 ubyte[] make_IEND(){
-    ubyte[] chunks_IEND = [0x0,0x0,0x0,0x0, 0x49 ,0x45 ,0x4E ,0x44];
-    ubyte[] IEND =  chunks_IEND ~ chunk_maker(chunks_IEND);
+    ubyte[] chunks_IEND = [0x0, 0x0, 0x0, 0x0];
+    ubyte[] chunks_type = [0x49, 0x45, 0x4E, 0x44];
+    ubyte[] IEND =  chunks_IEND ~chunks_type ~  chunk_maker(chunks_type);
+
     return IEND;
 }
 
 auto chunk_maker(ubyte[] data){
-    auto crc = crc32Of(data);
+    ubyte[4] crc;
+    crc32Of(data).each!((idx,a) => crc[3-idx]= a);
     return crc;
 }

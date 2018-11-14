@@ -8,7 +8,7 @@ int main(){
 
     // start decode
     auto parsed_data = decode(before_encode, "../png_img/lena.png");
-    if(parsed_data.length != 0) 
+    if(parsed_data.length == 0) return 0; 
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
 
     writefln("Width  %8d\nHeight  %7d",
