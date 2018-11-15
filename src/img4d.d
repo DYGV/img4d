@@ -1,7 +1,7 @@
 module img4d;
-import img4d_decode,
-       img4d_encode,
-       img4d_color_space;
+import img4d_lib.decode,
+       img4d_lib.encode,
+       img4d_lib.color_space;
 import std.stdio,
        std.array,
        std.bitmanip,

@@ -1,4 +1,4 @@
-module img4d_encode;
+module img4d_lib.encode;
 import img4d;
 import std.stdio,
        std.array,

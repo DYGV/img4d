@@ -1,4 +1,4 @@
-module img4d_decode;
+module img4d_lib.decode;
 import img4d;
 import std.file : read;
 import std.digest.crc : CRC32, crc32Of;
