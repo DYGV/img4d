@@ -25,8 +25,26 @@ private static PNG_Header read_IHDR(ref ubyte[] header, ref int idx){
         interlace_method   : header[idx+=1],
         crc                : header[idx+=1 .. idx+=4],
     };
-    
-    length_per_pixel = IHDR.color_type == 6 ? 4 : 3;  
+    switch(IHDR.color_type){
+        case 0:
+            length_per_pixel = IHDR.width;
+            break;
+        case 2:
+            length_per_pixel = 3;
+            break;
+        case 3:
+            length_per_pixel = 3;
+            break;
+        case 4:
+            length_per_pixel = IHDR.width * 2;
+            break;
+        case 6:
+            length_per_pixel = 4;
+            break;
+        default:
+            break;
+    }
+
     crc_check(IHDR.crc, IHDR.data_crc);
     return IHDR;
 }
@@ -191,8 +209,9 @@ public int[][] parse(ref PNG_Header info, string filename){
                   idx += length+4;
         }
     }
-    if(unc_idat.length == 0) return actual_data;
-    
+    if(unc_idat.length == 0 || info.color_type == 0 || info.color_type == 4) 
+        return actual_data;
+   
     int num_scanline = unc_idat.length / info.height;
     auto chunks =chunks(unc_idat, num_scanline).array;
     unc_chunks = (*cast(ubyte[][]*)&chunks).array;

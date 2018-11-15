@@ -7,7 +7,7 @@ int main(){
     int[][][] actual_data;
 
     // start decode
-    auto parsed_data = decode(before_encode, "../png_img/lena.png");
+    auto parsed_data = decode(before_encode, "../png_img/gray_lena.png");
     if(parsed_data.length == 0) return 0; 
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
 
