@@ -7,7 +7,7 @@ int main(){
     int[][][] actual_data;
 
     // start decode
-    auto parsed_data = decode(before_encode, "../png_img/gray_lena.png");
+    auto parsed_data = before_encode.decode("../png_img/gray_lena.png");
     if(parsed_data.length == 0) return 0; 
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
 
@@ -20,21 +20,20 @@ int main(){
           before_encode.compression_method);
 
     // start encode
-    ubyte[] encoded_data = before_encode.encode(parsed_data); // probably,a strange image is created in current implemention
+    ubyte[] encoded_data = before_encode.encode(parsed_data);
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encoded_data);
 
     PNG_Header after_encode;
     
     //read encoded file
-    auto encoded_data_to_decode = decode(after_encode, "../png_img/encoded_lena.png");
+    auto encoded_data_to_decode = after_encode.decode("../png_img/encoded_lena.png");
     writefln("Width  %8d\nHeight  %7d",
           after_encode.width,
           after_encode.height);
     writefln("Bit Depth  %4d\nColor Type  %3d",
           after_encode.bit_depth, 
-          after_encode.color_type, 
-          after_encode.compression_method);
+          after_encode.color_type);
 
     
 
@@ -44,28 +43,28 @@ int main(){
   /*
      covert to grayscale
    */
-    auto gray = rgb_to_grayscale(actual_data);
+    // auto gray = rgb_to_grayscale(actual_data);
     // auto gray_file = File("../png_img/gray_lena.txt","w");
     // gray_file.writeln(gray);
 
   /*
      convert to binary image by simple thresholding
    */
-    auto bin = to_binary(gray);
+    // auto bin = to_binary(gray);
     // auto bin_file = File("../png_img/bins_simple_lena.txt","w");
     // bin_file.writeln(bin);
 
   /*
      convert ot binary image by adaptive threshoding
    */
-    auto bin_adaptive = to_binarize_elucidate(gray);
+    // auto bin_adaptive = to_binarize_elucidate(gray);
     // auto bin_adaptive_file = File("../png_img/bin_adaptive_lena.txt","w");
     // bin_adaptive.each!(a => bin_adaptive_file.writeln(a));
   
 
-    auto median = to_binarize_elucidate(bin_adaptive, "median");
-    //auto median_filter_file = File("../png_img/median_filter_lena.txt","w");
-    //median.each!(a => median_filter_file.writeln(a));
+    // auto median = to_binarize_elucidate(bin_adaptive, "median");
+    // auto median_filter_file = File("../png_img/median_filter_lena.txt","w");
+    // median.each!(a => median_filter_file.writeln(a));
     
     return 0;
 }
