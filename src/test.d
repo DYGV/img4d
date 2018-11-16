@@ -16,17 +16,16 @@ int main(){
           before_encode.height);
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           before_encode.bit_depth, 
-          before_encode.color_type, 
-          before_encode.compression_method);
+          before_encode.color_type);
 
     // start encode
     ubyte[] encoded_data = before_encode.encode(parsed_data);
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encoded_data);
-
-    PNG_Header after_encode;
     
     //read encoded file
+    PNG_Header after_encode;
+
     auto encoded_data_to_decode = after_encode.decode("../png_img/encoded_lena.png");
     writefln("Width  %8d\nHeight  %7d",
           after_encode.width,
