@@ -1,7 +1,17 @@
 language: d
+
 d:
   - dmd
+
+before_install:
+  - brew update
+  - brew install imagemagick
+
 script:
   - cd src
   - rdmd test.d
 
+after_success:
+  - cd ../png_img
+  - composite -compose difference lena.png encoded_lena.png diff.png
+  - identify -format "%[mean]" diff.png
