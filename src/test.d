@@ -1,14 +1,16 @@
 import img4d;
 import std.stdio,
        std.range,
-       std.algorithm.iteration;
+       std.algorithm.iteration,
+       std.process;
+
 int main(){
     PNG_Header before_encode;
     int[][][] actual_data;
 
     // start decode
     auto parsed_data = before_encode.decode("../png_img/lena.png");
-    if(parsed_data.length == 0) return 0; 
+    if(parsed_data.length == 0) {return 0;}
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
 
     writefln("Width  %8d\nHeight  %7d",
@@ -30,11 +32,16 @@ int main(){
     writefln("Width  %8d\nHeight  %7d",
           after_encode.width,
           after_encode.height);
-    writefln("Bit Depth  %4d\nColor Type  %3d",
+    writefln("Bit Depth  %4d\nColor Type  %3d\n",
           after_encode.bit_depth, 
           after_encode.color_type);
 
-    
+    executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
+    auto diff =  executeShell("cd ../png_img && identify -format \"%[mean]\" diff.png").output;
+    if(diff != "0\n"){
+        "something is wrong (It doesn't match the original image)".writeln;
+        diff.writeln;
+    }
 
     // auto rgb_file = File("../png_img/rgb_lena.txt","w");
     // rgb_file.writeln(actual_data);

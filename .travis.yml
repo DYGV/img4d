@@ -10,8 +10,3 @@ before_install:
 script:
   - cd src
   - rdmd test.d
-
-after_success:
-  - cd ../png_img
-  - composite -compose difference lena.png encoded_lena.png diff.png
-  - identify -format "%[mean]" diff.png
