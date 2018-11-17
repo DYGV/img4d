@@ -4,8 +4,8 @@ d:
   - dmd
 
 before_install:
-  - brew update
-  - brew install imagemagick
+  - sudo apt-get update
+  - sudo apt-get install imagemagick
 
 script:
   - cd src
