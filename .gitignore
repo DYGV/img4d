@@ -2,4 +2,5 @@
 *.swp
 *d~
 *.gitignore~
+.travis.yml~
 .git

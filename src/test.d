@@ -7,7 +7,7 @@ int main(){
     int[][][] actual_data;
 
     // start decode
-    auto parsed_data = before_encode.decode("../png_img/gray_lena.png");
+    auto parsed_data = before_encode.decode("../png_img/lena.png");
     if(parsed_data.length == 0) return 0; 
     parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
 
@@ -22,7 +22,7 @@ int main(){
     ubyte[] encoded_data = before_encode.encode(parsed_data);
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encoded_data);
-    
+    file.flush(); 
     //read encoded file
     PNG_Header after_encode;
 

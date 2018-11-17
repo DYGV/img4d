@@ -44,12 +44,12 @@ ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
     actual_data.each!((idx,a) => byte_data[idx] = a.to!(ubyte[]));
     if(info.color_type == 0 || info.color_type == 4){
         idat_data = byte_data.join;
-        chunk_size = idat_data.length;
+        chunk_size = idat_data.length.to!uint;
     }else{
         byte_data.each!(a =>  before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
         (cast(ubyte[])cmps.compress(before_cmps_data)).each!(a =>idat_data ~= a);
         (cast(ubyte[])cmps.flush()).each!(a => idat_data ~= a);
-        chunk_size = idat_data.length;
+        chunk_size = idat_data.length.to!uint;
     }
     body_len_IDAT[0 .. 4].append!uint(chunk_size);
     chunk_data = chunks_type ~ idat_data;

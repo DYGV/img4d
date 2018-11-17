@@ -1,0 +1,7 @@
+language: d
+d:
+  - dmd
+script:
+  - cd src
+  - rdmd test.d
+

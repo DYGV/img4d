@@ -212,7 +212,7 @@ public int[][] parse(ref PNG_Header info, string filename){
     if(unc_idat.length == 0 || info.color_type == 0 || info.color_type == 4) 
         return actual_data;
    
-    int num_scanline = unc_idat.length / info.height;
+    uint num_scanline = (unc_idat.length / info.height).to!uint;
     auto chunks =chunks(unc_idat, num_scanline).array;
     unc_chunks = (*cast(ubyte[][]*)&chunks).array;
     actual_data = inverse_filtering(unc_chunks);
