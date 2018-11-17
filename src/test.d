@@ -35,7 +35,8 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           after_encode.bit_depth, 
           after_encode.color_type);
-
+    
+    // Verification (compare with original image)
     executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
     auto diff =  executeShell("cd ../png_img && identify -format \"%[mean]\" diff.png").output;
     if(diff != "0\n"){
