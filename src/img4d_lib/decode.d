@@ -57,7 +57,7 @@ private static string read_chunk_type(ref ubyte[] data, in int type_idx){
     return cast(string)data[type_idx .. type_idx+4];
 }
 
-private static ubyte[] read_idat(ubyte[] data,in int idx, in int length){
+private static ubyte[] read_idat(ref ubyte[] data,in int idx, in int length){
     ubyte[] data_crc = [0x49, 0x44, 0x41, 0x54];
     data_crc ~= data[idx .. length];
     ubyte[] crc = data[length .. length+4];
@@ -67,10 +67,9 @@ private static ubyte[] read_idat(ubyte[] data,in int idx, in int length){
 
 private void crc_check(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
-    if (crc != crc32Of(chunk) && reverse(crc[]) != crc32Of(chunk)){
+    if (crc != chunk.crc32Of){
           throw new Exception("invalid");
     }
-
 }
 
 private static int PaethPredictor(int left, int upper, int upper_left)
@@ -143,9 +142,10 @@ private static int[][] inverse_filtering(ref ubyte[][] data){
                                 .each!((idx,a) => temp ~= (a + joined[idx]).normalize_pixel_value);
                 
                 actual_data.back[length_per_pixel .. $]
-                                .each!((idx, a) => 
-                                temp ~= (PaethPredictor(temp[idx], a, actual_data.back[idx]) 
-                                + joined[idx + length_per_pixel]).normalize_pixel_value);
+                              .each!((idx, a) => 
+                              temp ~= (PaethPredictor(temp[idx], a, actual_data.back[idx]) 
+                                    + joined[idx + length_per_pixel])
+                              .normalize_pixel_value);
             
                 actual_data ~= [temp];
                 break;
@@ -159,21 +159,24 @@ private static int[][] inverse_filtering(ref ubyte[][] data){
  
 
 public int[][] parse(ref PNG_Header info, string filename){
-    ubyte[] data = cast(ubyte[]) read(filename);
-    string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
-                                "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
-                                "fRAc","gIFg","gIFt","gIFx","oFFs","pCAL","sCAL"];
+    ubyte[] data = cast(ubyte[])filename.read;
     int idx = 0;
     int sig_size = 8;
-    int length_size = 4;
 
+    if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+        throw new Exception("Invalid PNG format.");
+    
+    int length_size = 4;
     int length, img_height;
     string chunk_type;
     int[][] actual_data;
     ubyte[] idat, unc_idat;
     ubyte[][] unc_chunks;
-    if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
-        throw new Exception("Invalid PNG format.");
+
+    string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
+                                "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
+                                "fRAc","gIFg","gIFt","gIFx","oFFs","pCAL","sCAL"];
+    
     UnCompress uc = new UnCompress(HeaderFormat.deflate);
     idx += sig_size;
     while (idx >= 0){
@@ -189,11 +192,11 @@ public int[][] parse(ref PNG_Header info, string filename){
                 idat = read_idat(data, idx, idx+length);
                 idx+=length+4;
                 if(info.color_type == 0 || info.color_type == 4){
-                  int num_scanline = info.width;
-                  length_per_pixel = num_scanline; 
-                  auto chunks =chunks(idat, num_scanline).array.to!(int[][]);
-                  actual_data ~= chunks;
-                  break;
+                    int num_scanline = info.width;
+                    length_per_pixel = num_scanline; 
+                    auto chunks =chunks(idat, num_scanline).array.to!(int[][]);
+                    actual_data ~= chunks;
+                    break;
                 }
                 unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
                 break;

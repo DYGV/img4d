@@ -10,15 +10,15 @@ import std.stdio,
        std.range,
        std.algorithm;
 
-ubyte[] make_IHDR(ref PNG_Header info){
+ubyte[] make_IHDR(in PNG_Header info){
     ubyte depth = info.bit_depth.to!ubyte;
     ubyte colorType = info.color_type.to!ubyte;
     ubyte compress = info.compression_method.to!ubyte;
     ubyte filterType = info.filter_method.to!ubyte;
     ubyte adam7 = info.interlace_method.to!ubyte;
+    const ubyte[] sig = [0x89, 0x50, 0x4E,0x47, 0x0D, 0x0A, 0x1A, 0x0A];  
+    const ubyte[] body_len_IHDR = [0x0, 0x0, 0x0, 0x0D];
     
-    ubyte[] sig = [0x89, 0x50, 0x4E,0x47, 0x0D, 0x0A, 0x1A, 0x0A];  
-    ubyte[] body_len_IHDR = [0x0, 0x0, 0x0, 0x0D];
     ubyte[] chunks_IHDR = [0x49, 0x48, 0x44, 0x52, // "IHDR"
                           0x0, 0x0, 0x0, 0x00, // width
                           0x0, 0x0, 0x0, 0x00, // height
@@ -70,7 +70,7 @@ ubyte[] make_IEND(){
     return IEND;
 }
 
-auto chunk_maker(ubyte[] data){
+auto chunk_maker(in ubyte[] data){
     ubyte[4] crc;
     crc32Of(data).each!((idx,a) => crc[3-idx]= a);
     return crc;
