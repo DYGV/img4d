@@ -180,21 +180,21 @@ public int[][] parse(ref PNG_Header info, string filename){
     UnCompress uc = new UnCompress(HeaderFormat.deflate);
     idx += sig_size;
     while (idx >= 0){
-        length = read_data_chunk_len(data, idx);
-        chunk_type = read_chunk_type(data, idx+length_size);
+        length = data.read_data_chunk_len(idx);
+        chunk_type = data.read_chunk_type(idx+length_size);
         idx += 8;
         switch(chunk_type){
             case "IHDR":
-                info = read_IHDR(data, idx);
+                info = data.read_IHDR(idx);
                 break;
             
             case "IDAT":
-                idat = read_idat(data, idx, idx+length);
-                idx+=length+4;
+                idat = data.read_idat(idx, idx+length);
+                idx += length+4;
                 if(info.color_type == 0 || info.color_type == 4){
                     int num_scanline = info.width;
                     length_per_pixel = num_scanline; 
-                    auto chunks =chunks(idat, num_scanline).array.to!(int[][]);
+                    auto chunks = idat.chunks(num_scanline).array.to!(int[][]);
                     actual_data ~= chunks;
                     break;
                 }
@@ -216,9 +216,9 @@ public int[][] parse(ref PNG_Header info, string filename){
         return actual_data;
    
     uint num_scanline = (unc_idat.length / info.height).to!uint;
-    auto chunks =chunks(unc_idat, num_scanline).array;
+    auto chunks = unc_idat.chunks(num_scanline).array;
     unc_chunks = (*cast(ubyte[][]*)&chunks).array;
-    actual_data = inverse_filtering(unc_chunks);
+    actual_data = unc_chunks.inverse_filtering;
 
     return actual_data; 
 }

@@ -27,7 +27,7 @@ ubyte[] make_IHDR(in PNG_Header info){
     chunks_IHDR[4 .. 8].append!uint(info.width);
     chunks_IHDR[8 .. 12].append!uint(info.height);
 
-    ubyte[] IHDR = body_len_IHDR ~ chunks_IHDR ~ chunk_maker(chunks_IHDR);
+    ubyte[] IHDR = body_len_IHDR ~ chunks_IHDR ~ chunks_IHDR.make_crc;
     return sig ~ IHDR; 
 }
 ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
@@ -37,7 +37,7 @@ ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
     ubyte[] before_cmps_data, idat_data, chunk_data, IDAT; 
     ubyte filter_type = 0;
     uint chunk_size;
-    ubyte[][] byte_data = minimallyInitializedArray!(ubyte[][])(actual_data.length,actual_data[0].length);
+    ubyte[][] byte_data = minimallyInitializedArray!(ubyte[][])(actual_data.length, actual_data[0].length);
     ubyte[] chunks_type = [0x49, 0x44, 0x41, 0x54];
     ubyte[] body_len_IDAT = [0x0, 0x0, 0x0, 0x0];
 
@@ -46,14 +46,14 @@ ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
         idat_data = byte_data.join;
         chunk_size = idat_data.length.to!uint;
     }else{
-        byte_data.each!(a =>  before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
-        (cast(ubyte[])cmps.compress(before_cmps_data)).each!(a =>idat_data ~= a);
+        byte_data.each!(a => before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
+        (cast(ubyte[])cmps.compress(before_cmps_data)).each!(a => idat_data ~= a);
         (cast(ubyte[])cmps.flush()).each!(a => idat_data ~= a);
         chunk_size = idat_data.length.to!uint;
     }
     body_len_IDAT[0 .. 4].append!uint(chunk_size);
     chunk_data = chunks_type ~ idat_data;
-    IDAT = body_len_IDAT ~ chunk_data ~ chunk_maker(chunk_data);   
+    IDAT = body_len_IDAT ~ chunk_data ~ chunk_data.make_crc;   
     return IDAT;
 }
 
@@ -65,13 +65,13 @@ ubyte[] make_ancillary(){
 ubyte[] make_IEND(){
     ubyte[] chunks_IEND = [0x0, 0x0, 0x0, 0x0];
     ubyte[] chunks_type = [0x49, 0x45, 0x4E, 0x44];
-    ubyte[] IEND =  chunks_IEND ~chunks_type ~  chunk_maker(chunks_type);
+    ubyte[] IEND = chunks_IEND ~chunks_type ~  chunks_type.make_crc;
 
     return IEND;
 }
 
-auto chunk_maker(in ubyte[] data){
+auto make_crc(in ubyte[] data){
     ubyte[4] crc;
-    crc32Of(data).each!((idx,a) => crc[3-idx]= a);
+    crc32Of(data).each!((idx,a) => crc[3-idx] = a);
     return crc;
 }
