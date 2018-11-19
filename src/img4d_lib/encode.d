@@ -1,5 +1,5 @@
 module img4d_lib.encode;
-import img4d;
+import img4d,img4d_lib.decode;
 import std.stdio,
        std.array,
        std.bitmanip,
@@ -40,8 +40,17 @@ ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
     ubyte[][] byte_data = minimallyInitializedArray!(ubyte[][])(actual_data.length, actual_data[0].length);
     ubyte[] chunks_type = [0x49, 0x44, 0x41, 0x54];
     ubyte[] body_len_IDAT = [0x0, 0x0, 0x0, 0x0];
+    
+    /*
+    ubyte filter_type = 1;
+    ubyte[][] byte_data;
+    ubyte[][][] arr_rgb;
+    actual_data.each!(sc => arr_rgb ~= cast(ubyte[][])[sc.chunks(length_per_pixel).array]);
+    arr_rgb.each!((idx,a) =>byte_data~= (sub_filtering!("-",">0","+")(a)).join.to!(ubyte[]));
+    */
 
     actual_data.each!((idx,a) => byte_data[idx] = a.to!(ubyte[]));
+    
     if(info.color_type == 0 || info.color_type == 4){
         idat_data = byte_data.join;
         chunk_size = idat_data.length.to!uint;
