@@ -1,5 +1,5 @@
 module img4d_lib.decode;
-import img4d;
+import img4d, img4d_lib.filter;
 import std.file : read;
 import std.digest.crc : CRC32, crc32Of;
 import std.stdio,
@@ -87,12 +87,6 @@ private static int PaethPredictor(int left, int upper, int upper_left)
 
 private int normalize_pixel_value(int value){ return value < 256 ? value : value - 256; }
 
-public auto sub_filtering(string op,string inequality, string inv_op,T)(T[][] sc_data){
-    return [sc_data.front.walkLength.iota.map!(i => transversal(sc_data, i).chain
-                                .cumulativeFold!((a,b) => mixin("a" ~op~ "b" ~ inequality) 
-                                                          ? mixin("a" ~op~ "b")
-                                                          : mixin("a" ~op~ "b" ~inv_op~ "256")))].join.transposed;
-}
 auto calculate(string op, T)(T lhs, T rhs)
 {
     return mixin("lhs " ~ op ~ " rhs");
@@ -119,13 +113,7 @@ private static int[][] inverse_filtering(string op,string inequality, string inv
             	break;
             
             case 1:
-                actual_data ~=  sub_filtering!(op,inequality,inv_op)(sc_data).join; 
-              /*  actual_data ~= [sc_data.front.walkLength.iota
-                                .map!(i => transversal(sc_data, i).chain
-                                .cumulativeFold!((a,b) => mixin("a" ~op~ "b" ~ inequality) 
-                                                          ? mixin("a" ~op~ "b")
-                                                          : mixin("a" ~op~ "b" ~inv_op~ "256")))].join.transposed.join;*/
-
+                actual_data ~=  Sub!(op,inequality,inv_op)(sc_data).join; 
             	break;
             
             case 2:

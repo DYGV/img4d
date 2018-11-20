@@ -46,7 +46,7 @@ ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
     ubyte[][] byte_data;
     ubyte[][][] arr_rgb;
     actual_data.each!(sc => arr_rgb ~= cast(ubyte[][])[sc.chunks(length_per_pixel).array]);
-    arr_rgb.each!((idx,a) =>byte_data~= (sub_filtering!("-",">0","+")(a)).join.to!(ubyte[]));
+    arr_rgb.each!((idx,a) =>byte_data~= (Sub!("-",">=0","+")(a)).join.to!(ubyte[]));
     */
 
     actual_data.each!((idx,a) => byte_data[idx] = a.to!(ubyte[]));
