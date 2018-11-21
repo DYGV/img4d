@@ -35,7 +35,7 @@ unittest{
     int[][] test_array = [[1, 1, 1], [3, 2, 1], [1, 2, 3]];
     int[][] filtered_array = [[1, 1, 1], [254, 255, 0], [253, 253, 253]];
     
-    Sub!("-",">=0","+")(test_array).each!((idx,a) => assert(equal(a.array,filtered_array[idx])));
-    
+    Sub!("-",">=0","+")(test_array).each!((idx,a) =>
+        assert(equal(a.array,filtered_array[idx])));
     "unittest of Sub filter was passed".writeln;
 }

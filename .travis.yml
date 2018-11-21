@@ -9,4 +9,4 @@ before_install:
 
 script:
   - cd src
-  - rdmd test.d
+  - rdmd -unittest test.d
