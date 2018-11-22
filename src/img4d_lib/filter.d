@@ -32,10 +32,22 @@ unittest{
     assert(calculate!"+"(5, 10) == 15);
     assert(calculate!"-"(5, 10) == -5);
 
-    int[][] test_array = [[1, 1, 1], [3, 2, 1], [1, 2, 3]];
-    int[][] filtered_array = [[1, 1, 1], [254, 255, 0], [253, 253, 253]];
-    
-    Sub!("-",">=0","+")(test_array).each!((idx,a) =>
-        assert(equal(a.array,filtered_array[idx])));
+    int[][] filtered_array = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
+    int[][] before_array = [[1, 1, 255], [0, 3, 2], [3, 5, 3]];
+        
+    /*
+       sub filter
+       the first pixel is intact  =>                1,1,1
+
+         1 + 255 = 256 >= 256     =>  256 - 256 = 0  => 0
+         1 +   2 =   3 <  256     =>                    3
+       255 +   3 = 258 >  256     =>  258 - 256 = 2  => 2
+
+         0 +   3 = 3   <  256     =>                    3
+         3 +   2 = 5   <  256     =>                    5
+         2 +   1 = 3   <  256     =>                    3
+     */
+    Sub!("+","< 256","-")(filtered_array).each!((idx,a) =>
+        assert(a.equal(before_array[idx])));
     "unittest of Sub filter was passed".writeln;
 }
