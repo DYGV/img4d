@@ -9,6 +9,20 @@ import std.stdio,
        std.range,
        std.math;
 
+/*
+ *
+ *
+ *
+ *
+ *        Not available
+ *
+ *
+ *
+ *
+ */
+
+
+
 int main(){
     PNG_Header info;
     int[][][] actual_data;
