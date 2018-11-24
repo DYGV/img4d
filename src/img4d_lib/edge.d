@@ -38,10 +38,11 @@ double[][] gradient(double[][] Gr, double[][] Gth){
     int vicinity_w = 3;
     int y = vicinity_h / 2;
     int x = vicinity_w / 2;
+    double theta;
 
     double[][] output = minimallyInitializedArray!(double[][])(image_h, image_w);
     output = Gr.dup;
-    double theta;
+    
     foreach(h; y .. image_h-y){
         foreach(w; x .. image_w-x){
           theta = Gth[h][w];
@@ -76,8 +77,6 @@ double[][] gradient(double[][] Gr, double[][] Gth){
                   output[h][w] = 0;
               }
           }
-
-          //output[h][w] = theta;
         }
     }
     return output;

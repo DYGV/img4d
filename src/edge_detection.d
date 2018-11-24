@@ -52,7 +52,7 @@ int main(){
     }
 
     auto approximate_G = gradient(Gr, Gth);
-    auto edge = hysteresis(approximate_G, 30, 150);
+    auto edge = hysteresis(approximate_G, 80, 120);
     auto edge_file = File("../png_img/edge_lena.txt","w");
     edge.each!(a => edge_file.writeln(a));
     edge_file.flush();
