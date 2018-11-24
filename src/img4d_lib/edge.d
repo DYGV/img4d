@@ -34,10 +34,16 @@ double[][] differential(double[][] array, double[][] filter){
 double[][] gradient(double[][] Gr, double[][] Gth){
     int image_h = Gr.length.to!int;
     int image_w = Gr[0].length.to!int;
+    int vicinity_h = 3;
+    int vicinity_w = 3;
+    int y = vicinity_h / 2;
+    int x = vicinity_w / 2;
+
     double[][] output = minimallyInitializedArray!(double[][])(image_h, image_w);
+    output = Gr.dup;
     double theta;
-    foreach(h; 0 .. image_h){
-        foreach(w; 0 .. image_w){
+    foreach(h; y .. image_h-y){
+        foreach(w; x .. image_w-x){
           theta = Gth[h][w];
           
           if(theta >= -22.5  && theta < 22.5)   theta = 0;
@@ -49,8 +55,29 @@ double[][] gradient(double[][] Gr, double[][] Gth){
           if(theta >= -112.5 && theta < -67.5)  theta = 90;
           if(theta >=  112.5 && theta < 157.5)  theta = 135;
           if(theta >= -67.5  && theta < -22.5)  theta = 135;
-        
-          output[h][w] = theta;
+          
+          if(theta == 0){
+              if(Gr[h][w] < Gr[h][w+1] || Gr[h][w] < Gr[h][w-1]){
+                  output[h][w] = 0;
+              }
+          }
+          else if(theta == 45){
+              if(Gr[h][w] < Gr[h-1][w+1] || Gr[h][w] < Gr[h+1][w-1]){
+                  output[h][w] = 0;
+              }
+          }
+          else if(theta == 90){
+              if(Gr[h][w] < Gr[h+1][w] || Gr[h][w] < Gr[h-1][w]){
+                  output[h][w] = 0;
+              }
+          }
+          else{
+              if(Gr[w][h] < Gr[w+1][h+1] || Gr[h][w] < Gr[h-1][w-1]){
+                  output[h][w] = 0;
+              }
+          }
+
+          //output[h][w] = theta;
         }
     }
     return output;
