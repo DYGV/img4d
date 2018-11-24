@@ -42,7 +42,7 @@ double[][] gradient(double[][] Gr, double[][] Gth){
 
     double[][] output = minimallyInitializedArray!(double[][])(image_h, image_w);
     output = Gr.dup;
-    
+
     foreach(h; y .. image_h-y){
         foreach(w; x .. image_w-x){
           theta = Gth[h][w];
@@ -73,7 +73,7 @@ double[][] gradient(double[][] Gr, double[][] Gth){
               }
           }
           else{
-              if(Gr[w][h] < Gr[w+1][h+1] || Gr[h][w] < Gr[h-1][w-1]){
+              if(Gr[h][w] < Gr[h+1][w+1] || Gr[h][w] < Gr[h-1][w-1]){
                   output[h][w] = 0;
               }
           }
