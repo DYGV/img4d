@@ -9,10 +9,10 @@ import std.stdio,
        std.conv,
        std.algorithm,
        std.range,
-       std.math;
-import std.file : exists;
-import std.range.primitives;
-import std.algorithm.mutation;
+       std.math,
+       std.range.primitives,
+       std.algorithm.mutation,
+       std.file : exists;
 
 int length_per_pixel;
 
@@ -34,15 +34,13 @@ auto decode(ref PNG_Header info, string filename){
     return parse(info, filename);
 }
 
-ubyte[] encode(ref PNG_Header info,  int[][] color){
+ubyte[] encode(T)(ref PNG_Header info,  T[][] color){
     if(color == null) throw new Exception("null reference exception");
     ubyte[] data = info.make_IHDR ~ color.make_IDAT(info) ~ make_IEND;
     return data;
 }
 
-double[][] rgb_to_grayscale(T)(ref T[][][] color){
-    return to_grayscale(color);
-}
+auto rgb_to_grayscale(T)(ref T[][][] color){ return to_grayscale(color); }
 
 auto to_binary(T)(ref T[][] gray, T threshold=127){
   // Simple thresholding 
@@ -52,7 +50,7 @@ auto to_binary(T)(ref T[][] gray, T threshold=127){
   return bin;
 }
 
-int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
+auto to_binarize_elucidate(T)(T[][] array, string process="binary"){
     uint image_h = array.length;
     uint image_w = array[0].length;
     int vicinity_h = 3;
@@ -75,10 +73,10 @@ int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
                 if((t/(vicinity_h*vicinity_w)) < array[i][j]) output[i][j] = 255;
             }              
             else if(process == "median"){
-                int[] t;
+                T[] t;
                 foreach(m; 0 .. vicinity_h){
                     foreach(n; 0 .. vicinity_w){      
-                        t ~= array[i-h+m][j-w+n].to!int;
+                        t ~= array[i-h+m][j-w+n].to!T;
                     }
                 }    
                 output[i][j] = t.sort[4];
@@ -88,14 +86,14 @@ int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
     return output;
 }
 
-double[][] differ(T)(ref T[][] origin, ref T[][] target){
+auto differ(T)(ref T[][] origin, ref T[][] target){
     T[][] diff;
     origin.each!((idx,a) => diff ~=  (target[idx][] -= a[]).map!(b => abs(b)).array);
 
     return diff;
 }
 
-int[][] mask(T)(ref T[][][] color_target, ref T[][] gray){
+auto mask(T)(ref T[][][] color_target, ref T[][] gray){
     T[][] masked;
     masked.length = gray.length;
     gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? color_target[idx][edx] : [0, 0, 0]));

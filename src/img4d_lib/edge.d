@@ -8,7 +8,7 @@ import std.stdio,
 import std.range.primitives;
 import std.algorithm.mutation;
 
-auto differential(T)(ref T[][] array, T[][] filter){
+auto differential(T)(T[][] array, T[][] filter){
     uint image_h = array.length;
     uint image_w = array[0].length;
     int vicinity_h = 3;
@@ -75,8 +75,8 @@ auto gradient(T)(T[][] Gr, T[][] Gth){
                     output[h][w] = 0;
                 }
             }
-          }
-      }
+        }
+    }
     return output;
 }
 
