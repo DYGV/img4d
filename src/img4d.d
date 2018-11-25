@@ -40,27 +40,27 @@ ubyte[] encode(ref PNG_Header info,  int[][] color){
     return data;
 }
 
-double[][] rgb_to_grayscale(ref int[][][] color){
+double[][] rgb_to_grayscale(T)(ref T[][][] color){
     return to_grayscale(color);
 }
 
-int[][] to_binary(ref double[][] gray, double threshold=127){
+auto to_binary(T)(ref T[][] gray, T threshold=127){
   // Simple thresholding 
 
-  int[][] bin;
+  T[][] bin;
   gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
   return bin;
 }
 
 int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
-    int image_h = array.length.to!int;
-    int image_w = array[0].length.to!int;
+    uint image_h = array.length;
+    uint image_w = array[0].length;
     int vicinity_h = 3;
     int vicinity_w = 3;
     int h = vicinity_h / 2;
     int w = vicinity_w / 2;
     
-    int[][] output = minimallyInitializedArray!(int[][])(image_h, image_w);
+    auto output = minimallyInitializedArray!(typeof(array))(image_h, image_w);
     output.each!(a=> fill(a,0));
     
     foreach(i; h .. image_h-h){
@@ -88,15 +88,15 @@ int[][] to_binarize_elucidate(T)(T[][] array, string process="binary"){
     return output;
 }
 
-double[][] differ(ref double[][] origin, ref double[][] target){
-    double[][] diff;
+double[][] differ(T)(ref T[][] origin, ref T[][] target){
+    T[][] diff;
     origin.each!((idx,a) => diff ~=  (target[idx][] -= a[]).map!(b => abs(b)).array);
 
     return diff;
 }
 
-int[][] mask(ref int[][][] color_target, ref int[][] gray){
-    int[][] masked;
+int[][] mask(T)(ref T[][][] color_target, ref T[][] gray){
+    T[][] masked;
     masked.length = gray.length;
     gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? color_target[idx][edx] : [0, 0, 0]));
   

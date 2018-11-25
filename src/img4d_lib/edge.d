@@ -8,7 +8,7 @@ import std.stdio,
 import std.range.primitives;
 import std.algorithm.mutation;
 
-auto differential(T)(T[][] array, T[][] filter){
+auto differential(T)(ref T[][] array, T[][] filter){
     uint image_h = array.length;
     uint image_w = array[0].length;
     int vicinity_h = 3;
@@ -20,13 +20,13 @@ auto differential(T)(T[][] array, T[][] filter){
     output.each!(a=> fill(a,0));
     foreach(i; h .. image_h-h){
         foreach(j;  w .. image_w-w){
-            double t1 = 0;
+            double t = 0;
               foreach(m; 0 .. vicinity_h){
                     foreach(n; 0 .. vicinity_w){      
-                        t1 += array[i-h+m][j-w+n]*filter[m][n];
+                        t += array[i-h+m][j-w+n]*filter[m][n];
                     }
               }
-              output[i][j] += t1;        
+              output[i][j] += t;        
         }
     }
     return output;
