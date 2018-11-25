@@ -12,7 +12,7 @@ auto calculate(string op, T)(T lhs, T rhs)
     return mixin("lhs " ~ op ~ " rhs");
 }
 
-public auto Sub(string op, string inequality, string inv_op,T)(T[][] sc_data){
+public auto Sub(string op, string inequality, string inv_op, T)(T[][] sc_data){
     return [sc_data.front.walkLength.iota
         .map!(i => transversal(sc_data, i).chain
             .cumulativeFold!((a,b) =>

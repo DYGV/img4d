@@ -46,8 +46,8 @@ int main(){
 
     foreach(idx; 0 .. Gx.length){
         foreach(edx; 0 .. Gx[0].length){
-         Gr[idx][edx]  = sqrt(Gx[idx][edx].pow(2)+Gy[idx][edx].pow(2));
-         Gth[idx][edx] = ((atan2(Gy[idx][edx], Gx[idx][edx]) * 180) / PI); 
+            Gr[idx][edx]  = sqrt(Gx[idx][edx].pow(2)+Gy[idx][edx].pow(2));
+            Gth[idx][edx] = ((atan2(Gy[idx][edx], Gx[idx][edx]) * 180) / PI); 
         }
     }
 
@@ -58,6 +58,7 @@ int main(){
     edge_file.flush();
 
     executeShell("cd ../png_img && python generate_img.py");
+    //executeShell("cd ../png_img && generate_img.py");
 
     return 0;
 }

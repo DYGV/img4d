@@ -30,7 +30,7 @@ ubyte[] make_IHDR(in PNG_Header info){
     ubyte[] IHDR = body_len_IHDR ~ chunks_IHDR ~ chunks_IHDR.make_crc;
     return sig ~ IHDR; 
 }
-ubyte[] make_IDAT(int[][] actual_data, in PNG_Header info){
+ubyte[] make_IDAT(T)(T[][] actual_data, in PNG_Header info){
     if(actual_data == null) throw new Exception("null reference exception");
 
     Compress cmps = new Compress(HeaderFormat.deflate);

@@ -85,14 +85,14 @@ private static int PaethPredictor(int left, int upper, int upper_left)
     return upper_left;
 }
 
-private int normalize_pixel_value(int value){ return value < 256 ? value : value - 256; }
+private auto normalize_pixel_value(T)(T value){ return value < 256 ? value : value - 256; }
 
 auto calculate(string op, T)(T lhs, T rhs)
 {
     return mixin("lhs " ~ op ~ " rhs");
 }
 
-private static int[][] inverse_filtering(string op,string inequality, string inv_op)(ref ubyte[][] data){
+private static int[][] inverse_filtering(string op, string inequality, string inv_op)(ref ubyte[][] data){
     ubyte[][][] arr_rgb;  
     int[][][] comp_data;
     int[] filtering_type;

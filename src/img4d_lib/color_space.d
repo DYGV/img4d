@@ -5,7 +5,7 @@ import std.stdio,
        std.algorithm,
        std.range;
 
-double[][] to_grayscale(ref int[][][] color){
+double[][] to_grayscale(T)(ref T[][][] color){
     ulong input_len = color[0][0].length; 
     if (input_len != 3 && input_len != 4) throw new Exception("invalid format.");
     if (input_len == 4)
