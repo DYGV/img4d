@@ -50,11 +50,11 @@ private static PNG_Header read_IHDR(ubyte[] header){
     return IHDR;
 }
 
-private static int read_data_chunk_len(ubyte[] data){ return data.peek!int(); }
+private int read_data_chunk_len(ubyte[] data){ return data.peek!int(); }
 
-private static string read_chunk_type(ubyte[] data){ return cast(string)data; }
+private string read_chunk_type(ubyte[] data){ return cast(string)data; }
 
-private static ubyte[] read_idat(ubyte[] data){
+private ubyte[] read_idat(ubyte[] data){
     /*ubyte[] data_crc = data[0 .. $-4];
     ubyte[] crc = data[$-4 .. $];
     crc_check(crc, data_crc);*/
@@ -68,7 +68,7 @@ private void crc_check(ubyte[] crc, in ubyte[] chunk){
     }
 }
 
-private static int PaethPredictor(int left, int upper, int upper_left)
+private int PaethPredictor(int left, int upper, int upper_left)
 {
     int paeth = left + upper - upper_left;
     int paeth_left = abs(paeth - left);    
@@ -88,7 +88,7 @@ auto calculate(string op, T)(T lhs, T rhs)
     return mixin("lhs " ~ op ~ " rhs");
 }
 
-private static int[][] inverse_filtering(string op, string inequality, string inv_op)(ref ubyte[][] data){
+private int[][] inverse_filtering(string op, string inequality, string inv_op)(ref ubyte[][] data){
     ubyte[][][] arr_rgb;  
     int[][][] comp_data;
     int[] filtering_type;
