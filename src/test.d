@@ -19,7 +19,17 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           before_encode.bit_depth, 
           before_encode.color_type);
-
+    
+    /*  Canny Edge Detection (Defective State)
+    
+    auto gray = rgb_to_grayscale(actual_data);
+    auto edge = canny(gray,80,150);
+    auto edge_file = File("../png_img/edge_lena.txt","w");
+    edge.each!(a => edge_file.writeln(a));
+    edge_file.flush();
+    executeShell("cd ../png_img && python generate_img.py");
+    */
+    
     // start encode
     ubyte[] encoded_data = before_encode.encode(parsed_data);
     auto file = File("../png_img/encoded_lena.png","w");

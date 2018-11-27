@@ -2,7 +2,9 @@ module img4d;
 import img4d_lib.decode,
        img4d_lib.encode,
        img4d_lib.filter,
-       img4d_lib.color_space;
+       img4d_lib.color_space,
+       img4d_lib.edge;
+
 import std.stdio,
        std.array,
        std.bitmanip,
@@ -38,6 +40,33 @@ ubyte[] encode(T)(ref PNG_Header info,  T[][] color){
     if(color == null) throw new Exception("null reference exception");
     ubyte[] data = info.make_IHDR ~ color.make_IDAT(info) ~ make_IEND;
     return data;
+}
+
+// Canny Edge Detection (Defective)
+auto canny(T)(T[][] actual_data, int t_min, int t_max){
+    const double[][] gaussian = [[0.0625, 0.125, 0.0625],
+                          [0.125, 0.25, 0.125],
+                          [0.0625, 0.125, 0.0625]];
+    const double[][] sobel_x = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+    const double[][] sobel_y = [[-1, -2, -1], [0, 0, 0],[1, 2, 1]];
+
+    auto G  = actual_data.differential(gaussian);
+    auto Gx = G.differential(sobel_x);
+    auto Gy = G.differential(sobel_y);
+    double[][]  Gr = minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
+    double[][]  Gth= minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
+
+    foreach(idx; 0 .. Gx.length){
+        foreach(edx; 0 .. Gx[0].length){
+            Gr[idx][edx]  = sqrt(Gx[idx][edx].pow(2)+Gy[idx][edx].pow(2));
+            Gth[idx][edx] = ((atan2(Gy[idx][edx], Gx[idx][edx]) * 180) / PI); 
+        }
+    }
+
+    auto approximate_G = Gr.gradient(Gth);
+    auto edge = approximate_G.hysteresis(t_min, t_max);
+
+    return edge;
 }
 
 auto rgb_to_grayscale(T)(ref T[][][] color){ return to_grayscale(color); }
