@@ -13,17 +13,18 @@ import std.stdio,
        std.range,
        std.math;
 
-private static PNG_Header read_IHDR(ref ubyte[] header, ref int idx){ 
-    PNG_Header IHDR = {
-        data_crc           : header[idx-4 .. idx+13],
-        width              : header[idx .. idx+=4].peek!int(),
-        height             : header[idx .. idx+=4].peek!int(),
-        bit_depth          : header[idx],
-        color_type         : header[idx+=1],
-        compression_method : header[idx+=1],
-        filter_method      : header[idx+=1],
-        interlace_method   : header[idx+=1],
-        crc                : header[idx+=1 .. idx+=4],
+private static PNG_Header read_IHDR(ubyte[] header){ 
+  
+  PNG_Header IHDR = {
+        data_crc           : header[0 .. 17],
+        width              : header[4 .. 8].peek!int(),
+        height             : header[8 .. 12].peek!int(),
+        bit_depth          : header[12],
+        color_type         : header[13],
+        compression_method : header[14],
+        filter_method      : header[15],
+        interlace_method   : header[16],
+        crc                : header[17 .. 21],
     };
     switch(IHDR.color_type){
         case 0:
@@ -49,20 +50,15 @@ private static PNG_Header read_IHDR(ref ubyte[] header, ref int idx){
     return IHDR;
 }
 
-private static int read_data_chunk_len(ref ubyte[] data, ref int idx){
-  return data[idx .. idx+4].peek!int();
-}
+private static int read_data_chunk_len(ubyte[] data){ return data.peek!int(); }
 
-private static string read_chunk_type(ref ubyte[] data, in int type_idx){
-    return cast(string)data[type_idx .. type_idx+4];
-}
+private static string read_chunk_type(ubyte[] data){ return cast(string)data; }
 
-private static ubyte[] read_idat(ref ubyte[] data,in int idx, in int length){
-    ubyte[] data_crc = [0x49, 0x44, 0x41, 0x54];
-    data_crc ~= data[idx .. length];
-    ubyte[] crc = data[length .. length+4];
-    crc_check(crc, data_crc);
-    return data[idx .. length];
+private static ubyte[] read_idat(ubyte[] data){
+    /*ubyte[] data_crc = data[0 .. $-4];
+    ubyte[] crc = data[$-4 .. $];
+    crc_check(crc, data_crc);*/
+    return data[4 .. $-4];
 }
 
 private void crc_check(ubyte[] crc, in ubyte[] chunk){
@@ -182,17 +178,18 @@ public int[][] parse(ref PNG_Header info, string filename){
     UnCompress uc = new UnCompress(HeaderFormat.deflate);
     idx += sig_size;
     while (idx >= 0){
-        length = data.read_data_chunk_len(idx);
-        chunk_type = data.read_chunk_type(idx+length_size);
-        idx += 8;
+        length = data[idx .. idx+4].read_data_chunk_len;
+        chunk_type = data[idx+4 .. idx+8].read_chunk_type;
+        idx += 4;
         switch(chunk_type){
             case "IHDR":
-                info = data.read_IHDR(idx);
-                break;
+              info = data[idx .. 33].read_IHDR;
+              idx += 21;
+              break;
             
             case "IDAT":
-                idat = data.read_idat(idx, idx+length);
-                idx += length+4;
+                idat = data[idx .. idx+length+4].read_idat;//(idx, idx+length);
+                idx += length+8;
                 if(info.color_type == 0 || info.color_type == 4){
                     int num_scanline = info.width;
                     length_per_pixel = num_scanline; 
@@ -211,7 +208,7 @@ public int[][] parse(ref PNG_Header info, string filename){
                   if (!ancillary_chunks.canFind(chunk_type))
                       throw new Exception("Invalid png format"); 
                   //writeln(chunk_type);
-                  idx += length+4;
+                  idx += length+8;
         }
     }
     if(unc_idat.length == 0 || info.color_type == 0 || info.color_type == 4) 
