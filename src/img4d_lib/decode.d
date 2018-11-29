@@ -83,11 +83,6 @@ private int PaethPredictor(int left, int upper, int upper_left)
 
 private auto normalize_pixel_value(T)(T value){ return value < 256 ? value : value - 256; }
 
-auto calculate(string op, T)(T lhs, T rhs)
-{
-    return mixin("lhs " ~ op ~ " rhs");
-}
-
 private int[][] inverse_filtering(string op, string inequality, string inv_op)(ref ubyte[][] data){
     ubyte[][][] arr_rgb;  
     int[][][] comp_data;
@@ -188,7 +183,7 @@ public int[][] parse(ref PNG_Header info, string filename){
               break;
             
             case "IDAT":
-                idat = data[idx .. idx+length+4].read_idat;//(idx, idx+length);
+                idat = data[idx .. idx+length+4].read_idat;
                 idx += length+8;
                 if(info.color_type == 0 || info.color_type == 4){
                     int num_scanline = info.width;
