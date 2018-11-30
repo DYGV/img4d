@@ -13,7 +13,7 @@ import std.stdio,
        std.range,
        std.math;
 
-private static PNG_Header read_IHDR(ubyte[] header){ 
+private PNG_Header read_IHDR(ubyte[] header){ 
   
   PNG_Header IHDR = {
         data_crc           : header[0 .. 17],
@@ -155,7 +155,6 @@ public int[][] parse(ref PNG_Header info, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx = 0;
     int sig_size = 8;
-
     if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");
     
@@ -186,10 +185,8 @@ public int[][] parse(ref PNG_Header info, string filename){
                 idat = data[idx .. idx+length+4].read_idat;
                 idx += length+8;
                 if(info.color_type == 0 || info.color_type == 4){
-                    int num_scanline = info.width;
-                    length_per_pixel = num_scanline; 
-                    auto chunks = idat.chunks(num_scanline).array.to!(int[][]);
-                    actual_data ~= chunks;
+                    length_per_pixel = info.width;
+                    actual_data ~= idat.chunks(length_per_pixel).array.to!(int[][]);
                     break;
                 }
                 unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
