@@ -44,11 +44,11 @@ ubyte[] encode(T)(ref PNG_Header info,  T[][] color){
 
 // Canny Edge Detection (Defective)
 auto canny(T)(T[][] actual_data, int t_min, int t_max){
-    const double[][] gaussian = [[0.0625, 0.125, 0.0625],
+    double[][] gaussian = [[0.0625, 0.125, 0.0625],
                           [0.125, 0.25, 0.125],
                           [0.0625, 0.125, 0.0625]];
-    const double[][] sobel_x = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
-    const double[][] sobel_y = [[-1, -2, -1], [0, 0, 0],[1, 2, 1]];
+    double[][] sobel_x = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+    double[][] sobel_y = [[-1, -2, -1], [0, 0, 0],[1, 2, 1]];
 
     auto G  = actual_data.differential(gaussian);
     auto Gx = G.differential(sobel_x);

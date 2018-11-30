@@ -165,7 +165,7 @@ public int[][] parse(ref PNG_Header info, string filename){
     ubyte[] idat, unc_idat;
     ubyte[][] unc_chunks;
 
-    string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
+    const string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
                                 "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
                                 "fRAc","gIFg","gIFt","gIFx","oFFs","pCAL","sCAL"];
     

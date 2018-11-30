@@ -20,13 +20,13 @@ auto differential(T)(T[][] array, T[][] filter){
     output.each!(a=> fill(a,0));
     foreach(i; h .. image_h-h){
         foreach(j;  w .. image_w-w){
-            double t = 0;
+              double t = 0;
               foreach(m; 0 .. vicinity_h){
                     foreach(n; 0 .. vicinity_w){      
                         t += array[i-h+m][j-w+n]*filter[m][n];
                     }
               }
-              output[i][j] += t;        
+              output[i][j] = t;        
         }
     }
     return output;

@@ -14,10 +14,8 @@ double[][] to_grayscale(T)(ref T[][][] color){
     double[][] temp, gray;
     double[] arr = [0.3, 0.59, 0.11];
 
-    alias to_double = map!(to!double);
-    
     color.each!(a=> a.transposed
-          .each!((idx,b)=> temp ~= to_double(b)
+          .each!((idx,b)=> temp ~= to_double(b.to!double)
           .map!(h => h*=arr[idx]).array));
     
     temp.chunks(3)
