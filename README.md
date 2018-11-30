@@ -4,6 +4,11 @@ PNG images Decoder in D language.
 It's defective implemention and I cannot guarantee the operation.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
 # Package  
+ [img4d_lib.decode](https://github.com/DYGV/img4d#img4d_libdecode)  
+ [img4d_lib.encode](https://github.com/DYGV/img4d#img4d_libencode)  
+ [img4d_lib.color_space](https://github.com/DYGV/img4d#img4d_libcolor_space)  
+ [img4d_lib.edge](https://github.com/DYGV/img4d#img4d_libedge)  
+  
 ## img4d_lib.decode  
 -  **PNG_Header read_IHDR(ubyte[] header)**  
 Set PNG_Header struct and Return its struct  
