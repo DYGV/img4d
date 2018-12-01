@@ -50,9 +50,9 @@ private PNG_Header read_IHDR(ubyte[] header){
     return IHDR;
 }
 
-private int read_data_chunk_len(ubyte[] data){ return data.peek!int(); }
+private int byte_to_int(T)(T[] data){ return data.peek!int(); }
 
-private string read_chunk_type(ubyte[] data){ return cast(string)data; }
+private string byte_to_string(T)(T[] data){ return cast(string)data; }
 
 private ubyte[] read_idat(ubyte[] data){
     /*ubyte[] data_crc = data[0 .. $-4];
@@ -172,8 +172,8 @@ public int[][] parse(ref PNG_Header info, string filename){
     UnCompress uc = new UnCompress(HeaderFormat.deflate);
     idx += sig_size;
     while (idx >= 0){
-        length = data[idx .. idx+4].read_data_chunk_len;
-        chunk_type = data[idx+4 .. idx+8].read_chunk_type;
+        length = data[idx .. idx+4].byte_to_int;
+        chunk_type = data[idx+4 .. idx+8].byte_to_string;
         idx += 4;
         switch(chunk_type){
             case "IHDR":
