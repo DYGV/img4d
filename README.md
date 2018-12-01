@@ -39,11 +39,21 @@ Return the value which are subtracted 256 if it exceeds 256
 - **int[][] parse(ref PNG_Header info, string filename)**  
 ## img4d_lib.encode  
 - **ubyte[] make_IHDR(in PNG_Header info)**  
+Return IHDR which required for encoding  
+   - ***Params:***  
+PNG_Header info : arranged PNG_Header  
 - **ubyte[] make_IDAT(T)(T[][] actual_data, in PNG_Header info)**  
+   - ***Params:***  
+T[][] actual_data : IDAT chunk data  
+PNG_Header info   : arranged PNG_Header  
+
+Return IDAT which required for encoding  
 - **ubyte[] make_ancillary()**  
 Not implemented  
 - **ubyte[] make_IEND()**  
+Return IEND which required for encoding  
 - **auto make_crc(in ubyte[] data)**  
+Calculate and Return CRC value  
 ## img4d_lib.filter  
 - **auto calculate(string op, T)(T lhs, T rhs)**  
 - **auto Sub(string op, string inequality, string inv_op, T)(T[][] sc_data)**  
