@@ -43,11 +43,10 @@ Return IHDR which required for encoding
    - ***Params:***  
 PNG_Header info : arranged PNG_Header  
 - **ubyte[] make_IDAT(T)(T[][] actual_data, in PNG_Header info)**  
+Return IDAT which required for encoding  
    - ***Params:***  
 T[][] actual_data : IDAT chunk data  
 PNG_Header info   : arranged PNG_Header  
-
-Return IDAT which required for encoding  
 - **ubyte[] make_ancillary()**  
 Not implemented  
 - **ubyte[] make_IEND()**  
@@ -56,7 +55,9 @@ Return IEND which required for encoding
 Calculate and Return CRC value  
 ## img4d_lib.filter  
 - **auto calculate(string op, T)(T lhs, T rhs)**  
+Calculate and Return using template arguments and mixin  
 - **auto Sub(string op, string inequality, string inv_op, T)(T[][] sc_data)**  
+Calculate and Return Sub filter(Difference from left pixel)  
 - **auto Up()**  
 Not implemented  
 - **auto Ave()**  
@@ -65,6 +66,7 @@ Not implemented
 Not implemented  
 ## img4d_lib.color_space  
 - **double[][] to_grayscale(T)(ref T[][][] color)**  
+Convert to grayscale by weighting  
 ## img4d_lib.edge  
 - **auto differential(T)(T[][] array, T[][] filter)**  
 - **auto gradient(T)(T[][] Gr, T[][] Gth)**  
