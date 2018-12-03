@@ -5,46 +5,46 @@ import std.stdio,
        std.process;
 
 int main(){
-    PNG_Header before_encode;
-    int[][][] actual_data;
+    Header beforeEncode;
+    int[][][] actualData;
 
     // start decode
-    auto parsed_data = before_encode.decode("../png_img/lena.png");
-    if(parsed_data.length == 0) {return 0;}
-    parsed_data.each!(n  => actual_data ~= n.chunks(length_per_pixel).array);
+    auto parsedData = beforeEncode.decode("../png_img/lena.png");
+    if(parsedData.length == 0) {return 0;}
+    parsedData.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);
 
     writefln("Width  %8d\nHeight  %7d",
-          before_encode.width,
-          before_encode.height);
+          beforeEncode.width,
+          beforeEncode.height);
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
-          before_encode.bit_depth, 
-          before_encode.color_type);
+          beforeEncode.bitDepth, 
+          beforeEncode.colorType);
     
     /*  Canny Edge Detection (Defective State)
     
-    auto gray = rgb_to_grayscale(actual_data);
+    auto gray = rgbToGrayscale(actualData);
     auto edge = canny(gray,80,150);
-    auto edge_file = File("../png_img/edge_lena.txt","w");
-    edge.each!(a => edge_file.writeln(a));
-    edge_file.flush();
+    auto edgeFile = File("../png_img/edge_lena.txt","w");
+    edge.each!(a => edgeFile.writeln(a));
+    edgeFile.flush();
     executeShell("cd ../png_img && python generate_img.py");
     */
     
     // start encode
-    ubyte[] encoded_data = before_encode.encode(parsed_data);
+    ubyte[] encodedData = beforeEncode.encode(parsedData);
     auto file = File("../png_img/encoded_lena.png","w");
-    file.rawWrite(encoded_data);
+    file.rawWrite(encodedData);
     file.flush(); 
     //read encoded file
-    PNG_Header after_encode;
+    Header afterEncode;
 
-    auto encoded_data_to_decode = after_encode.decode("../png_img/encoded_lena.png");
+    auto encodedDataToDecode = afterEncode.decode("../png_img/encoded_lena.png");
     writefln("Width  %8d\nHeight  %7d",
-          after_encode.width,
-          after_encode.height);
+          afterEncode.width,
+          afterEncode.height);
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
-          after_encode.bit_depth, 
-          after_encode.color_type);
+          afterEncode.bitDepth, 
+          afterEncode.colorType);
     
     // Verification (compare with original image)
     executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
@@ -54,34 +54,34 @@ int main(){
         diff.writeln;
     }
 
-    // auto rgb_file = File("../png_img/rgb_lena.txt","w");
-    // rgb_file.writeln(actual_data);
+    // auto rgbFile = File("../png_img/rgb_lena.txt","w");
+    // rgbFile.writeln(actual_data);
 
   /*
      covert to grayscale
    */
-    // auto gray = rgb_to_grayscale(actual_data);
-    // auto gray_file = File("../png_img/gray_lena.txt","w");
-    // gray_file.writeln(gray);
+    // auto gray = rgbToGrayscale(actual_data);
+    // auto grayFile = File("../png_img/gray_lena.txt","w");
+    // grayFile.writeln(gray);
 
   /*
      convert to binary image by simple thresholding
    */
-    // auto bin = to_binary(gray);
-    // auto bin_file = File("../png_img/bins_simple_lena.txt","w");
-    // bin_file.writeln(bin);
+    // auto bin = toBinary(gray);
+    // auto binFile = File("../png_img/bins_simple_lena.txt","w");
+    // binFile.writeln(bin);
 
   /*
      convert ot binary image by adaptive threshoding
    */
-    // auto bin_adaptive = to_binarize_elucidate(gray);
-    // auto bin_adaptive_file = File("../png_img/bin_adaptive_lena.txt","w");
-    // bin_adaptive.each!(a => bin_adaptive_file.writeln(a));
+    // auto binAdaptive = toBinarizeElucidate(gray);
+    // auto binAdaptiveFile = File("../png_img/binAdaptive_lena.txt","w");
+    // binAdaptive.each!(a => binAdaptiveFile.writeln(a));
   
 
-    // auto median = to_binarize_elucidate(bin_adaptive, "median");
-    // auto median_filter_file = File("../png_img/median_filter_lena.txt","w");
-    // median.each!(a => median_filter_file.writeln(a));
+    // auto median = toBinarizeElucidate(binAdaptive, "median");
+    // auto medianFilterFile = File("../png_img/median_filter_lena.txt","w");
+    // median.each!(a => medianFilterFile.writeln(a));
     
     return 0;
 }

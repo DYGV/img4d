@@ -16,42 +16,42 @@ import std.stdio,
        std.algorithm.mutation,
        std.file : exists;
 
-int length_per_pixel;
+int lengthPerPixel;
 
-struct PNG_Header {
+struct Header {
     int     width,
             height,
-            bit_depth,
-            color_type,
-            compression_method,  
-            filter_method,
-            interlace_method;
+            bitDepth,
+            colorType,
+            compressionMethod,  
+            filterMethod,
+            interlaceMethod;
     ubyte[] crc; 
 }
 
-auto decode(ref PNG_Header info, string filename){
+auto decode(ref Header info, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     return parse(info, filename);
 }
 
-ubyte[] encode(T)(ref PNG_Header info,  T[][] color){
+ubyte[] encode(T)(ref Header info,  T[][] color){
     if(color == null) throw new Exception("null reference exception");
-    ubyte[] data = info.make_IHDR ~ color.make_IDAT(info) ~ make_IEND;
+    ubyte[] data = info.makeIHDR ~ color.makeIDAT(info) ~ makeIEND;
     return data;
 }
 
 // Canny Edge Detection (Defective)
-auto canny(T)(T[][] actual_data, int t_min, int t_max){
+auto canny(T)(T[][] actualData, int tMin, int tMax){
     double[][] gaussian = [[0.0625, 0.125, 0.0625],
                           [0.125, 0.25, 0.125],
                           [0.0625, 0.125, 0.0625]];
-    double[][] sobel_x = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
-    double[][] sobel_y = [[-1, -2, -1], [0, 0, 0],[1, 2, 1]];
+    double[][] sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+    double[][] sobelY = [[-1, -2, -1], [0, 0, 0],[1, 2, 1]];
 
-    auto G  = actual_data.differential(gaussian);
-    auto Gx = G.differential(sobel_x);
-    auto Gy = G.differential(sobel_y);
+    auto G  = actualData.differential(gaussian);
+    auto Gx = G.differential(sobelX);
+    auto Gy = G.differential(sobelY);
     double[][]  Gr = minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
     double[][]  Gth= minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
 
@@ -62,15 +62,15 @@ auto canny(T)(T[][] actual_data, int t_min, int t_max){
         }
     }
 
-    auto approximate_G = Gr.gradient(Gth);
-    auto edge = approximate_G.hysteresis(t_min, t_max);
+    auto approximateG = Gr.gradient(Gth);
+    auto edge = approximateG.hysteresis(tMin, tMax);
 
     return edge;
 }
 
-auto rgb_to_grayscale(T)(ref T[][][] color){ return to_grayscale(color); }
+auto rgbToGrayscale(T)(ref T[][][] color){ return toGrayscale(color); }
 
-auto to_binary(T)(ref T[][] gray, T threshold=127){
+auto toBinary(T)(ref T[][] gray, T threshold=127){
   // Simple thresholding 
 
   T[][] bin;
@@ -78,32 +78,32 @@ auto to_binary(T)(ref T[][] gray, T threshold=127){
   return bin;
 }
 
-auto to_binarize_elucidate(T)(T[][] array, string process="binary"){
-    uint image_h = array.length;
-    uint image_w = array[0].length;
-    int vicinity_h = 3;
-    int vicinity_w = 3;
-    int h = vicinity_h / 2;
-    int w = vicinity_w / 2;
+auto toBinarizeElucidate(T)(T[][] array, string process="binary"){
+    uint imageH = array.length;
+    uint imageW = array[0].length;
+    int vicinityH = 3;
+    int vicinityW = 3;
+    int h = vicinityH / 2;
+    int w = vicinityW / 2;
     
-    auto output = minimallyInitializedArray!(typeof(array))(image_h, image_w);
+    auto output = minimallyInitializedArray!(typeof(array))(imageH, imageW);
     output.each!(a=> fill(a,0));
     
-    foreach(i; h .. image_h-h){
-        foreach(j;  w .. image_w-w){
+    foreach(i; h .. imageH-h){
+        foreach(j;  w .. imageW-w){
             if (process=="binary"){
                 int t = 0;
-                foreach(m; 0 .. vicinity_h){
-                    foreach(n; 0 .. vicinity_w){      
+                foreach(m; 0 .. vicinityH){
+                    foreach(n; 0 .. vicinityW){      
                         t += array[i-h+m][j-w+n];
                     }
                 }
-                if((t/(vicinity_h*vicinity_w)) < array[i][j]) output[i][j] = 255;
+                if((t/(vicinityH*vicinityW)) < array[i][j]) output[i][j] = 255;
             }              
             else if(process == "median"){
                 T[] t;
-                foreach(m; 0 .. vicinity_h){
-                    foreach(n; 0 .. vicinity_w){      
+                foreach(m; 0 .. vicinityH){
+                    foreach(n; 0 .. vicinityW){      
                         t ~= array[i-h+m][j-w+n].to!T;
                     }
                 }    
@@ -121,10 +121,10 @@ auto differ(T)(ref T[][] origin, ref T[][] target){
     return diff;
 }
 
-auto mask(T)(ref T[][][] color_target, ref T[][] gray){
+auto mask(T)(ref T[][][] colorTarget, ref T[][] gray){
     T[][] masked;
     masked.length = gray.length;
-    gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? color_target[idx][edx] : [0, 0, 0]));
+    gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? colorTarget[idx][edx] : [0, 0, 0]));
   
     return masked;
 }

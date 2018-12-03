@@ -13,187 +13,189 @@ import std.stdio,
        std.range,
        std.math;
 
-private PNG_Header read_IHDR(ubyte[] header){ 
+private Header readIHDR(ubyte[] header){ 
     ubyte[] chunk = header[0 .. 17];  // Chunk Type + Chunk Data 
-    PNG_Header IHDR = {
-        width              : header[4 .. 8].byte_to_int,
-        height             : header[8 .. 12].byte_to_int,
-        bit_depth          : header[12],
-        color_type         : header[13],
-        compression_method : header[14],
-        filter_method      : header[15],
-        interlace_method   : header[16],
-        crc                : header[17 .. 21],
+    Header IHDR = {
+        width             : header[4 .. 8].byteToInt,
+        height            : header[8 .. 12].byteToInt,
+        bitDepth          : header[12],
+        colorType         : header[13],
+        compressionMethod : header[14],
+        filterMethod      : header[15],
+        interlaceMethod   : header[16],
+        crc               : header[17 .. 21],
     };
-    switch(IHDR.color_type){
+    switch(IHDR.colorType){
         case 0:
-            length_per_pixel = IHDR.width;
+            lengthPerPixel = IHDR.width;
             break;
         case 2:
-            length_per_pixel = 3;
+            lengthPerPixel = 3;
             break;
         case 3:
-            length_per_pixel = 3;
+            lengthPerPixel = 3;
             break;
         case 4:
-            length_per_pixel = IHDR.width * 2;
+            lengthPerPixel = IHDR.width * 2;
             break;
         case 6:
-            length_per_pixel = 4;
+            lengthPerPixel = 4;
             break;
         default:
             break;
     }
 
-    crc_check(IHDR.crc, chunk);
+    crcCheck(IHDR.crc, chunk);
     return IHDR;
 }
 
-private int byte_to_int(T)(T[] data){ return data.peek!int(); }
+private int byteToInt(ubyte[] data){ return data.peek!int(); }
 
-private string byte_to_string(T)(T[] data){ return cast(string)data; }
+private string byteToString(T)(T[] data){ return cast(string)data; }
 
-private ubyte[] read_idat(ubyte[] data){
-    /*ubyte[] data_crc = data[0 .. $-4];
-    ubyte[] crc = data[$-4 .. $];
-    crc_check(crc, data_crc);*/
+private ubyte[] readIDAT(ubyte[] data){
+    version(none){
+        ubyte[] dataCrc = data[0 .. $-4];
+        ubyte[] crc = data[$-4 .. $];
+        crcCheck(crc, dataCrc);
+    }
     return data[4 .. $-4];
 }
 
-private void crc_check(ubyte[] crc, in ubyte[] chunk){
+private void crcCheck(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
     if (crc != chunk.crc32Of){
           throw new Exception("invalid");
     }
 }
 
-private int PaethPredictor(int left, int upper, int upper_left){
-    int paeth = left + upper - upper_left;
-    int paeth_left = abs(paeth - left);    
-    int paeth_upper = abs(paeth - upper);    
-    int paeth_upper_left = abs(paeth - upper_left);    
-    if (paeth_left <= paeth_upper && paeth_left <= paeth_upper_left)
+private int paethPredictor(int left, int upper, int upperLeft){
+    int paeth = left + upper - upperLeft;
+    int paethLeft = abs(paeth - left);
+    int paethUpper = abs(paeth - upper);
+    int paethUpperLeft = abs(paeth - upperLeft);
+    if (paethLeft <= paethUpper && paethLeft <= paethUpperLeft)
         return left;
-    if (paeth_upper <= paeth_upper_left)
+    if (paethUpper <= paethUpperLeft)
         return upper;   
-    return upper_left;
+    return upperLeft;
 }
 
-private auto normalize_pixel_value(T)(T value){ return value < 256 ? value : value - 256; }
+private auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
 
-private int[][] inverse_filtering(string op, string inequality, string inv_op)(ref ubyte[][] data){
-    ubyte[][][] arr_rgb;  
-    int[][][] comp_data;
-    int[] filtering_type;
-    int[][] actual_data;
-    data.each!(sc => filtering_type ~= sc.front);
-    data.each!(sc => arr_rgb ~= [sc.remove(0).chunks(length_per_pixel).array]);
+private int[][] inverseFiltering(string op, string inequality, string inverseOp)(ref ubyte[][] data){
+    ubyte[][][] rgb;  
+    int[][][] compData;
+    int[] filteringType;
+    int[][] actualData;
+    data.each!(sc => filteringType ~= sc.front);
+    data.each!(sc => rgb ~= [sc.remove(0).chunks(lengthPerPixel).array]);
 
-    foreach(idx, sc_data; arr_rgb){
+    foreach(idx, scanline; rgb){
         int[] temp;
         int[] predictor;
-        int[] actual_data_back;
+        int[] actualDataBack;
 
-        switch(filtering_type[idx]){
+        switch(filteringType[idx]){
             case 0:
-                sc_data.each!(a => a.each!(b => temp ~= b));
-            	actual_data ~= [temp.array];
+                scanline.each!(a => a.each!(b => temp ~= b));
+            	actualData ~= [temp.array];
                 
             	break;
             
             case 1:
-                actual_data ~=  Sub!(op,inequality,inv_op)(sc_data).join; 
+                actualData ~=  sub!(op,inequality,inverseOp)(scanline).join; 
             	break;
             
             case 2:
-                sc_data.each!(a => a.each!(b => temp ~= b));
-                actual_data ~= [(temp[] += actual_data.back[]).map!(a => a.normalize_pixel_value).array];
+                scanline.each!(a => a.each!(b => temp ~= b));
+                actualData ~= [(temp[] += actualData.back[]).map!(a => a.normalizePixelValue).array];
 
                 break;
 	    
             case 3:
-                actual_data_back = actual_data.back;
-                auto up = chunks(actual_data_back, length_per_pixel);
-                auto current = chunks(sc_data, length_per_pixel);
-                int[] up_pixel = *cast(int[]*)&up;
-            	sc_data.popFront;            		
-            	auto sc = sc_data.join;
-                up.front.each!((idx,n) =>temp ~= ((n/2) + current.front[0][idx]).normalize_pixel_value);
+                actualDataBack = actualData.back;
+                auto up = actualDataBack.chunks(lengthPerPixel);
+                auto current = scanline.chunks(lengthPerPixel);
+                int[] upPixel = *cast(int[]*)&up;
+            	scanline.popFront;            		
+            	auto sc = scanline.join;
+                up.front.each!((idx,n) =>temp ~= ((n/2) + current.front[0][idx]).normalizePixelValue);
 
-                up_pixel[length_per_pixel .. $].each!((o,n)=>  
-                                temp ~= (((temp[o] + n)/2) + sc[o]).normalize_pixel_value);
+                upPixel[lengthPerPixel .. $].each!((o,n)=>  
+                                temp ~= (((temp[o] + n)/2) + sc[o]).normalizePixelValue);
 
-                actual_data ~= [temp];
+                actualData ~= [temp];
                 break;
 
             case 4:
-                auto joined = sc_data.join;
+                auto joined = scanline.join;
 
-                actual_data.back[0 .. length_per_pixel]
-                                .each!((idx,a) => temp ~= (a + joined[idx]).normalize_pixel_value);
+                actualData.back[0 .. lengthPerPixel]
+                                .each!((idx,a) => temp ~= (a + joined[idx]).normalizePixelValue);
                 
-                actual_data.back[length_per_pixel .. $]
+                actualData.back[lengthPerPixel .. $]
                               .each!((idx, a) => 
-                              temp ~= (PaethPredictor(temp[idx], a, actual_data.back[idx]) 
-                                    + joined[idx + length_per_pixel])
-                              .normalize_pixel_value);
+                              temp ~= (paethPredictor(temp[idx], a, actualData.back[idx]) 
+                                    + joined[idx + lengthPerPixel])
+                              .normalizePixelValue);
             
-                actual_data ~= [temp];
+                actualData ~= [temp];
                 break;
 
   	    default:
                 break;
         }       
     }
-    return actual_data;
+    return actualData;
 }
  
 
-public int[][] parse(ref PNG_Header info, string filename){
+public int[][] parse(ref Header info, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;
-    int sig_size  = 8;
+    int sigSize   = 8;
 
-    if (data[idx .. sig_size] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+    if (data[idx .. sigSize] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");
     
-    int chunk_length_size = 4;
-    int chunk_type_size   = 4;
-    int chunk_crc_size    = 4;
-    int chunk_data_size;
-    string chunk_type;
-    int[][] actual_data;
-    ubyte[] unc_idat;
-    const string[] ancillary_chunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
+    int chunkLengthSize = 4;
+    int chunkTypeSize   = 4;
+    int chunkCrcSize    = 4;
+    int chunkDataSize;
+    string chunkType;
+    int[][] actualData;
+    ubyte[] uncIDAT;
+    const string[] ancillaryChunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
                                       "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
                                       "fRAc","gIFg","gIFt","gIFx","oFFs","pCAL","sCAL"];
     
-    idx += sig_size;
+    idx += sigSize;
     UnCompress uc = new UnCompress(HeaderFormat.deflate);
     while (idx >= 0){
-        chunk_data_size = data[idx .. idx+chunk_length_size].byte_to_int;
-        idx += chunk_length_size;
-        chunk_type = data[idx .. idx+chunk_type_size].byte_to_string;
+        chunkDataSize = data[idx .. idx+chunkLengthSize].byteToInt;
+        idx += chunkLengthSize;
+        chunkType = data[idx .. idx+chunkTypeSize].byteToString;
 
-        switch(chunk_type){
+        switch(chunkType){
             case "IHDR":
-              int end_idx = chunk_type_size + chunk_data_size + chunk_crc_size;
-              info = data[idx .. idx + end_idx].read_IHDR;
-              idx += end_idx;
+              int endIdx = chunkTypeSize + chunkDataSize + chunkCrcSize;
+              info = data[idx .. idx + endIdx].readIHDR;
+              idx += endIdx;
               break;
             
             case "IDAT":
-                int end_idx = chunk_data_size + chunk_crc_size;
-                ubyte[] idat = data[idx .. idx + end_idx].read_idat;
-                idx += chunk_length_size + end_idx;
+                int endIdx = chunkDataSize + chunkCrcSize;
+                ubyte[] idat = data[idx .. idx + endIdx].readIDAT;
+                idx += chunkLengthSize + endIdx;
 
-                if(info.color_type == 0 || info.color_type == 4){
-                    length_per_pixel = info.width;
-                    actual_data ~= idat.chunks(length_per_pixel).array.to!(int[][]);
+                if(info.colorType == 0 || info.colorType == 4){
+                    lengthPerPixel = info.width;
+                    actualData ~= idat.chunks(lengthPerPixel).array.to!(int[][]);
                     break;
                 }
 
-                unc_idat ~= cast(ubyte[])uc.uncompress(idat.dup);
+                uncIDAT ~= cast(ubyte[])uc.uncompress(idat.dup);
                 break;
           
             case "IEND": 
@@ -201,20 +203,20 @@ public int[][] parse(ref PNG_Header info, string filename){
                 break;
 
             default:  // except for IHDR, IDAT, IEND
-                if (!ancillary_chunks.canFind(chunk_type))
+                if (!ancillaryChunks.canFind(chunkType))
                       throw new Exception("Invalid png format"); 
-                //writeln(chunk_type);
-                idx += chunk_type_size + chunk_data_size + chunk_crc_size;
+                //writeln(chunkType);
+                idx += chunkTypeSize + chunkDataSize + chunkCrcSize;
         }
     }
-    if(unc_idat.length == 0 || info.color_type == 0 || info.color_type == 4) 
-        return actual_data;
+    if(uncIDAT.length == 0 || info.colorType == 0 || info.colorType == 4) 
+        return actualData;
    
-    uint num_scanline = (unc_idat.length / info.height).to!uint;
-    auto chunks = unc_idat.chunks(num_scanline).array;
-    ubyte[][] unc_chunks = (*cast(ubyte[][]*)&chunks).array;
-    actual_data = inverse_filtering!("+","<256","-")(unc_chunks);
+    uint numScanline = (uncIDAT.length / info.height).to!uint;
+    auto chunks = uncIDAT.chunks(numScanline).array;
+    ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
+    actualData = inverseFiltering!("+","<256","-")(uncChunks);
 
-    return actual_data; 
+    return actualData; 
 }
 

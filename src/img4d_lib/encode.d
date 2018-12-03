@@ -10,77 +10,77 @@ import std.stdio,
        std.range,
        std.algorithm;
 
-ubyte[] make_IHDR(in PNG_Header info){
-    ubyte depth = info.bit_depth.to!ubyte;
-    ubyte colorType = info.color_type.to!ubyte;
-    ubyte compress = info.compression_method.to!ubyte;
-    ubyte filterType = info.filter_method.to!ubyte;
-    ubyte adam7 = info.interlace_method.to!ubyte;
+ubyte[] makeIHDR(in Header info){
+    ubyte depth = info.bitDepth.to!ubyte;
+    ubyte colorType = info.colorType.to!ubyte;
+    ubyte compress = info.compressionMethod.to!ubyte;
+    ubyte filterType = info.filterMethod.to!ubyte;
+    ubyte adam7 = info.interlaceMethod.to!ubyte;
     const ubyte[] sig = [0x89, 0x50, 0x4E,0x47, 0x0D, 0x0A, 0x1A, 0x0A];  
-    const ubyte[] body_len_IHDR = [0x0, 0x0, 0x0, 0x0D];
+    const ubyte[] bodyLenIHDR = [0x0, 0x0, 0x0, 0x0D];
     
-    ubyte[] chunks_IHDR = [0x49, 0x48, 0x44, 0x52, // "IHDR"
+    ubyte[] chunkIHDR = [0x49, 0x48, 0x44, 0x52, // "IHDR"
                           0x0, 0x0, 0x0, 0x00, // width
                           0x0, 0x0, 0x0, 0x00, // height
                           depth, colorType, 
                           compress, filterType, adam7];
-    chunks_IHDR[4 .. 8].append!uint(info.width);
-    chunks_IHDR[8 .. 12].append!uint(info.height);
+    chunkIHDR[4 .. 8].append!uint(info.width);
+    chunkIHDR[8 .. 12].append!uint(info.height);
 
-    ubyte[] IHDR = body_len_IHDR ~ chunks_IHDR ~ chunks_IHDR.make_crc;
-    return sig ~ IHDR; 
+    ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ chunkIHDR.makeCrc;
+    return sig ~ IHDR;
 }
-ubyte[] make_IDAT(T)(T[][] actual_data, in PNG_Header info){
-    if(actual_data == null) throw new Exception("null reference exception");
+ubyte[] makeIDAT(T)(T[][] actualData, in Header info){
+    if(actualData == null) throw new Exception("null reference exception");
 
     Compress cmps = new Compress(HeaderFormat.deflate);
-    ubyte[] before_cmps_data, idat_data, chunk_data, IDAT; 
-    ubyte filter_type = 0;
-    uint chunk_size;
-    ubyte[][] byte_data = minimallyInitializedArray!(ubyte[][])(actual_data.length, actual_data[0].length);
-    const ubyte[] chunks_type = [0x49, 0x44, 0x41, 0x54];
-    ubyte[] body_len_IDAT = [0x0, 0x0, 0x0, 0x0];
+    ubyte[] beforeCmpsData, idatData, chunkData, IDAT; 
+    ubyte filterType = 0;
+    uint chunkSize;
+    ubyte[][] byteData = minimallyInitializedArray!(ubyte[][])(actualData.length, actualData[0].length);
+    const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
+    ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
     
-    /*
-    import img4d_lib.filter
-    ubyte filter_type = 1;
-    ubyte[][] byte_data;
-    ubyte[][][] arr_rgb;
-    actual_data.each!(sc => arr_rgb ~= cast(ubyte[][])[sc.chunks(length_per_pixel).array]);
-    arr_rgb.each!((idx,a) =>byte_data~= (Sub!("-",">=0","+")(a)).join.to!(ubyte[]));
-    */
-
-    actual_data.each!((idx,a) => byte_data[idx] = a.to!(ubyte[]));
-    
-    if(info.color_type == 0 || info.color_type == 4){
-        idat_data = byte_data.join;
-        chunk_size = idat_data.length.to!uint;
-    }else{
-        byte_data.each!(a => before_cmps_data ~= a.padLeft(filter_type, a.length+1).array);
-        idat_data ~= cast(ubyte[])cmps.compress(before_cmps_data);
-        idat_data ~= cast(ubyte[])cmps.flush();
-        chunk_size = idat_data.length.to!uint;
+    version(none){
+        import img4d_lib.filter;
+        ubyte filterType = 1;
+        ubyte[][] byteData;
+        ubyte[][][] rgb;
+        actualData.each!(sc => rgb ~= cast(ubyte[][])[sc.chunks(lengthPerPixel).array]);
+        rgb.each!((idx,a) =>byteData~= (sub!("-",">=0","+")(a)).join.to!(ubyte[]));
     }
-    body_len_IDAT[0 .. 4].append!uint(chunk_size);
-    chunk_data = chunks_type ~ idat_data;
-    IDAT = body_len_IDAT ~ chunk_data ~ chunk_data.make_crc;   
+
+    actualData.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+    
+    if(info.colorType == 0 || info.colorType == 4){
+        idatData = byteData.join;
+        chunkSize = idatData.length.to!uint;
+    }else{
+        byteData.each!(a => beforeCmpsData ~= a.padLeft(filterType, a.length+1).array);
+        idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
+        idatData ~= cast(ubyte[])cmps.flush();
+        chunkSize = idatData.length.to!uint;
+    }
+    bodyLenIDAT[0 .. 4].append!uint(chunkSize);
+    chunkData = chunkType ~ idatData;
+    IDAT = bodyLenIDAT ~ chunkData ~ chunkData.makeCrc;
     return IDAT;
 }
 
 
-ubyte[] make_ancillary(){
+ubyte[] makeAncillary(){
     throw new Exception("Not implemented.");
 }
 
-ubyte[] make_IEND(){
-    const ubyte[] chunks_IEND = [0x0, 0x0, 0x0, 0x0];
-    const ubyte[] chunks_type = [0x49, 0x45, 0x4E, 0x44];
-    ubyte[] IEND = chunks_IEND ~chunks_type ~  chunks_type.make_crc;
+ubyte[] makeIEND(){
+    const ubyte[] chunkIEND = [0x0, 0x0, 0x0, 0x0];
+    const ubyte[] chunkType = [0x49, 0x45, 0x4E, 0x44];
+    ubyte[] IEND = chunkIEND ~chunkType ~  chunkType.makeCrc;
 
     return IEND;
 }
 
-auto make_crc(in ubyte[] data){
+auto makeCrc(in ubyte[] data){
     ubyte[4] crc;
     crc32Of(data).each!((idx,a) => crc[3-idx] = a);
     return crc;
