@@ -19,7 +19,6 @@ import std.stdio,
 int length_per_pixel;
 
 struct PNG_Header {
-    ubyte[] data_crc;
     int     width,
             height,
             bit_depth,
