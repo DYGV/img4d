@@ -13,7 +13,8 @@ import std.stdio,
        std.range,
        std.math;
 
-private Header readIHDR(ubyte[] header){ 
+private Header readIHDR(ubyte[] header){
+    if(header.length != 21) throw new Exception("invalid header format");
     ubyte[] chunk = header[0 .. 17];  // Chunk Type + Chunk Data 
     Header IHDR = {
         width             : header[4 .. 8].byteToInt,
@@ -156,7 +157,7 @@ public int[][] parse(ref Header info, string filename){
     int idx       = 0;
     int sigSize   = 8;
 
-    if (data[idx .. sigSize] != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+    if (data.take(sigSize) != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");
     
     int chunkLengthSize = 4;
