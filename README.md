@@ -9,63 +9,63 @@ Please see current status on [commit page](https://github.com/DYGV/img4d/commits
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
   
 ## img4d_lib.decode  
--  **PNG_Header read_IHDR(ubyte[] header)**  
-Set PNG_Header struct and Return its struct  
+-  **Header readIHDR(ubyte[] header)**  
+Set Header struct and Return its struct  
    - ***Params:***  
 ubyte[] header: Header byte-data  
   
-- **int byte_to_int(T)(T[] data)**  
+- **int byteToInt(T)(T[] data)**  
 Return ChunkData-length(Convert byte array to int)   
   
-- **string byte_to_string(T)(T[] data)**  
+- **string byteToString(T)(T[] data)**  
 Return Chunk Type(Convert byte array to string)   
   
-- **ubyte[] read_idat(ubyte[] data)**  
+- **ubyte[] readIDAT(ubyte[] data)**  
 Calculate CRC and Return IDAT Chunk-Data  
    - ***Params:***  
 ubyte[] data : IDAT array expect for Chunk-Data-Size  
   
-- **void crc_check(ubyte[] crc, ubyte[] chunk)**  
+- **void crcCheck(ubyte[] crc, in ubyte[] chunk)**  
 The function of CRC calculation  
   - ***Params***  
 ubyte[] crc : The CRC code at the end of the chunk  
 ubyte[] chunk : Byte array to be CRC calculated  
   
-- **int PaethPredictor(int left, int upper, int upper_left)**  
+- **int paethPredictor(int left, int upper, int upperLeft)**  
 Calculate and Return Paeth-Predictor  
-- **auto normalize_pixel_value(T)(T value)**  
+- **auto normalizePixelValue(T)(T value)**  
 Return the value which are subtracted 256 if it exceeds 256  
-- **int[][] inverse_filtering(string op, string inequality, string inv_op)(ubyte[][] data)**  
-- **int[][] parse(ref PNG_Header info, string filename)**  
+- **int[][] inverseFiltering(string op, string inequality, string inverseOp)(ubyte[][] data)**  
+- **int[][] parse(ref Header info, string filename)**  
 ## img4d_lib.encode  
-- **ubyte[] make_IHDR(in PNG_Header info)**  
+- **ubyte[] makeIHDR(in Header info)**  
 Return IHDR which required for encoding  
    - ***Params:***  
-PNG_Header info : arranged PNG_Header  
-- **ubyte[] make_IDAT(T)(T[][] actual_data, in PNG_Header info)**  
+Header info : arranged Header  
+- **ubyte[] makeIDAT(T)(T[][] actualData, in Header info)**  
 Return IDAT which required for encoding  
    - ***Params:***  
-T[][] actual_data : IDAT chunk data  
-PNG_Header info   : arranged PNG_Header  
-- **ubyte[] make_ancillary()**  
+T[][] actualData : IDAT chunk data  
+Header info   : arranged Header  
+- **ubyte[] makeAncillary()**  
 Not implemented  
-- **ubyte[] make_IEND()**  
+- **ubyte[] makeIEND()**  
 Return IEND which required for encoding  
-- **auto make_crc(in ubyte[] data)**  
+- **auto makeCrc(in ubyte[] data)**  
 Calculate and Return CRC value  
 ## img4d_lib.filter  
 - **auto calculate(string op, T)(T lhs, T rhs)**  
 Calculate and Return using template arguments and mixin  
-- **auto Sub(string op, string inequality, string inv_op, T)(T[][] sc_data)**  
+- **auto sub(string op, string inequality, string inverseOp, T)(T[][] scanline)**  
 Calculate and Return Sub filter(Difference from left pixel)  
-- **auto Up()**  
+- **auto up()**  
 Not implemented  
-- **auto Ave()**  
+- **auto ave()**  
 Not implemented  
-- **auto Paeth()**
+- **auto paeth()**
 Not implemented  
 ## img4d_lib.color_space  
-- **double[][] to_grayscale(T)(ref T[][][] color)**  
+- **double[][] toGrayscale(T)(ref T[][][] color)**  
 Convert to grayscale by weighting  
 ## img4d_lib.edge  
 - **auto differential(T)(T[][] array, T[][] filter)**  
