@@ -5,7 +5,7 @@ import std.stdio,
        std.algorithm,
        std.range;
 
-double[][] toGrayscale(T)(ref T[][][] color){
+double[][] toGrayscale(T)(T[][][] color){
     uint input_len = color[0][0].length; 
     if (input_len != 3 && input_len != 4) throw new Exception("invalid format.");
     if (input_len == 4)
@@ -15,8 +15,11 @@ double[][] toGrayscale(T)(ref T[][][] color){
     double[] arr = [0.3, 0.59, 0.11];
 
     color.each!(a=> a.transposed
-          .each!((idx,b)=> temp ~= to_double(b.to!double)
-          .map!(h => h*=arr[idx]).array));
+          .each!((idx,b)=> 
+                  temp ~= b.map!(to!double)
+                  .map!(h => h*=arr[idx]).array
+                )
+          );
     
     temp.chunks(3)
           .map!(v => v.transposed)

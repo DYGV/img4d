@@ -43,7 +43,7 @@ auto decode(ref Header info, string filename){
     return parse(info, filename);
 }
 
-ubyte[] encode(T)(ref Header info,  T[][] color){
+ubyte[] encode(T)(Header info,  T[][] color){
     if(color == null) throw new Exception("null reference exception");
     ubyte[] data = info.makeIHDR ~ color.makeIDAT(info) ~ makeIEND;
     return data;
@@ -76,7 +76,7 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-auto rgbToGrayscale(T)(ref T[][][] color){ return toGrayscale(color); }
+auto rgbToGrayscale(T)(T[][][] color){ return color.toGrayscale; }
 
 auto toBinary(T)(ref T[][] gray, T threshold=127){
   // Simple thresholding 

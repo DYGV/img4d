@@ -19,7 +19,7 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
-    
+        
     /*  Canny Edge Detection (Defective State)
     
     auto gray = rgbToGrayscale(actualData);

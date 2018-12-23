@@ -10,15 +10,15 @@ import std.stdio,
        std.range,
        std.algorithm;
 
-ubyte[] makeIHDR(in Header info){
+ubyte[] makeIHDR(Header info){
     ubyte depth = info.bitDepth.to!ubyte;
     ubyte colorType = info.colorType.to!ubyte;
+    colorType.writeln;
     ubyte compress = info.compressionMethod.to!ubyte;
     ubyte filterType = info.filterMethod.to!ubyte;
     ubyte adam7 = info.interlaceMethod.to!ubyte;
     const ubyte[] sig = [0x89, 0x50, 0x4E,0x47, 0x0D, 0x0A, 0x1A, 0x0A];  
     const ubyte[] bodyLenIHDR = [0x0, 0x0, 0x0, 0x0D];
-    
     ubyte[] chunkIHDR = [0x49, 0x48, 0x44, 0x52, // "IHDR"
                           0x0, 0x0, 0x0, 0x00, // width
                           0x0, 0x0, 0x0, 0x00, // height
@@ -30,7 +30,7 @@ ubyte[] makeIHDR(in Header info){
     ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ chunkIHDR.makeCrc;
     return sig ~ IHDR;
 }
-ubyte[] makeIDAT(T)(T[][] actualData, in Header info){
+ubyte[] makeIDAT(T)(T[][] actualData, Header info){
     if(actualData == null) throw new Exception("null reference exception");
 
     Compress cmps = new Compress(HeaderFormat.deflate);
