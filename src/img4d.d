@@ -19,11 +19,19 @@ import std.stdio,
 int lengthPerPixel;
 
 enum filterType{
-  None,
-  Sub,
-  Up,
-  Average,
-  Paeth
+    None,
+    Sub,
+    Up,
+    Average,
+    Paeth
+}
+
+enum colorType{
+    grayscale,
+    trueColor = 2,
+    indexColor,
+    grayscaleA,
+    trueColorA = 6,
 }
 
 struct Header {
@@ -79,11 +87,11 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
 auto rgbToGrayscale(T)(T[][][] color){ return color.toGrayscale; }
 
 auto toBinary(T)(ref T[][] gray, T threshold=127){
-  // Simple thresholding 
+    // Simple thresholding 
 
-  T[][] bin;
-  gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
-  return bin;
+    T[][] bin;
+    gray.each!(a =>bin ~=  a.map!(b => b < threshold ? 0 : 255).array);
+    return bin;
 }
 
 auto toBinarizeElucidate(T)(T[][] array, string process="binary"){

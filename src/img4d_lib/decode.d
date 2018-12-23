@@ -27,19 +27,19 @@ private Header readIHDR(ubyte[] header){
         crc               : header[17 .. 21],
     };
     switch(IHDR.colorType){
-        case 0:
+        case colorType.grayscale:
             lengthPerPixel = IHDR.width;
             break;
-        case 2:
+        case colorType.trueColor:
             lengthPerPixel = 3;
             break;
-        case 3:
+        case colorType.indexColor:
             lengthPerPixel = 3;
             break;
-        case 4:
+        case colorType.grayscaleA:
             lengthPerPixel = IHDR.width * 2;
             break;
-        case 6:
+        case colorType.trueColorA:
             lengthPerPixel = 4;
             break;
         default:

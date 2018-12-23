@@ -13,7 +13,6 @@ import std.stdio,
 ubyte[] makeIHDR(Header info){
     ubyte depth = info.bitDepth.to!ubyte;
     ubyte colorType = info.colorType.to!ubyte;
-    colorType.writeln;
     ubyte compress = info.compressionMethod.to!ubyte;
     ubyte filterType = info.filterMethod.to!ubyte;
     ubyte adam7 = info.interlaceMethod.to!ubyte;
