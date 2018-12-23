@@ -18,6 +18,14 @@ import std.stdio,
 
 int lengthPerPixel;
 
+enum filterType{
+  None,
+  Sub,
+  Up,
+  Average,
+  Paeth
+}
+
 struct Header {
     int     width,
             height,

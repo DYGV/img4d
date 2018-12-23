@@ -85,11 +85,11 @@ private int paethPredictor(int left, int upper, int upperLeft){
 private auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
 
 private int[][] inverseFiltering(string op, string inequality, string inverseOp)(ref ubyte[][] data){
-    ubyte[][][] rgb;  
+    ubyte[][][] rgb;
     int[][][] compData;
-    int[] filteringType;
+    int[] filters;
     int[][] actualData;
-    data.each!(sc => filteringType ~= sc.front);
+    data.each!(sc => filters ~= sc.front);
     data.each!(sc => rgb ~= [sc.remove(0).chunks(lengthPerPixel).array]);
 
     foreach(idx, scanline; rgb){
@@ -97,24 +97,24 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
         int[] predictor;
         int[] actualDataBack;
 
-        switch(filteringType[idx]){
-            case 0:
+        switch(filters[idx]){
+            case filterType.None:
                 scanline.each!(a => a.each!(b => temp ~= b));
             	actualData ~= [temp.array];
                 
             	break;
             
-            case 1:
+            case filterType.Sub:
                 actualData ~=  sub!(op,inequality,inverseOp)(scanline).join; 
             	break;
             
-            case 2:
+            case filterType.Up:
                 scanline.each!(a => a.each!(b => temp ~= b));
                 actualData ~= [(temp[] += actualData.back[]).map!(a => a.normalizePixelValue).array];
 
                 break;
 	    
-            case 3:
+            case filterType.Average:
                 actualDataBack = actualData.back;
                 auto up = actualDataBack.chunks(lengthPerPixel);
                 auto current = scanline.chunks(lengthPerPixel);
@@ -129,7 +129,7 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
                 actualData ~= [temp];
                 break;
 
-            case 4:
+            case filterType.Paeth:
                 auto joined = scanline.join;
 
                 actualData.back[0 .. lengthPerPixel]

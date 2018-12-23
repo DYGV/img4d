@@ -35,7 +35,8 @@ ubyte[] makeIDAT(T)(T[][] actualData, in Header info){
 
     Compress cmps = new Compress(HeaderFormat.deflate);
     ubyte[] beforeCmpsData, idatData, chunkData, IDAT; 
-    ubyte filterType = 0;
+    ubyte filterType = filterType.None; // only None filter you can apply in current
+
     uint chunkSize;
     ubyte[][] byteData = minimallyInitializedArray!(ubyte[][])(actualData.length, actualData[0].length);
     const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
@@ -43,7 +44,7 @@ ubyte[] makeIDAT(T)(T[][] actualData, in Header info){
     
     version(none){
         import img4d_lib.filter;
-        ubyte filterType = 1;
+        ubyte filterType = 0;
         ubyte[][] byteData;
         ubyte[][][] rgb;
         actualData.each!(sc => rgb ~= cast(ubyte[][])[sc.chunks(lengthPerPixel).array]);
@@ -82,6 +83,6 @@ ubyte[] makeIEND(){
 
 auto makeCrc(in ubyte[] data){
     ubyte[4] crc;
-    crc32Of(data).each!((idx,a) => crc[3-idx] = a);
+    data.crc32Of.each!((idx,a) => crc[3-idx] = a);
     return crc;
 }
