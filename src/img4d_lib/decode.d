@@ -152,7 +152,7 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
 }
  
 
-public int[][] parse(ref Header info, string filename){
+public int[][] parse(ref Header header, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;
     int sigSize   = 8;
@@ -181,7 +181,7 @@ public int[][] parse(ref Header info, string filename){
         switch(chunkType){
             case "IHDR":
               int endIdx = chunkTypeSize + chunkDataSize + chunkCrcSize;
-              info = data[idx .. idx + endIdx].readIHDR;
+              header = data[idx .. idx + endIdx].readIHDR;
               idx += endIdx;
               break;
             
@@ -190,8 +190,8 @@ public int[][] parse(ref Header info, string filename){
                 ubyte[] idat = data[idx .. idx + endIdx].readIDAT;
                 idx += chunkLengthSize + endIdx;
 
-                if(info.colorType ==  colorType.grayscale || info.colorType ==  colorType.grayscaleA){
-                    lengthPerPixel = info.width;
+                if(header.colorType ==  colorType.grayscale || header.colorType ==  colorType.grayscaleA){
+                    lengthPerPixel = header.width;
                     actualData ~= idat.chunks(lengthPerPixel).array.to!(int[][]);
                     break;
                 }
@@ -210,10 +210,10 @@ public int[][] parse(ref Header info, string filename){
                 idx += chunkTypeSize + chunkDataSize + chunkCrcSize;
         }
     }
-    if(uncIDAT.length == 0 || info.colorType == colorType.grayscale || info.colorType == colorType.grayscaleA) 
+    if(uncIDAT.length == 0 || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) 
         return actualData;
    
-    uint numScanline = (uncIDAT.length / info.height).to!uint;
+    uint numScanline = (uncIDAT.length / header.height).to!uint;
     auto chunks = uncIDAT.chunks(numScanline).array;
     ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
     actualData = inverseFiltering!("+","<256","-")(uncChunks);

@@ -10,12 +10,12 @@ import std.stdio,
        std.range,
        std.algorithm;
 
-ubyte[] makeIHDR(Header info){
-    ubyte depth = info.bitDepth.to!ubyte;
-    ubyte colorType = info.colorType.to!ubyte;
-    ubyte compress = info.compressionMethod.to!ubyte;
-    ubyte filterType = info.filterMethod.to!ubyte;
-    ubyte adam7 = info.interlaceMethod.to!ubyte;
+ubyte[] makeIHDR(Header header){
+    ubyte depth = header.bitDepth.to!ubyte;
+    ubyte colorType = header.colorType.to!ubyte;
+    ubyte compress = header.compressionMethod.to!ubyte;
+    ubyte filterType = header.filterMethod.to!ubyte;
+    ubyte adam7 = header.interlaceMethod.to!ubyte;
     const ubyte[] sig = [0x89, 0x50, 0x4E,0x47, 0x0D, 0x0A, 0x1A, 0x0A];  
     const ubyte[] bodyLenIHDR = [0x0, 0x0, 0x0, 0x0D];
     ubyte[] chunkIHDR = [0x49, 0x48, 0x44, 0x52, // "IHDR"
@@ -23,13 +23,13 @@ ubyte[] makeIHDR(Header info){
                           0x0, 0x0, 0x0, 0x00, // height
                           depth, colorType, 
                           compress, filterType, adam7];
-    chunkIHDR[4 .. 8].append!uint(info.width);
-    chunkIHDR[8 .. 12].append!uint(info.height);
+    chunkIHDR[4 .. 8].append!uint(header.width);
+    chunkIHDR[8 .. 12].append!uint(header.height);
 
     ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ chunkIHDR.makeCrc;
     return sig ~ IHDR;
 }
-ubyte[] makeIDAT(T)(T[][] actualData, Header info){
+ubyte[] makeIDAT(T)(T[][] actualData, Header header){
     if(actualData == null) throw new Exception("null reference exception");
 
     Compress cmps = new Compress(HeaderFormat.deflate);
@@ -52,7 +52,7 @@ ubyte[] makeIDAT(T)(T[][] actualData, Header info){
 
     actualData.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
     
-    if(info.colorType == 0 || info.colorType == 4){
+    if(header.colorType == 0 || header.colorType == 4){
         idatData = byteData.join;
         chunkSize = idatData.length.to!uint;
     }else{

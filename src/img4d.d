@@ -45,15 +45,15 @@ struct Header {
     ubyte[] crc; 
 }
 
-auto decode(ref Header info, string filename){
+auto decode(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
-    return parse(info, filename);
+    return parse(header, filename);
 }
 
-ubyte[] encode(T)(Header info,  T[][] color){
+ubyte[] encode(T)(Header header,  T[][] color){
     if(color == null) throw new Exception("null reference exception");
-    ubyte[] data = info.makeIHDR ~ color.makeIDAT(info) ~ makeIEND;
+    ubyte[] data = header.makeIHDR ~ color.makeIDAT(header) ~ makeIEND;
     return data;
 }
 
