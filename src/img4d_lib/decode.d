@@ -206,7 +206,7 @@ public int[][] parse(ref Header header, string filename){
                 idx += chunkTypeSize + chunkDataSize + chunkCrcSize;
         }
     }
-    if(uncIDAT.length == 0 || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) 
+    if(uncIDAT.empty || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) 
         return actualData;
    
     uint numScanline = (uncIDAT.length / header.height).to!uint;

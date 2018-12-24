@@ -29,6 +29,7 @@ ubyte[] makeIHDR(Header header){
     ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ chunkIHDR.makeCrc;
     return sig ~ IHDR;
 }
+
 ubyte[] makeIDAT(T)(T[][] actualData, Header header){
     if(actualData == null) throw new Exception("null reference exception");
 
@@ -51,16 +52,11 @@ ubyte[] makeIDAT(T)(T[][] actualData, Header header){
     }
 
     actualData.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+    byteData.each!(a => beforeCmpsData ~= a.padLeft(filterType, a.length+1).array);
+    idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
+    idatData ~= cast(ubyte[])cmps.flush();
+    chunkSize = idatData.length.to!uint;
     
-    if(header.colorType == 0 || header.colorType == 4){
-        idatData = byteData.join;
-        chunkSize = idatData.length.to!uint;
-    }else{
-        byteData.each!(a => beforeCmpsData ~= a.padLeft(filterType, a.length+1).array);
-        idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
-        idatData ~= cast(ubyte[])cmps.flush();
-        chunkSize = idatData.length.to!uint;
-    }
     bodyLenIDAT[0 .. 4].append!uint(chunkSize);
     chunkData = chunkType ~ idatData;
     IDAT = bodyLenIDAT ~ chunkData ~ chunkData.makeCrc;

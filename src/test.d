@@ -19,6 +19,8 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
+    auto gray = rgbToGrayscale(actualData);
+    beforeEncode.colorType = colorType.grayscale;
 
     /*  Canny Edge Detection (Defective State) 
     auto gray = rgbToGrayscale(actualData);
@@ -30,7 +32,7 @@ int main(){
     */
     
     // start encode
-    ubyte[] encodedData = beforeEncode.encode(parsedData);
+    ubyte[] encodedData = beforeEncode.encode(gray);
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
@@ -46,11 +48,13 @@ int main(){
           afterEncode.colorType);
     
     // Verification (compare with original image)
-    executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
-    auto diff =  executeShell("cd ../png_img && identify -format \"%[mean]\" diff.png").output;
-    if(diff != "0\n"){
-        "something is wrong (It doesn't match the original image)".writeln;
-        diff.writeln;
+    version(none){
+        executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
+        auto diff =  executeShell("cd ../png_img && identify -format \"%[mean]\" diff.png").output;
+        if(diff != "0\n"){
+            "something is wrong (It doesn't match the original image)".writeln;
+            diff.writeln;
+        }
     }
 
     // auto rgbFile = File("../png_img/rgb_lena.txt","w");
