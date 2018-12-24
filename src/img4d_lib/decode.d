@@ -148,7 +148,7 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
 }
  
 
-public int[][] parse(ref Header header, string filename){
+public auto parse(ref Header header, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;
     int sigSize   = 8;
@@ -186,11 +186,11 @@ public int[][] parse(ref Header header, string filename){
                 ubyte[] idat = data[idx .. idx + endIdx].readIDAT;
                 idx += chunkLengthSize + endIdx;
 
-                if(header.colorType ==  colorType.grayscale || header.colorType ==  colorType.grayscaleA){
+                /*if(header.colorType ==  colorType.grayscale || header.colorType ==  colorType.grayscaleA){
                     lengthPerPixel = header.width;
                     actualData ~= idat.chunks(lengthPerPixel).array.to!(int[][]);
                     break;
-                }
+                }*/
 
                 uncIDAT ~= cast(ubyte[])uc.uncompress(idat.dup);
                 break;
@@ -206,11 +206,14 @@ public int[][] parse(ref Header header, string filename){
                 idx += chunkTypeSize + chunkDataSize + chunkCrcSize;
         }
     }
-    if(uncIDAT.empty || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) 
-        return actualData;
-   
     uint numScanline = (uncIDAT.length / header.height).to!uint;
     auto chunks = uncIDAT.chunks(numScanline).array;
+    
+    if(uncIDAT.empty || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) {
+      int[][] uncChunks = (*cast(int[][]*)&chunks).array;
+      return uncChunks;
+    }
+
     ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
     actualData = inverseFiltering!("+","<256","-")(uncChunks);
 
