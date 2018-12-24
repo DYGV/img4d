@@ -190,7 +190,7 @@ public int[][] parse(ref Header info, string filename){
                 ubyte[] idat = data[idx .. idx + endIdx].readIDAT;
                 idx += chunkLengthSize + endIdx;
 
-                if(info.colorType == 0 || info.colorType == 4){
+                if(info.colorType ==  colorType.grayscale || info.colorType ==  colorType.grayscaleA){
                     lengthPerPixel = info.width;
                     actualData ~= idat.chunks(lengthPerPixel).array.to!(int[][]);
                     break;
@@ -210,7 +210,7 @@ public int[][] parse(ref Header info, string filename){
                 idx += chunkTypeSize + chunkDataSize + chunkCrcSize;
         }
     }
-    if(uncIDAT.length == 0 || info.colorType == 0 || info.colorType == 4) 
+    if(uncIDAT.length == 0 || info.colorType == colorType.grayscale || info.colorType == colorType.grayscaleA) 
         return actualData;
    
     uint numScanline = (uncIDAT.length / info.height).to!uint;
