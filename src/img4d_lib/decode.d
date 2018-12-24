@@ -16,16 +16,12 @@ import std.stdio,
 private Header readIHDR(ubyte[] header){
     if(header.length != 21) throw new Exception("invalid header format");
     ubyte[] chunk = header[0 .. 17];  // Chunk Type + Chunk Data 
-    Header IHDR = {
-        width             : header[4 .. 8].byteToInt,
-        height            : header[8 .. 12].byteToInt,
-        bitDepth          : header[12],
-        colorType         : header[13],
-        compressionMethod : header[14],
-        filterMethod      : header[15],
-        interlaceMethod   : header[16],
-        crc               : header[17 .. 21],
-    };
+    Header IHDR = Header(header[4 .. 8].byteToInt, 
+                        header[8 .. 12].byteToInt,
+                        header[12], header[13],
+                        header[14], header[15],
+                        header[16], header[17 .. 21]);
+
     switch(IHDR.colorType){
         case colorType.grayscale:
             lengthPerPixel = IHDR.width;

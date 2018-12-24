@@ -35,14 +35,49 @@ enum colorType{
 }
 
 struct Header {
-    int     width,
-            height,
-            bitDepth,
-            colorType,
-            compressionMethod,  
-            filterMethod,
-            interlaceMethod;
-    ubyte[] crc; 
+
+    this(int width, int height, int bitDepth, int colorType,
+        int compressionMethod, int filterMethod, int interlaceMethod, ubyte[] crc){
+        
+        _width              = width;
+        _height             = height;
+        _bitDepth           = bitDepth;
+        _colorType          = colorType;
+        _compressionMethod  = compressionMethod;
+        _filterMethod       = filterMethod;
+        _interlaceMethod    = interlaceMethod;
+        _crc                = crc; 
+    }
+    
+    @property{
+        void width(int width){ _width = width;}
+        void height(int height){ _height = height; }
+        void bitDepth(int bitDepth){ _bitDepth = bitDepth; }
+        void colorType(int colorType){ _colorType = colorType; }
+        void compressionMethod (int compressionMethod){ _compressionMethod = compressionMethod; }
+        void filterMethod(int filterMethod){ _filterMethod = filterMethod; }
+        void interlaceMethod(int interlaceMethod){ _interlaceMethod = interlaceMethod; }
+        void crc(ubyte[] crc){_crc = crc;}
+
+        int width(){ return _width; }
+        int height(){ return _height; }
+        int bitDepth(){ return  _bitDepth; }
+        int colorType(){ return  _colorType; }
+        int compressionMethod (){ return  _compressionMethod; }
+        int filterMethod(){ return  _filterMethod; }
+        int interlaceMethod(){ return  _interlaceMethod; }
+        ubyte[] crc(){ return  _crc; }
+    }
+
+    private:
+        int   _width,
+              _height,
+              _bitDepth,
+              _colorType,
+              _compressionMethod,
+              _filterMethod,
+              _interlaceMethod;
+        ubyte[] _crc;
 }
 
 auto decode(ref Header header, string filename){

@@ -19,9 +19,8 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
-        
-    /*  Canny Edge Detection (Defective State)
-    
+
+    /*  Canny Edge Detection (Defective State) 
     auto gray = rgbToGrayscale(actualData);
     auto edge = canny(gray,80,150);
     auto edgeFile = File("../png_img/edge_lena.txt","w");
