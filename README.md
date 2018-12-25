@@ -29,6 +29,8 @@ int main(){
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
+    
+    return 0;
 }
 ```    
 # Package  
