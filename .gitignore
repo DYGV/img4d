@@ -1,3 +1,17 @@
+.dub
+docs.json
+__dummy.html
+docs/
+img4d.so
+img4d.dylib
+img4d.dll
+img4d.a
+img4d.lib
+img4d-test-*
+*.exe
+*.o
+*.obj
+*.lst
 *.un~
 *.swp
 *d~

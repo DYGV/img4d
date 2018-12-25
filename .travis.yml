@@ -8,5 +8,4 @@ before_install:
   - sudo apt-get install imagemagick
 
 script:
-  - cd src
-  - rdmd -unittest test.d
+  - dub run

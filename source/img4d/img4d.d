@@ -1,4 +1,4 @@
-module img4d;
+module img4d.img4d;
 import img4d_lib.decode,
        img4d_lib.encode,
        img4d_lib.filter,

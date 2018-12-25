@@ -1,0 +1,9 @@
+{
+	"description": "PNG decoder/encoder in Dlang.",
+	"license": "MIT",
+	"authors": [
+		"DYGV"
+	],
+	"copyright": "Copyright c 2018, DYGV",
+	"name": "img4d"
+}
