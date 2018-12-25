@@ -15,7 +15,7 @@ int main(){
     int[][][] actualData;
 
     // start decode
-    auto parsedData = hdr.decode("../png_img/lena.png");
+    auto parsedData = hdr.decode("png_img/lena.png");
     if(parsedData.length == 0) {return 0;}
     parsedData.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
     
@@ -26,7 +26,7 @@ int main(){
     
     // start encode
     ubyte[] encodedData = hdr.encode(gray);
-    auto file = File("../png_img/encoded_lena.png","w");
+    auto file = File("png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
     
