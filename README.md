@@ -2,6 +2,35 @@
 PNG images Decoder/Encoder in D language.  
 **It's defective implemention and I cannot guarantee the operation**.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
+# Examples  
+## decode, convert to grayscale and encode
+```D
+import img4d;
+import std.stdio,
+       std.range,
+       std.algorithm.iteration,
+       std.process;
+
+int main(){
+    Header hdr;
+    int[][][] actualData;
+
+    // start decode
+    auto parsedData = hdr.decode("../png_img/lena.png");
+    if(parsedData.length == 0) {return 0;}
+    parsedData.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
+    
+    // convert to grayscale
+    auto gray = rgbToGrayscale(actualData);
+    hdr.colorType = colorType.grayscale;
+
+    
+    // start encode
+    ubyte[] encodedData = hdr.encode(gray);
+    auto file = File("../png_img/encoded_lena.png","w");
+    file.rawWrite(encodedData);
+    file.flush(); 
+```    
 # Package  
  [img4d_lib.decode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdecode)  
  [img4d_lib.encode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libencode)  
