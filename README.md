@@ -8,8 +8,7 @@ Please see current status on [commit page](https://github.com/DYGV/img4d/commits
 import img4d;
 import std.stdio,
        std.range,
-       std.algorithm.iteration,
-       std.process;
+       std.algorithm.iteration;
 
 int main(){
     Header hdr;
