@@ -35,9 +35,14 @@ int main(){
 ```    
 # Package  
  [img4d_lib.decode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdecode)  
+ 
  [img4d_lib.encode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libencode)  
+ 
  [img4d_lib.color_space](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libcolor_space)  
+ 
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
+ 
+ 
   
 ## img4d_lib.decode  
 -  **Header readIHDR(ubyte[] header)**  
