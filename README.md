@@ -29,6 +29,7 @@ int main(){
     auto file = File("../png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
+}
 ```    
 # Package  
  [img4d_lib.decode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdecode)  
