@@ -2,6 +2,9 @@
 PNG images Decoder/Encoder in D language.  
 **It's defective implemention and I cannot guarantee the operation**.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
+
+**Please feel free to throw PR or issues.**  
+
 # Examples  
 ## decode, convert to grayscale and encode
 ```D
