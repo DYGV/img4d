@@ -80,6 +80,35 @@ struct Header {
         ubyte[] _crc;
 }
 
+struct Pixel(T){
+    this(ubyte[] R, ubyte[] G, ubyte[] B){
+        _R = R;
+        _G = G;
+        _B = B;
+    }
+
+    this(T[][] grayscale){
+        _grayscale = grayscale;
+    }
+
+    @property{
+        void R(ubyte[] R){ _R = R; }
+        void G(ubyte[] G){ _G = G; }
+        void B(ubyte[] B){ _B = B; }
+        void grayscale(T[][] grayscale){ _grayscale = grayscale; }
+
+        ubyte[] R(){ return _R; }
+        ubyte[] G(){ return _G; }
+        ubyte[] B(){ return _B; }
+        ubyte[][] Pixel(){ return [_R]~[_G]~[_B]; }
+        T[][] grayscale(){ return _grayscale; }
+    }
+
+    private:
+        ubyte[] _R, _G, _B;
+        T[][] _grayscale;
+}
+
 auto decode(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
