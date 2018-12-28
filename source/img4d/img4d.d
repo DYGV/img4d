@@ -86,6 +86,12 @@ struct Pixel(T){
         _G = G;
         _B = B;
     }
+    this(ubyte[] R, ubyte[] G, ubyte[] B, ubyte[] A){
+        _R = R;
+        _G = G;
+        _B = B;
+        _A = A;
+    }
 
     this(T[][] grayscale){
         _grayscale = grayscale;
@@ -95,17 +101,21 @@ struct Pixel(T){
         void R(ubyte[] R){ _R = R; }
         void G(ubyte[] G){ _G = G; }
         void B(ubyte[] B){ _B = B; }
+        void A(ubyte[] A){ _A = A; }
         void grayscale(T[][] grayscale){ _grayscale = grayscale; }
 
         ubyte[] R(){ return _R; }
         ubyte[] G(){ return _G; }
         ubyte[] B(){ return _B; }
-        ubyte[][] Pixel(){ return [_R]~[_G]~[_B]; }
+        ubyte[] A(){ return _A; }
+        ubyte[][] Pixel(){
+            return A.empty ? [_R]~[_G]~[_B] : [_R]~[_G]~[_B]~[_A];
+        }
         T[][] grayscale(){ return _grayscale; }
     }
 
     private:
-        ubyte[] _R, _G, _B;
+        ubyte[] _R, _G, _B, _A;
         T[][] _grayscale;
 }
 
