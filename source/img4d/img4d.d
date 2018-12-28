@@ -80,43 +80,43 @@ struct Header {
         ubyte[] _crc;
 }
 
-struct Pixel(T){
-    this(ubyte[] R, ubyte[] G, ubyte[] B){
+struct Pixel{
+    this(ubyte[][] R, ubyte[][] G, ubyte[][] B){
         _R = R;
         _G = G;
         _B = B;
     }
-    this(ubyte[] R, ubyte[] G, ubyte[] B, ubyte[] A){
+    this(ubyte[][] R, ubyte[][] G, ubyte[][] B, ubyte[][] A){
         _R = R;
         _G = G;
         _B = B;
         _A = A;
     }
 
-    this(T[][] grayscale){
+    this(double[][] grayscale){
         _grayscale = grayscale;
     }
 
     @property{
-        void R(ubyte[] R){ _R = R; }
-        void G(ubyte[] G){ _G = G; }
-        void B(ubyte[] B){ _B = B; }
-        void A(ubyte[] A){ _A = A; }
-        void grayscale(T[][] grayscale){ _grayscale = grayscale; }
+        void R(ubyte[][] R){ _R = R; }
+        void G(ubyte[][] G){ _G = G; }
+        void B(ubyte[][] B){ _B = B; }
+        void A(ubyte[][] A){ _A = A; }
+        void grayscale(double[][] grayscale){ _grayscale = grayscale; }
 
-        ubyte[] R(){ return _R; }
-        ubyte[] G(){ return _G; }
-        ubyte[] B(){ return _B; }
-        ubyte[] A(){ return _A; }
-        ubyte[][] Pixel(){
+        ubyte[][] R(){ return _R; }
+        ubyte[][] G(){ return _G; }
+        ubyte[][] B(){ return _B; }
+        ubyte[][] A(){ return _A; }
+        ubyte[][][] Pixel(){
             return A.empty ? [_R]~[_G]~[_B] : [_R]~[_G]~[_B]~[_A];
         }
-        T[][] grayscale(){ return _grayscale; }
+        double[][] grayscale(){ return _grayscale; }
     }
 
     private:
-        ubyte[] _R, _G, _B, _A;
-        T[][] _grayscale;
+        ubyte[][] _R, _G, _B, _A;
+        double[][] _grayscale;
 }
 
 auto decode(ref Header header, string filename){

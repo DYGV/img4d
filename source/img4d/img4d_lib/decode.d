@@ -162,6 +162,7 @@ public auto parse(ref Header header, string filename){
     int chunkDataSize;
     string chunkType;
     int[][] actualData;
+    ubyte[][][] rgb, joinRGB;
     ubyte[] uncIDAT;
     const string[] ancillaryChunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
                                       "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
@@ -201,11 +202,28 @@ public auto parse(ref Header header, string filename){
     }
     uint numScanline = (uncIDAT.length / header.height).to!uint;
     auto chunks = uncIDAT.chunks(numScanline).array;
-    
+     
     if(uncIDAT.empty || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) {
         int[][] uncChunks = (*cast(int[][]*)&chunks).array;
         return uncChunks;
     }
+
+    /* start process before inverse filtering */
+    chunks.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
+    rgb.each!(a => joinRGB ~= a.front.walkLength.iota.map!(i => transversal(a, i).array).array);
+    auto pix = joinRGB.transposed;
+    ubyte[][] R = pix[0].array.to!(ubyte[][]);
+    ubyte[][] G = pix[1].array.to!(ubyte[][]);
+    ubyte[][] B = pix[2].array.to!(ubyte[][]);
+    ubyte[][] A = pix[3].array.to!(ubyte[][]);
+
+    Pixel pixel;
+    if(header.colorType == colorType.trueColor || header.colorType == colorType.indexColor){
+        pixel = Pixel(R, G, B);
+    }else{
+        pixel = Pixel(R, G, B, A);
+    }
+    /* end process before inverse filtering */
 
     ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
     actualData = inverseFiltering!("+","<256","-")(uncChunks);
