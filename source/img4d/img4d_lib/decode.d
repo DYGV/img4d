@@ -80,18 +80,18 @@ private int paethPredictor(int left, int upper, int upperLeft){
 
 private auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
 
-private int[][] inverseFiltering(string op, string inequality, string inverseOp)(ref ubyte[][] data){
+private ubyte[][] inverseFiltering(string op, string inequality, string inverseOp)(ref ubyte[][] data){
     ubyte[][][] rgb;
-    int[][][] compData;
-    int[] filters;
-    int[][] actualData;
+    ubyte[][][] compData;
+    ubyte[] filters;
+    ubyte[][] actualData;
     data.each!(sc => filters ~= sc.front);
     data.each!(sc => rgb ~= [sc.remove(0).chunks(lengthPerPixel).array]);
 
     foreach(idx, scanline; rgb){
-        int[] temp;
-        int[] predictor;
-        int[] actualDataBack;
+        ubyte[] temp;
+        ubyte[] predictor;
+        ubyte[] actualDataBack;
 
         switch(filters[idx]){
             case filterType.None:
@@ -101,12 +101,12 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
             	break;
             
             case filterType.Sub:
-                actualData ~=  sub!(op,inequality,inverseOp)(scanline).join; 
+                actualData ~=  [sub!(op,inequality,inverseOp)(scanline).join].to!(ubyte[][]); 
             	break;
             
             case filterType.Up:
                 scanline.each!(a => a.each!(b => temp ~= b));
-                actualData ~= [(temp[] += actualData.back[]).map!(a => a.normalizePixelValue).array];
+                actualData ~= [(temp[] += actualData.back[]).map!(a => a.normalizePixelValue).array].to!(ubyte[][]);
 
                 break;
 	    
@@ -114,13 +114,13 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
                 actualDataBack = actualData.back;
                 auto up = actualDataBack.chunks(lengthPerPixel);
                 auto current = scanline.chunks(lengthPerPixel);
-                int[] upPixel = *cast(int[]*)&up;
+                ubyte[] upPixel = *cast(ubyte[]*)&up;
             	scanline.popFront;            		
             	auto sc = scanline.join;
-                up.front.each!((idx,n) =>temp ~= ((n/2) + current.front[0][idx]).normalizePixelValue);
+                up.front.each!((idx,n) =>temp ~= [((n/2) + current.front[0][idx]).normalizePixelValue].to!(ubyte[]));
 
                 upPixel[lengthPerPixel .. $].each!((o,n)=>  
-                                temp ~= (((temp[o] + n)/2) + sc[o]).normalizePixelValue);
+                                temp ~= [(((temp[o] + n)/2) + sc[o]).normalizePixelValue].to!(ubyte[]));
 
                 actualData ~= [temp];
                 break;
@@ -129,13 +129,13 @@ private int[][] inverseFiltering(string op, string inequality, string inverseOp)
                 auto joined = scanline.join;
 
                 actualData.back[0 .. lengthPerPixel]
-                                .each!((idx,a) => temp ~= (a + joined[idx]).normalizePixelValue);
+                                .each!((idx,a) => temp ~= [(a + joined[idx]).normalizePixelValue].to!(ubyte[]));
                 
                 actualData.back[lengthPerPixel .. $]
                               .each!((idx, a) => 
-                              temp ~= (paethPredictor(temp[idx], a, actualData.back[idx]) 
+                              temp ~= [(paethPredictor(temp[idx], a, actualData.back[idx]) 
                                     + joined[idx + lengthPerPixel])
-                              .normalizePixelValue);
+                              .normalizePixelValue].to!(ubyte[]));
             
                 actualData ~= [temp];
                 break;
@@ -161,7 +161,7 @@ public auto parse(ref Header header, string filename){
     int chunkCrcSize    = 4;
     int chunkDataSize;
     string chunkType;
-    int[][] actualData;
+    ubyte[][] actualData;
     ubyte[][][] rgb, joinRGB;
     ubyte[] uncIDAT;
     const string[] ancillaryChunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
@@ -202,32 +202,13 @@ public auto parse(ref Header header, string filename){
     }
     uint numScanline = (uncIDAT.length / header.height).to!uint;
     auto chunks = uncIDAT.chunks(numScanline).array;
-     
+    ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
+  
     if(uncIDAT.empty || header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA) {
-        int[][] uncChunks = (*cast(int[][]*)&chunks).array;
         return uncChunks;
     }
 
-    /* start process before inverse filtering */
-    chunks.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
-    rgb.each!(a => joinRGB ~= a.front.walkLength.iota.map!(i => transversal(a, i).array).array);
-    auto pix = joinRGB.transposed;
-    ubyte[][] R = pix[0].array.to!(ubyte[][]);
-    ubyte[][] G = pix[1].array.to!(ubyte[][]);
-    ubyte[][] B = pix[2].array.to!(ubyte[][]);
-    ubyte[][] A = pix[3].array.to!(ubyte[][]);
-
-    Pixel pixel;
-    if(header.colorType == colorType.trueColor || header.colorType == colorType.indexColor){
-        pixel = Pixel(R, G, B);
-    }else{
-        pixel = Pixel(R, G, B, A);
-    }
-    /* end process before inverse filtering */
-
-    ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
     actualData = inverseFiltering!("+","<256","-")(uncChunks);
-
     return actualData; 
 }
 

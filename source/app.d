@@ -6,7 +6,7 @@ import std.stdio,
 
 int main(){
     Header beforeEncode;
-    int[][][] actualData;
+    ubyte[][][] actualData;
 
     // start decode
     auto parsedData = beforeEncode.decode("png_img/lena.png");

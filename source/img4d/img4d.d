@@ -93,7 +93,7 @@ struct Pixel{
         _A = A;
     }
 
-    this(double[][] grayscale){
+    this(ubyte[][] grayscale){
         _grayscale = grayscale;
     }
 
@@ -102,7 +102,7 @@ struct Pixel{
         void G(ubyte[][] G){ _G = G; }
         void B(ubyte[][] B){ _B = B; }
         void A(ubyte[][] A){ _A = A; }
-        void grayscale(double[][] grayscale){ _grayscale = grayscale; }
+        void grayscale(ubyte[][] grayscale){ _grayscale = grayscale; }
 
         ubyte[][] R(){ return _R; }
         ubyte[][] G(){ return _G; }
@@ -111,18 +111,42 @@ struct Pixel{
         ubyte[][][] Pixel(){
             return A.empty ? [_R]~[_G]~[_B] : [_R]~[_G]~[_B]~[_A];
         }
-        double[][] grayscale(){ return _grayscale; }
+        ubyte[][] grayscale(){ return _grayscale; }
     }
 
     private:
         ubyte[][] _R, _G, _B, _A;
-        double[][] _grayscale;
+        ubyte[][] _grayscale;
 }
 
 auto decode(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
-    return parse(header, filename);
+    ubyte[][][] rgb, joinRGB;
+    auto data = parse(header, filename);
+    
+    Pixel pixel;
+    if(header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA){
+        alias grayscale = data;
+          pixel = Pixel(grayscale);
+        //pixel.grayscale.writeln;
+      return data;
+    }
+    
+    data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
+    rgb.each!(a => joinRGB ~= a.front.walkLength.iota.map!(i => transversal(a, i).array).array);
+    auto pix = joinRGB.transposed;
+    ubyte[][] R = pix[0].array.to!(ubyte[][]);
+    ubyte[][] G = pix[1].array.to!(ubyte[][]);
+    ubyte[][] B = pix[2].array.to!(ubyte[][]);
+    ubyte[][] A = pix[3].array.to!(ubyte[][]);
+
+    if(header.colorType == colorType.trueColor || header.colorType == colorType.indexColor){
+        pixel = Pixel(R, G, B);
+    }else{
+        pixel = Pixel(R, G, B, A);
+    }
+    return data;
 }
 
 ubyte[] encode(T)(Header header,  T[][] color){
