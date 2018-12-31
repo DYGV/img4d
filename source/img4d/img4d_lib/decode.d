@@ -162,7 +162,6 @@ public auto parse(ref Header header, string filename){
     int chunkDataSize;
     string chunkType;
     ubyte[][] actualData;
-    ubyte[][][] rgb, joinRGB;
     ubyte[] uncIDAT;
     const string[] ancillaryChunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
                                       "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",

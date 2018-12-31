@@ -36,8 +36,8 @@ enum colorType{
 
 struct Header {
 
-    this(int width, int height, int bitDepth, int colorType,
-        int compressionMethod, int filterMethod, int interlaceMethod, ubyte[] crc){
+    this(in int width, in int height, in int bitDepth, in int colorType,
+        in int compressionMethod, in int filterMethod, in int interlaceMethod, ubyte[] crc){
         
         _width              = width;
         _height             = height;
@@ -50,14 +50,14 @@ struct Header {
     }
     
     @property{
-        void width(int width){ _width = width;}
-        void height(int height){ _height = height; }
-        void bitDepth(int bitDepth){ _bitDepth = bitDepth; }
+        void width(ref int width){ _width = width;}
+        void height(ref int height){ _height = height; }
+        void bitDepth(ref int bitDepth){ _bitDepth = bitDepth; }
         void colorType(int colorType){ _colorType = colorType; }
-        void compressionMethod (int compressionMethod){ _compressionMethod = compressionMethod; }
-        void filterMethod(int filterMethod){ _filterMethod = filterMethod; }
-        void interlaceMethod(int interlaceMethod){ _interlaceMethod = interlaceMethod; }
-        void crc(ubyte[] crc){_crc = crc;}
+        void compressionMethod (ref int compressionMethod){ _compressionMethod = compressionMethod; }
+        void filterMethod(ref int filterMethod){ _filterMethod = filterMethod; }
+        void interlaceMethod(ref int interlaceMethod){ _interlaceMethod = interlaceMethod; }
+        void crc(ref ubyte[] crc){_crc = crc;}
 
         int width(){ return _width; }
         int height(){ return _height; }
@@ -81,45 +81,64 @@ struct Header {
 }
 
 struct Pixel{
-    this(ubyte[][] R, ubyte[][] G, ubyte[][] B){
+    this(ref ubyte[][] R, ref ubyte[][] G, ref ubyte[][] B){
         _R = R;
         _G = G;
         _B = B;
     }
-    this(ubyte[][] R, ubyte[][] G, ubyte[][] B, ubyte[][] A){
+    this(ref ubyte[][] R, ref ubyte[][] G, ref ubyte[][] B, ref ubyte[][] A){
         _R = R;
         _G = G;
         _B = B;
         _A = A;
     }
 
-    this(ubyte[][] grayscale){
+    this(ref ubyte[][] grayscale){
         _grayscale = grayscale;
     }
 
     @property{
-        void R(ubyte[][] R){ _R = R; }
-        void G(ubyte[][] G){ _G = G; }
-        void B(ubyte[][] B){ _B = B; }
-        void A(ubyte[][] A){ _A = A; }
-        void grayscale(ubyte[][] grayscale){ _grayscale = grayscale; }
+        void R(ref ubyte[][] R){ _R = R; }
+        void G(ref ubyte[][] G){ _G = G; }
+        void B(ref ubyte[][] B){ _B = B; }
+        void A(ref ubyte[][] A){ _A = A; }
+        void grayscale(ref ubyte[][] grayscale){ _grayscale = grayscale; }
 
         ubyte[][] R(){ return _R; }
         ubyte[][] G(){ return _G; }
         ubyte[][] B(){ return _B; }
         ubyte[][] A(){ return _A; }
-        ubyte[][][] Pixel(){
-            return A.empty ? [_R]~[_G]~[_B] : [_R]~[_G]~[_B]~[_A];
+
+        ubyte[][] Pixel(){
+            if(!_RGB.empty) return _RGB;
+            
+            if(A.empty){
+                _R.each!((idx,a) => 
+                      a.each!((edx,b) => 
+                          _tmp ~= [_R[idx][edx], _G[idx][edx], _B[idx][edx]]
+                              )
+                        );
+                _RGB = _tmp.chunks(_R[0].length*3).array;
+            }else{
+                _R.each!((idx,a) => 
+                      a.each!((edx,b) => 
+                          _tmp ~= [_R[idx][edx], _G[idx][edx], _B[idx][edx], _A[idx][edx]]
+                              )
+                        );
+                _RGB = _tmp.chunks(_R[0].length*4).array;
+            }
+            return _RGB;
         }
+
         ubyte[][] grayscale(){ return _grayscale; }
     }
 
     private:
-        ubyte[][] _R, _G, _B, _A;
-        ubyte[][] _grayscale;
+        ubyte[][] _R, _G, _B, _A, _RGB, _grayscale;
+        ubyte[] _tmp;
 }
 
-auto decode(ref Header header, string filename){
+Pixel decode(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[][][] rgb, joinRGB;
@@ -128,9 +147,8 @@ auto decode(ref Header header, string filename){
     Pixel pixel;
     if(header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA){
         alias grayscale = data;
-          pixel = Pixel(grayscale);
-        //pixel.grayscale.writeln;
-      return data;
+        pixel = Pixel(grayscale);
+        return pixel;
     }
     
     data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
@@ -140,18 +158,18 @@ auto decode(ref Header header, string filename){
     ubyte[][] G = pix[1].array.to!(ubyte[][]);
     ubyte[][] B = pix[2].array.to!(ubyte[][]);
     ubyte[][] A = pix[3].array.to!(ubyte[][]);
-
+    
     if(header.colorType == colorType.trueColor || header.colorType == colorType.indexColor){
         pixel = Pixel(R, G, B);
     }else{
         pixel = Pixel(R, G, B, A);
     }
-    return data;
+    return pixel;
 }
 
 ubyte[] encode(T)(Header header,  T[][] color){
     if(color == null) throw new Exception("null reference exception");
-    ubyte[] data = header.makeIHDR ~ color.makeIDAT(header) ~ makeIEND;
+    auto data = header.makeIHDR ~ color.makeIDAT(header) ~ makeIEND;
     return data;
 }
 
@@ -182,7 +200,7 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-auto rgbToGrayscale(T)(T[][][] color){ return color.toGrayscale; }
+Pixel rgbToGrayscale(T)(T[][][] color){ return color.toGrayscale; }
 
 auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 

@@ -9,9 +9,9 @@ int main(){
     ubyte[][][] actualData;
 
     // start decode
-    auto parsedData = beforeEncode.decode("png_img/lena.png");
-    if(parsedData.length == 0) {return 0;}
-    parsedData.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);
+    Pixel parsedData = beforeEncode.decode("png_img/lena.png");
+    if(parsedData.Pixel.length == 0) { return 0; }
+    parsedData.Pixel.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);
 
     writefln("Width  %8d\nHeight  %7d",
           beforeEncode.width,
@@ -19,10 +19,10 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
-
-    auto gray = rgbToGrayscale(actualData);
+   
+    Pixel grayPix = actualData.rgbToGrayscale;
     beforeEncode.colorType = colorType.grayscale;
-
+ 
     /*  Canny Edge Detection (Defective State) 
     auto gray = rgbToGrayscale(actualData);
     auto edge = canny(gray,80,150);
@@ -33,10 +33,11 @@ int main(){
     */
     
     // start encode
-    ubyte[] encodedData = beforeEncode.encode(gray);
+    ubyte[] encodedData = beforeEncode.encode(grayPix.grayscale);
     auto file = File("png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
+
     //read encoded file
     Header afterEncode;
 

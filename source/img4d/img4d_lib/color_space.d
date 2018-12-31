@@ -1,17 +1,19 @@
 module img4d_lib.color_space;
-import std.stdio,
+import img4d,
+       std.stdio,
        std.array,
        std.conv,
        std.algorithm,
        std.range;
 
-double[][] toGrayscale(T)(T[][][] color){
+Pixel toGrayscale(T)(ref T[][][] color){
     uint input_len = color[0][0].length.to!uint; 
     if (input_len != 3 && input_len != 4) throw new Exception("invalid format.");
     if (input_len == 4)
         color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
     
-    double[][] temp, gray;
+    double[][] temp;
+    ubyte[][]gray;
     double[] arr = [0.3, 0.59, 0.11];
 
     color.each!(a=> a.transposed
@@ -23,8 +25,8 @@ double[][] toGrayscale(T)(T[][][] color){
     
     temp.chunks(3)
           .map!(v => v.transposed)
-          .each!(h => gray ~= h.map!(n => n.sum).array);
-    
-    return gray;
+          .each!(h => gray ~= h.map!(n => n.sum).array.to!(ubyte[]).array);
+    Pixel pix = Pixel(gray);
+    return pix;
 }
 
