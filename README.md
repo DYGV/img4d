@@ -18,17 +18,16 @@ int main(){
     int[][][] actualData;
 
     // start decode
-    auto parsedData = hdr.decode("png_img/lena.png");
+    Pixel parsedData = hdr.decode("png_img/lena.png");
     if(parsedData.length == 0) {return 0;}
     parsedData.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
     
     // convert to grayscale
-    auto gray = rgbToGrayscale(actualData);
-    hdr.colorType = colorType.grayscale;
-
+    Pixel grayPix = actualData.rgbToGrayscale;
+    beforeEncode.colorType = colorType.grayscale;
     
     // start encode
-    ubyte[] encodedData = hdr.encode(gray);
+    ubyte[] encodedData = hdr.encode(grayPix.grayscale);
     auto file = File("png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
