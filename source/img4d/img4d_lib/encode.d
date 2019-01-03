@@ -1,5 +1,6 @@
 module img4d_lib.encode;
-import img4d;
+import img4d,
+       img4d_lib.filter;
 import std.stdio,
        std.array,
        std.bitmanip,
@@ -80,4 +81,12 @@ auto makeCrc(in ubyte[] data){
     ubyte[4] crc;
     data.crc32Of.each!((idx,a) => crc[3-idx] = a);
     return crc;
+}
+
+// makeshift
+auto choiceFilterType(Pixel pix){
+   ubyte[][] filtered_R = pix.R.sub;
+   ubyte[][] filtered_G = pix.G.sub;
+   ubyte[][] filtered_B = pix.B.sub;
+   ubyte[][] filtered_A = pix.A.sub;
 }

@@ -3,7 +3,8 @@ import std.stdio,
        std.array,
        std.conv,
        std.algorithm,
-       std.range;
+       std.range,
+       std.math;
 import std.range.primitives;
 import std.algorithm.mutation;
 
@@ -20,6 +21,29 @@ public auto sub(string op, string inequality, string inverseOp, T)(T[][] scanlin
                 ? mixin("calculate!op(a,b)")
                 : mixin("calculate!op(a,b)" ~inverseOp~ "256")))]
                 .join.transposed;
+}
+
+auto sub(T)(T[][] src){
+    return src.neighborDifference;
+}
+
+auto up(T)(T[][] src){
+    return src.front.walkLength.iota
+            .map!(i => transversal(src, i).array)
+            .neighborDifference;
+}
+auto neighborDifference(ubyte[][] src){
+    ubyte[][] difference;
+    src.map!(a => a.slide(2))
+         .each!(b => difference ~= 
+             b.map!(b=> b.front - b.back)
+             .map!(c =>
+                      c > 0
+                      ? 256 - c 
+                      : c.abs
+                  )
+             .array.to!(ubyte[]));
+         return difference;
 }
 
 public auto up(){}
