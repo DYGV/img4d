@@ -167,9 +167,8 @@ Pixel decode(ref Header header, string filename){
     return pixel;
 }
 
-ubyte[] encode(T)(Header header,  T[][] color){
-    if(color == null) throw new Exception("null reference exception");
-    auto data = header.makeIHDR ~ color.makeIDAT(header) ~ makeIEND;
+ubyte[] encode(Header header, Pixel pix){
+    auto data = header.makeIHDR ~ pix.makeIDAT(header) ~ makeIEND;
     return data;
 }
 

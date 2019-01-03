@@ -24,6 +24,7 @@ public auto sub(string op, string inequality, string inverseOp, T)(T[][] scanlin
 }
 
 auto sub(T)(T[][] src){
+    "a".writeln;
     return src.neighborDifference;
 }
 
@@ -33,9 +34,10 @@ auto up(T)(T[][] src){
             .neighborDifference;
 }
 auto neighborDifference(ubyte[][] src){
-    ubyte[][] difference;
+    ubyte[][] difference =  uninitializedArray!(ubyte[][])(src.length, src[0].length);
+    src.each!((idx,a) =>  difference[idx].front = src[idx].front);
     src.map!(a => a.slide(2))
-         .each!(b => difference ~= 
+         .each!((idx,b) => difference[idx] ~= 
              b.map!(b=> b.front - b.back)
              .map!(c =>
                       c > 0
@@ -43,7 +45,7 @@ auto neighborDifference(ubyte[][] src){
                       : c.abs
                   )
              .array.to!(ubyte[]));
-         return difference;
+    return difference;
 }
 
 public auto up(){}

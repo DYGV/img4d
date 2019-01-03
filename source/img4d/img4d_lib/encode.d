@@ -31,15 +31,15 @@ ubyte[] makeIHDR(Header header){
     return sig ~ IHDR;
 }
 
-ubyte[] makeIDAT(T)(T[][] actualData, Header header){
-    if(actualData == null) throw new Exception("null reference exception");
+ubyte[] makeIDAT(Pixel pix, Header header){
 
     Compress cmps = new Compress(HeaderFormat.deflate);
     ubyte[] beforeCmpsData, idatData, chunkData, IDAT; 
-    ubyte filterType = filterType.None; // only None filter you can apply in current
+    ubyte filterType = filterType.None;
+    //ubyte filterType = filterType.Sub;
 
     uint chunkSize;
-    ubyte[][] byteData = minimallyInitializedArray!(ubyte[][])(actualData.length, actualData[0].length);
+    ubyte[][] byteData = minimallyInitializedArray!(ubyte[][])(pix.R.length, pix.R[0].length);
     const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
     ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
     
@@ -51,8 +51,8 @@ ubyte[] makeIDAT(T)(T[][] actualData, Header header){
         actualData.each!(sc => rgb ~= cast(ubyte[][])[sc.chunks(lengthPerPixel).array]);
         rgb.each!((idx,a) =>byteData~= (sub!("-",">=0","+")(a)).join.to!(ubyte[]));
     }
-
-    actualData.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+    pix.Pixel.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+    //pix.Pixel.sub.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
     byteData.each!(a => beforeCmpsData ~= a.padLeft(filterType, a.length+1).array);
     idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
     idatData ~= cast(ubyte[])cmps.flush();
@@ -85,8 +85,20 @@ auto makeCrc(in ubyte[] data){
 
 // makeshift
 auto choiceFilterType(Pixel pix){
-   ubyte[][] filtered_R = pix.R.sub;
-   ubyte[][] filtered_G = pix.G.sub;
-   ubyte[][] filtered_B = pix.B.sub;
-   ubyte[][] filtered_A = pix.A.sub;
+    int sumSub,
+        sumUp,
+        sumAve,
+        sumPaeth;
+    ubyte [][] actualSub;
+    ubyte [][] R = pix.R.sub;
+    ubyte [][] G = pix.G.sub;
+    ubyte [][] B = pix.B.sub;
+    //ubyte [][] A = pix.A.sub;
+    ubyte[][] sub = Pixel(R, G, B).Pixel;
+
+    /* compare up ave .........*/
+
+
+     return sub;
+
 }

@@ -20,8 +20,8 @@ int main(){
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
    
-    Pixel grayPix = actualData.rgbToGrayscale;
-    beforeEncode.colorType = colorType.grayscale;
+    //Pixel grayPix = actualData.rgbToGrayscale;
+    //beforeEncode.colorType = colorType.grayscale;
  
     /*  Canny Edge Detection (Defective State) 
     auto gray = rgbToGrayscale(actualData);
@@ -33,7 +33,7 @@ int main(){
     */
     
     // start encode
-    ubyte[] encodedData = beforeEncode.encode(grayPix.grayscale);
+    ubyte[] encodedData = beforeEncode.encode(parsedData);
     auto file = File("png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
