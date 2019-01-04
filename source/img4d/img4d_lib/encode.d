@@ -94,23 +94,39 @@ pure auto makeCrc(in ubyte[] data){
 
 // defective
 auto choiceFilterType(ref Pixel pix){
-    int sumSub,
-        sumUp,
-        sumAve,
-        sumPaeth;
-    ubyte [][] actualSub;
+    int[] sumNone,
+          sumSub,
+          sumUp,
+          sumAve,
+          sumPaeth;
+    ubyte [][] R, G, B, A,
+              filteredNone,
+              filteredSub,
+              filteredUp,
+              filteredAve,
+              filteredPaeth;
 
-    scanlineFilterType = filterTypes.Sub;
-    
+    /* begin comparison with none, sub, up, ave and paeth*/
+        
     if(!pix.grayscale.empty){
-        return pix.grayscale.sub;
-    }
-    ubyte [][] R = pix.R.sub;
-    ubyte [][] G = pix.G.sub;
-    ubyte [][] B = pix.B.sub;
-    //ubyte [][] A = pix.A.sub;
-    ubyte[][] sub = Pixel(R, G, B).Pixel;
+        filteredNone = pix.grayscale.dup;
+        filteredSub = pix.grayscale.sub;
+    }else{
+        filteredNone = pix.Pixel.dup;
+                
+        R = pix.R.sub;
+        G = pix.G.sub;
+        B = pix.B.sub;
+        A = pix.A.sub;
 
-    /* compare up ave .........*/
-    return sub;
+        filteredSub = Pixel(R, G, B).Pixel;
+    } 
+    sumNone = cast(int[])(filteredNone.map!(a => a.sum).array);
+    sumSub = cast(int[])(filteredSub.map!(a => a.sum).array);
+
+
+
+    /* end comparison with none, sub, up, ave and paeth*/
+    scanlineFilterType = filterTypes.Sub;
+    return filteredSub;
 }
