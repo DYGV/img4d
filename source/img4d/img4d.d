@@ -18,7 +18,7 @@ import std.stdio,
 
 int lengthPerPixel;
 
-enum filterType{
+enum filterTypes{
     None,
     Sub,
     Up,
@@ -26,7 +26,7 @@ enum filterType{
     Paeth
 }
 
-enum colorType{
+enum colorTypes{
     grayscale,
     trueColor = 2,
     indexColor,
@@ -145,7 +145,7 @@ Pixel decode(ref Header header, string filename){
     auto data = parse(header, filename);
     
     Pixel pixel;
-    if(header.colorType == colorType.grayscale || header.colorType == colorType.grayscaleA){
+    if(header.colorType == colorTypes.grayscale || header.colorType == colorTypes.grayscaleA){
         alias grayscale = data;
         pixel = Pixel(grayscale);
         return pixel;
@@ -159,7 +159,7 @@ Pixel decode(ref Header header, string filename){
     ubyte[][] B = pix[2].array.to!(ubyte[][]);
     ubyte[][] A = pix[3].array.to!(ubyte[][]);
     
-    if(header.colorType == colorType.trueColor || header.colorType == colorType.indexColor){
+    if(header.colorType == colorTypes.trueColor || header.colorType == colorTypes.indexColor){
         pixel = Pixel(R, G, B);
     }else{
         pixel = Pixel(R, G, B, A);

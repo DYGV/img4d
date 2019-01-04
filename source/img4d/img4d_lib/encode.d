@@ -11,6 +11,8 @@ import std.stdio,
        std.range,
        std.algorithm;
 
+ubyte filterType;
+
 ubyte[] makeIHDR(Header header){
     ubyte depth = header.bitDepth.to!ubyte;
     ubyte colorType = header.colorType.to!ubyte;
@@ -35,24 +37,20 @@ ubyte[] makeIDAT(Pixel pix, Header header){
 
     Compress cmps = new Compress(HeaderFormat.deflate);
     ubyte[] beforeCmpsData, idatData, chunkData, IDAT; 
-    ubyte filterType = filterType.None;
-    //ubyte filterType = filterType.Sub;
-
+    //filterType = filterType.None;
+    
     uint chunkSize;
-    ubyte[][] byteData = minimallyInitializedArray!(ubyte[][])(pix.R.length, pix.R[0].length);
+    ubyte[][] byteData;
     const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
     ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
-    
-    version(none){
-        import img4d_lib.filter;
-        ubyte filterType = 0;
-        ubyte[][] byteData;
-        ubyte[][][] rgb;
-        actualData.each!(sc => rgb ~= cast(ubyte[][])[sc.chunks(lengthPerPixel).array]);
-        rgb.each!((idx,a) =>byteData~= (sub!("-",">=0","+")(a)).join.to!(ubyte[]));
+    if(header.colorType == colorTypes.grayscale || header.colorType == colorTypes.grayscaleA){
+        byteData.length = pix.grayscale.length;
+    }else{
+        byteData.length = pix.R[0].length;    
     }
-    pix.Pixel.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
-    //pix.Pixel.sub.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+
+    //pix.Pixel.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+    pix.choiceFilterType.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
     byteData.each!(a => beforeCmpsData ~= a.padLeft(filterType, a.length+1).array);
     idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
     idatData ~= cast(ubyte[])cmps.flush();
@@ -83,13 +81,19 @@ auto makeCrc(in ubyte[] data){
     return crc;
 }
 
-// makeshift
+// defective
 auto choiceFilterType(Pixel pix){
     int sumSub,
         sumUp,
         sumAve,
         sumPaeth;
     ubyte [][] actualSub;
+
+    filterType = filterTypes.Sub;
+    
+    if(!pix.grayscale.empty){
+        return pix.grayscale.sub;
+    }
     ubyte [][] R = pix.R.sub;
     ubyte [][] G = pix.G.sub;
     ubyte [][] B = pix.B.sub;
@@ -97,8 +101,5 @@ auto choiceFilterType(Pixel pix){
     ubyte[][] sub = Pixel(R, G, B).Pixel;
 
     /* compare up ave .........*/
-
-
-     return sub;
-
+    return sub;
 }
