@@ -53,9 +53,9 @@ ubyte[] makeIDAT(ref Pixel pix,ref Header header){
     with(header){
         with(colorTypes){
             if(colorType == grayscale || colorType == grayscaleA){
-            byteData.length = pix.grayscale.length;
+                byteData.length = pix.grayscale.length;
             }else{
-                byteData.length = pix.R[0].length;    
+                byteData.length = pix.R.length;    
             }
         }
     }
