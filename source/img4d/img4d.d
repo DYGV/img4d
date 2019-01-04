@@ -167,7 +167,7 @@ Pixel decode(ref Header header, string filename){
     return pixel;
 }
 
-ubyte[] encode(Header header, Pixel pix){
+ubyte[] encode(ref Header header,ref Pixel pix){
     auto data = header.makeIHDR ~ pix.makeIDAT(header) ~ makeIEND;
     return data;
 }
@@ -199,7 +199,7 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-Pixel rgbToGrayscale(T)(T[][][] color){ return color.toGrayscale; }
+Pixel rgbToGrayscale(T)(ref T[][][] color){ return color.toGrayscale; }
 
 auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 

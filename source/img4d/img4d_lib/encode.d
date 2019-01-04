@@ -13,7 +13,7 @@ import std.stdio,
 
 ubyte filterType;
 
-ubyte[] makeIHDR(Header header){
+ubyte[] makeIHDR(ref Header header){
     ubyte depth = header.bitDepth.to!ubyte;
     ubyte colorType = header.colorType.to!ubyte;
     ubyte compress = header.compressionMethod.to!ubyte;
@@ -33,7 +33,7 @@ ubyte[] makeIHDR(Header header){
     return sig ~ IHDR;
 }
 
-ubyte[] makeIDAT(Pixel pix, Header header){
+ubyte[] makeIDAT(ref Pixel pix,ref Header header){
 
     Compress cmps = new Compress(HeaderFormat.deflate);
     ubyte[] beforeCmpsData, idatData, chunkData, IDAT; 
@@ -82,7 +82,7 @@ auto makeCrc(in ubyte[] data){
 }
 
 // defective
-auto choiceFilterType(Pixel pix){
+auto choiceFilterType(ref Pixel pix){
     int sumSub,
         sumUp,
         sumAve,

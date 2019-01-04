@@ -8,34 +8,30 @@ import std.stdio,
 import std.range.primitives;
 import std.algorithm.mutation;
 
-auto calculate(string op, T)(T lhs, T rhs)
-{
-    return mixin("lhs " ~ op ~ " rhs");
-}
-
-public auto sub(string op, string inequality, string inverseOp, T)(T[][] scanline){
+auto inverseSub(ref ubyte[][] scanline){
     return [scanline.front.walkLength.iota
-        .map!(i => transversal(scanline, i).chain
+            .map!(i => transversal(scanline, i).chain
             .cumulativeFold!((a,b) =>
-                mixin("calculate!op(a,b)"~inequality) 
-                ? mixin("calculate!op(a,b)")
-                : mixin("calculate!op(a,b)" ~inverseOp~ "256")))]
-                .join.transposed;
+                  a + b < 256
+                ? a + b
+                : a + b - 256))].join.transposed;
 }
 
-auto sub(T)(T[][] src){
+ubyte[][] sub(T)(T[][] src){
     return src.neighborDifference;
 }
 
-auto up(T)(T[][] src){
+ubyte[][] up(T)(ref T[][] src){
     return src.front.walkLength.iota
             .map!(i => transversal(src, i).array)
             .neighborDifference;
 }
-auto neighborDifference(ubyte[][] src){
-    ubyte[][] difference;// = uninitializedArray!(ubyte[][])(src.length, src[0].length);
+
+ubyte[][] neighborDifference(ref ubyte[][] src){
+    ubyte[][] difference;
     difference.length = src.length;
     src.each!((idx,a) =>  difference[idx] ~= src[idx].front);
+
     src.map!(a => a.slide(2))
          .each!((idx,b) => difference[idx] ~= 
              b.map!(b=> b.front - b.back)
@@ -48,16 +44,13 @@ auto neighborDifference(ubyte[][] src){
     return difference;
 }
 
-public auto up(){}
+auto up(){}
 
-public auto ave(){}
+auto ave(){}
 
-public auto paeth(){}
+auto paeth(){}
 
 unittest{
-    assert(calculate!"+"(5, 10) == 15);
-    assert(calculate!"-"(5, 10) == -5);
-
     int[][] filtered = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
     int[][] before   = [[1, 1, 255], [0, 3, 2], [3, 5, 3]];
         
@@ -73,7 +66,7 @@ unittest{
          3 +   2 =   5 <  256     =>                    5
          2 +   1 =   3 <  256     =>                    3
      */
-    sub!("+","< 256","-")(filtered).each!((idx,a) =>
+    filtered.inverseSub.each!((idx,a) =>
         assert(a.equal(before[idx])));
     "unittest of Sub filter was passed".writeln;
 }

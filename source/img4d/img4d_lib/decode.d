@@ -13,7 +13,7 @@ import std.stdio,
        std.range,
        std.math;
 
-private Header readIHDR(ubyte[] header){
+Header readIHDR(ubyte[] header){
     if(header.length != 21) throw new Exception("invalid header format");
     ubyte[] chunk = header[0 .. 17];  // Chunk Type + Chunk Data 
     Header IHDR = Header(header[4 .. 8].byteToInt, // width
@@ -50,11 +50,11 @@ private Header readIHDR(ubyte[] header){
     return IHDR;
 }
 
-private int byteToInt(ubyte[] data){ return data.peek!int(); }
+int byteToInt(ubyte[] data){ return data.peek!int(); }
 
-private string byteToString(T)(T[] data){ return cast(string)data; }
+string byteToString(T)(T[] data){ return cast(string)data; }
 
-private ubyte[] readIDAT(ubyte[] data){
+ubyte[] readIDAT(ubyte[] data){
     version(none){
         ubyte[] dataCrc = data[0 .. $-4];
         ubyte[] crc = data[$-4 .. $];
@@ -63,14 +63,14 @@ private ubyte[] readIDAT(ubyte[] data){
     return data[4 .. $-4];
 }
 
-private void crcCheck(ubyte[] crc, in ubyte[] chunk){
+void crcCheck(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
     if (crc != chunk.crc32Of){
           throw new Exception("invalid");
     }
 }
 
-private int paethPredictor(int left, int upper, int upperLeft){
+int paethPredictor(int left, int upper, int upperLeft){
     int paeth = left + upper - upperLeft;
     int paethLeft = abs(paeth - left);
     int paethUpper = abs(paeth - upper);
@@ -82,9 +82,9 @@ private int paethPredictor(int left, int upper, int upperLeft){
     return upperLeft;
 }
 
-private auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
+auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
 
-private ubyte[][] inverseFiltering(string op, string inequality, string inverseOp)(ref ubyte[][] data){
+ubyte[][] inverseFiltering(ref ubyte[][] data){
     ubyte[][][] rgb;
     ubyte[][][] compData;
     ubyte[] filters;
@@ -105,7 +105,7 @@ private ubyte[][] inverseFiltering(string op, string inequality, string inverseO
             	break;
             
             case filterTypes.Sub:
-                actualData ~=  [sub!(op,inequality,inverseOp)(scanline).join].to!(ubyte[][]); 
+                actualData ~=  [scanline.inverseSub.join].to!(ubyte[][]); 
             	break;
             
             case filterTypes.Up:
@@ -151,8 +151,7 @@ private ubyte[][] inverseFiltering(string op, string inequality, string inverseO
     return actualData;
 }
  
-
-public auto parse(ref Header header, string filename){
+ubyte[][] parse(ref Header header, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;
     int sigSize   = 8;
@@ -211,7 +210,7 @@ public auto parse(ref Header header, string filename){
         return uncChunks;
     }
 
-    actualData = inverseFiltering!("+","<256","-")(uncChunks);
+    actualData = uncChunks.inverseFiltering;
     return actualData; 
 }
 
