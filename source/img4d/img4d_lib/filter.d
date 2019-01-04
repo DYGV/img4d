@@ -8,7 +8,7 @@ import std.stdio,
 import std.range.primitives;
 import std.algorithm.mutation;
 
-auto inverseSub(ref ubyte[][] scanline){
+pure auto inverseSub(ref ubyte[][] scanline){
     return [scanline.front.walkLength.iota
             .map!(i => transversal(scanline, i).chain
             .cumulativeFold!((a,b) =>
@@ -17,17 +17,17 @@ auto inverseSub(ref ubyte[][] scanline){
                 : a + b - 256))].join.transposed;
 }
 
-ubyte[][] sub(T)(T[][] src){
+pure ubyte[][] sub(T)(T[][] src){
     return src.neighborDifference;
 }
 
-ubyte[][] up(T)(ref T[][] src){
+pure ubyte[][] up(T)(ref T[][] src){
     return src.front.walkLength.iota
             .map!(i => transversal(src, i).array)
             .neighborDifference;
 }
 
-ubyte[][] neighborDifference(ref ubyte[][] src){
+pure ubyte[][] neighborDifference(ref ubyte[][] src){
     ubyte[][] difference;
     difference.length = src.length;
     src.each!((idx,a) =>  difference[idx] ~= src[idx].front);

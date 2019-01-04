@@ -48,25 +48,25 @@ struct Header {
         _interlaceMethod    = interlaceMethod;
         _crc                = crc; 
     }
-    
+       
     @property{
-        void width(ref int width){ _width = width;}
-        void height(ref int height){ _height = height; }
-        void bitDepth(ref int bitDepth){ _bitDepth = bitDepth; }
-        void colorType(int colorType){ _colorType = colorType; }
-        void compressionMethod (ref int compressionMethod){ _compressionMethod = compressionMethod; }
-        void filterMethod(ref int filterMethod){ _filterMethod = filterMethod; }
-        void interlaceMethod(ref int interlaceMethod){ _interlaceMethod = interlaceMethod; }
-        void crc(ref ubyte[] crc){_crc = crc;}
+        pure void width(ref int width){ _width = width;}
+        pure void height(ref int height){ _height = height; }
+        pure void bitDepth(ref int bitDepth){ _bitDepth = bitDepth; }
+        pure void colorType(int colorType){ _colorType = colorType; }
+        pure void compressionMethod (ref int compressionMethod){ _compressionMethod = compressionMethod; }
+        pure void filterMethod(ref int filterMethod){ _filterMethod = filterMethod; }
+        pure void interlaceMethod(ref int interlaceMethod){ _interlaceMethod = interlaceMethod; }
+        pure void crc(ref ubyte[] crc){_crc = crc;}
 
-        int width(){ return _width; }
-        int height(){ return _height; }
-        int bitDepth(){ return  _bitDepth; }
-        int colorType(){ return  _colorType; }
-        int compressionMethod (){ return  _compressionMethod; }
-        int filterMethod(){ return  _filterMethod; }
-        int interlaceMethod(){ return  _interlaceMethod; }
-        ubyte[] crc(){ return  _crc; }
+        pure int width(){ return _width; }
+        pure int height(){ return _height; }
+        pure int bitDepth(){ return  _bitDepth; }
+        pure int colorType(){ return  _colorType; }
+        pure int compressionMethod (){ return  _compressionMethod; }
+        pure int filterMethod(){ return  _filterMethod; }
+        pure int interlaceMethod(){ return  _interlaceMethod; }
+        pure ubyte[] crc(){ return  _crc; }
     }
 
     private:
@@ -98,18 +98,18 @@ struct Pixel{
     }
 
     @property{
-        void R(ref ubyte[][] R){ _R = R; }
-        void G(ref ubyte[][] G){ _G = G; }
-        void B(ref ubyte[][] B){ _B = B; }
-        void A(ref ubyte[][] A){ _A = A; }
-        void grayscale(ref ubyte[][] grayscale){ _grayscale = grayscale; }
+        pure void R(ref ubyte[][] R){ _R = R; }
+        pure void G(ref ubyte[][] G){ _G = G; }
+        pure void B(ref ubyte[][] B){ _B = B; }
+        pure void A(ref ubyte[][] A){ _A = A; }
+        pure void grayscale(ref ubyte[][] grayscale){ _grayscale = grayscale; }
 
-        ubyte[][] R(){ return _R; }
-        ubyte[][] G(){ return _G; }
-        ubyte[][] B(){ return _B; }
-        ubyte[][] A(){ return _A; }
+        pure ubyte[][] R(){ return _R; }
+        pure ubyte[][] G(){ return _G; }
+        pure ubyte[][] B(){ return _B; }
+        pure ubyte[][] A(){ return _A; }
 
-        ubyte[][] Pixel(){
+        pure ubyte[][] Pixel(){
             if(!_RGB.empty) return _RGB;
             
             if(A.empty){
@@ -130,7 +130,7 @@ struct Pixel{
             return _RGB;
         }
 
-        ubyte[][] grayscale(){ return _grayscale; }
+        pure ubyte[][] grayscale(){ return _grayscale; }
     }
 
     private:
@@ -201,7 +201,7 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
 
 Pixel rgbToGrayscale(T)(ref T[][][] color){ return color.toGrayscale; }
 
-auto toBinary(T)(ref T[][] gray, T threshold=127){
+pure auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 
 
     T[][] bin;
@@ -209,7 +209,7 @@ auto toBinary(T)(ref T[][] gray, T threshold=127){
     return bin;
 }
 
-auto toBinarizeElucidate(T)(T[][] array, string process="binary"){
+pure auto toBinary(T)(T[][] array){
     uint imageH = array.length;
     uint imageW = array[0].length;
     int vicinityH = 3;
@@ -222,37 +222,26 @@ auto toBinarizeElucidate(T)(T[][] array, string process="binary"){
     
     foreach(i; h .. imageH-h){
         foreach(j;  w .. imageW-w){
-            if (process=="binary"){
                 int t = 0;
                 foreach(m; 0 .. vicinityH){
                     foreach(n; 0 .. vicinityW){      
                         t += array[i-h+m][j-w+n];
                     }
                 }
-                if((t/(vicinityH*vicinityW)) < array[i][j]) output[i][j] = 255;
-            }              
-            else if(process == "median"){
-                T[] t;
-                foreach(m; 0 .. vicinityH){
-                    foreach(n; 0 .. vicinityW){      
-                        t ~= array[i-h+m][j-w+n].to!T;
-                    }
-                }    
-                output[i][j] = t.sort[4];
-            }  
+                if((t/(vicinityH*vicinityW)) < array[i][j]) output[i][j] = 255;              
         }
     }
     return output;
 }
 
-auto differ(T)(ref T[][] origin, ref T[][] target){
+pure auto differ(T)(ref T[][] origin, ref T[][] target){
     T[][] diff;
     origin.each!((idx,a) => diff ~=  (target[idx][] -= a[]).map!(b => abs(b)).array);
 
     return diff;
 }
 
-auto mask(T)(ref T[][][] colorTarget, ref T[][] gray){
+pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray){
     T[][] masked;
     masked.length = gray.length;
     gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? colorTarget[idx][edx] : [0, 0, 0]));

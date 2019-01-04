@@ -26,20 +26,20 @@ Header readIHDR(ubyte[] header){
 			header[17 .. 21]  // crc
 			);
 
-    switch(IHDR.colorType){
-        case colorTypes.grayscale:
+    switch(IHDR.colorType) with(colorTypes){
+        case grayscale:
             lengthPerPixel = IHDR.width;
             break;
-        case colorTypes.trueColor:
+        case trueColor:
             lengthPerPixel = 3;
             break;
-        case colorTypes.indexColor:
+        case indexColor:
             lengthPerPixel = 3;
             break;
-        case colorTypes.grayscaleA:
+        case grayscaleA:
             lengthPerPixel = IHDR.width * 2;
             break;
-        case colorTypes.trueColorA:
+        case trueColorA:
             lengthPerPixel = 4;
             break;
         default:
@@ -97,24 +97,24 @@ ubyte[][] inverseFiltering(ref ubyte[][] data){
         ubyte[] predictor;
         ubyte[] actualDataBack;
 
-        switch(filters[idx]){
-            case filterTypes.None:
+        switch(filters[idx]) with(filterTypes){
+            case None:
                 scanline.each!(a => a.each!(b => temp ~= b));
             	actualData ~= [temp.array];
                 
             	break;
             
-            case filterTypes.Sub:
+            case Sub:
                 actualData ~=  [scanline.inverseSub.join].to!(ubyte[][]); 
             	break;
             
-            case filterTypes.Up:
+            case Up:
                 scanline.each!(a => a.each!(b => temp ~= b));
                 actualData ~= [(temp[] += actualData.back[]).map!(a => a.normalizePixelValue).array].to!(ubyte[][]);
 
                 break;
 	    
-            case filterTypes.Average:
+            case Average:
                 actualDataBack = actualData.back;
                 auto up = actualDataBack.chunks(lengthPerPixel);
                 auto current = scanline.chunks(lengthPerPixel);
@@ -129,7 +129,7 @@ ubyte[][] inverseFiltering(ref ubyte[][] data){
                 actualData ~= [temp];
                 break;
 
-            case filterTypes.Paeth:
+            case Paeth:
                 auto joined = scanline.join;
 
                 actualData.back[0 .. lengthPerPixel]
@@ -205,9 +205,12 @@ ubyte[][] parse(ref Header header, string filename){
     uint numScanline = (uncIDAT.length / header.height).to!uint;
     auto chunks = uncIDAT.chunks(numScanline).array;
     ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
-  
-    if(uncIDAT.empty || header.colorType == colorTypes.grayscale || header.colorType == colorTypes.grayscaleA) {
-        return uncChunks;
+    with(header){
+        with(colorTypes){ 
+            if(uncIDAT.empty || colorType == grayscale || colorType == grayscaleA) {
+                return uncChunks;
+            }
+        }
     }
 
     actualData = uncChunks.inverseFiltering;
