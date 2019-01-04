@@ -61,7 +61,7 @@ ubyte[] makeIDAT(ref Pixel pix,ref Header header){
     }
 
     //pix.Pixel.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
-    pix.choiceFilterType.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
+    header.choiceFilterType(pix).each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
     byteData.each!(a => beforeCmpsData ~= a.padLeft(scanlineFilterType, a.length+1).array);
     idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
     idatData ~= cast(ubyte[])cmps.flush();
@@ -93,7 +93,7 @@ pure auto makeCrc(in ubyte[] data){
 }
 
 // defective
-auto choiceFilterType(ref Pixel pix){
+auto choiceFilterType(ref Header header, ref Pixel pix){
     int[] sumNone,
           sumSub,
           sumUp,
@@ -108,19 +108,23 @@ auto choiceFilterType(ref Pixel pix){
 
     /* begin comparison with none, sub, up, ave and paeth*/
         
-    if(!pix.grayscale.empty){
-        filteredNone = pix.grayscale.dup;
-        filteredSub = pix.grayscale.sub;
-    }else{
-        filteredNone = pix.Pixel.dup;
+    with(header){
+        with(colorTypes){
+            if(colorType == grayscale || colorType == grayscaleA) {
+                filteredNone = pix.grayscale.dup;
+                filteredSub = pix.grayscale.sub;
+            }else{
+                filteredNone = pix.Pixel.dup;
                 
-        R = pix.R.sub;
-        G = pix.G.sub;
-        B = pix.B.sub;
-        A = pix.A.sub;
+                R = pix.R.sub;
+                G = pix.G.sub;
+                B = pix.B.sub;
+                A = pix.A.sub;
 
-        filteredSub = Pixel(R, G, B).Pixel;
-    } 
+                filteredSub = Pixel(R, G, B).Pixel;
+            } 
+        }
+    }
     sumNone = cast(int[])(filteredNone.map!(a => a.sum).array);
     sumSub = cast(int[])(filteredSub.map!(a => a.sum).array);
 
