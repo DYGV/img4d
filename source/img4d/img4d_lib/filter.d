@@ -1,4 +1,5 @@
 module img4d_lib.filter;
+import img4d;
 import std.stdio,
        std.array,
        std.conv,
@@ -21,13 +22,14 @@ pure ubyte[][] sub(T)(T[][] src){
     return src.neighborDifference;
 }
 
-pure ubyte[][] up(T)(ref T[][] src){
-    return src.front.walkLength.iota
-            .map!(i => transversal(src, i).array)
-            .neighborDifference;
+pure ubyte[][] up(T)(T[][] src, ref Header header){
+    auto diff = src.front.walkLength.iota
+                  .map!(i => transversal(src, i).array).array
+                  .neighborDifference.chunks(header.height).array;
+    return src.front ~ *cast(ubyte[][]*)&diff;
 }
 
-pure ubyte[][] neighborDifference(ref ubyte[][] src){
+pure ubyte[][] neighborDifference(ubyte[][] src){
     ubyte[][] difference;
     difference.length = src.length;
     src.each!((idx,a) =>  difference[idx] ~= src[idx].front);

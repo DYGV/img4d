@@ -106,27 +106,38 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
               filteredPaeth;
 
     /* begin comparison with none, sub, up, ave and paeth*/
-
+    ubyte[][] tmpR = pix.R;
+    ubyte[][] tmpG = pix.G;
+    ubyte[][] tmpB = pix.B;
+    ubyte[][] tmpA = pix.A;
     with(header){
         with(colorTypes){
             if(colorType == grayscale || colorType == grayscaleA) {
                 filteredNone = pix.grayscale.dup;
                 filteredSub = pix.grayscale.sub;
+                filteredUp = pix.grayscale.up(header);
             }else{
                 filteredNone = pix.Pixel.dup;
-                
-                R = pix.R.sub;
-                G = pix.G.sub;
-                B = pix.B.sub;
-                A = pix.A.sub;
 
+                R = tmpR.sub;
+                G = tmpG.sub;
+                B = tmpB.sub;
+                //A = tmpA.sub;
                 filteredSub = Pixel(R, G, B).Pixel;
+                
+                R = tmpR.up(header);
+                G = tmpG.up(header);
+                B = tmpB.up(header);
+                //A = tmpA.up(header);
+                filteredUp = Pixel(R, G, B).Pixel; 
             } 
         }
     }
     sumNone = cast(int[])(filteredNone.map!(a => a.sum).array);
     sumSub = cast(int[])(filteredSub.map!(a => a.sum).array);
-    auto sums = [sumNone, sumSub];
+    sumUp = cast(int[])(filteredUp.map!(a => a.sum).array);
+
+    auto sums = [sumNone, sumSub, sumUp];
     auto minIndex = sums.front.walkLength.iota.map!(i => transversal(sums,i)).map!(minIndex);
 
     foreach(idx, min ; minIndex.array.to!(ubyte[])){
@@ -138,6 +149,7 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
                 actualData ~= min ~ filteredSub[idx];
                 break;
             case Up:
+                actualData ~= min ~ filteredUp[idx];
                 break;
             case Average:
                 break;
