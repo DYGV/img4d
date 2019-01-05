@@ -60,9 +60,7 @@ ubyte[] makeIDAT(ref Pixel pix,ref Header header){
         }
     }
 
-    //pix.Pixel.each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
-    header.choiceFilterType(pix).each!((idx,a) => byteData[idx] = a.to!(ubyte[]));
-    byteData.each!(a => beforeCmpsData ~= a.padLeft(scanlineFilterType, a.length+1).array);
+    beforeCmpsData = header.chooseFilterType(pix).join;
     idatData ~= cast(ubyte[])cmps.compress(beforeCmpsData);
     idatData ~= cast(ubyte[])cmps.flush();
     chunkSize = idatData.length.to!uint;
@@ -93,13 +91,14 @@ pure auto makeCrc(in ubyte[] data){
 }
 
 // defective
-auto choiceFilterType(ref Header header, ref Pixel pix){
+auto chooseFilterType(ref Header header, ref Pixel pix){
     int[] sumNone,
           sumSub,
           sumUp,
           sumAve,
           sumPaeth;
     ubyte [][] R, G, B, A,
+              actualData,
               filteredNone,
               filteredSub,
               filteredUp,
@@ -107,7 +106,7 @@ auto choiceFilterType(ref Header header, ref Pixel pix){
               filteredPaeth;
 
     /* begin comparison with none, sub, up, ave and paeth*/
-        
+
     with(header){
         with(colorTypes){
             if(colorType == grayscale || colorType == grayscaleA) {
@@ -130,11 +129,13 @@ auto choiceFilterType(ref Header header, ref Pixel pix){
     auto sums = [sumNone, sumSub];
     auto minIndex = sums.front.walkLength.iota.map!(i => transversal(sums,i)).map!(minIndex);
 
-    foreach(min; minIndex){
+    foreach(idx, min ; minIndex.array.to!(ubyte[])){
         switch(min) with(filterTypes){
             case None:
+                actualData ~= min ~ filteredNone[idx];
                 break;
             case Sub:
+                actualData ~= min ~ filteredSub[idx];
                 break;
             case Up:
                 break;
@@ -144,10 +145,9 @@ auto choiceFilterType(ref Header header, ref Pixel pix){
                 break;
             default:
                 break; 
-        }
-    
+        } 
     }
+
     /* end comparison with none, sub, up, ave and paeth*/
-    scanlineFilterType = filterTypes.Sub;
-    return filteredSub;
+    return actualData;
 }
