@@ -127,9 +127,26 @@ auto choiceFilterType(ref Header header, ref Pixel pix){
     }
     sumNone = cast(int[])(filteredNone.map!(a => a.sum).array);
     sumSub = cast(int[])(filteredSub.map!(a => a.sum).array);
+    auto sums = [sumNone, sumSub];
+    auto minIndex = sums.front.walkLength.iota.map!(i => transversal(sums,i)).map!(minIndex);
 
-
-
+    foreach(min; minIndex){
+        switch(min) with(filterTypes){
+            case None:
+                break;
+            case Sub:
+                break;
+            case Up:
+                break;
+            case Average:
+                break;
+            case Paeth:
+                break;
+            default:
+                break; 
+        }
+    
+    }
     /* end comparison with none, sub, up, ave and paeth*/
     scanlineFilterType = filterTypes.Sub;
     return filteredSub;
