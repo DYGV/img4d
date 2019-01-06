@@ -12,23 +12,29 @@ import std.algorithm.mutation;
 pure auto inverseSub(ref ubyte[][] scanline){
     return [scanline.front.walkLength.iota
             .map!(i => transversal(scanline, i).chain
-            .cumulativeFold!((a,b) =>
+            .cumulativeFold!((a,b) => 
                   a + b < 256
                 ? a + b
                 : a + b - 256))].join.transposed;
 }
 
-pure ubyte[][] sub(T)(T[][] src){
+pure ubyte[][] sub(ubyte[][] src){
+    if(src.empty) return src;
     return src.neighborDifference;
 }
 
-pure ubyte[][] up(T)(T[][] src, ref Header header){
+pure ubyte[][] up(ubyte[][] src, ref Header header){
+    if(src.empty) return src;
+
     auto diff = src.front.walkLength.iota
                   .map!(i => transversal(src, i).array).array
                   .neighborDifference.chunks(header.height).array;
     return src.front ~ *cast(ubyte[][]*)&diff;
 }
 
+  /**
+   *  Calculate difference neighbor pixel.
+   */
 pure ubyte[][] neighborDifference(ubyte[][] src){
     ubyte[][] difference;
     difference.length = src.length;

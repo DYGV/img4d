@@ -11,8 +11,6 @@ import std.stdio,
        std.range,
        std.algorithm;
 
-ubyte scanlineFilterType;
-
 ubyte[] makeIHDR(Header header){
     ubyte depth,
           colorSpaceType,
@@ -84,13 +82,26 @@ pure ubyte[] makeIEND(){
     return IEND;
 }
 
+  /**
+   *  Calculate from chunk data. 
+   */
 pure auto makeCrc(in ubyte[] data){
     ubyte[4] crc;
     data.crc32Of.each!((idx,a) => crc[3-idx] = a);
     return crc;
 }
+  /**
+   *  Cast to int[]
+   *  and Calculate sum every horizontal line.
+   */
+auto sumScanline(ubyte[][] src){
+   return cast(int[])(src.map!(a => a.sum).array);
+}
 
-// defective
+  /**
+   * Choose optimal filter
+   * and Return filtered pixel.
+   */
 auto chooseFilterType(ref Header header, ref Pixel pix){
     int[] sumNone,
           sumSub,
@@ -113,51 +124,53 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
     with(header){
         with(colorTypes){
             if(colorType == grayscale || colorType == grayscaleA) {
-                filteredNone = pix.grayscale.dup;
+                filteredNone = pix.grayscale;
                 filteredSub = pix.grayscale.sub;
                 filteredUp = pix.grayscale.up(header);
             }else{
-                filteredNone = pix.Pixel.dup;
+                filteredNone = pix.Pixel;
 
                 R = tmpR.sub;
                 G = tmpG.sub;
                 B = tmpB.sub;
-                //A = tmpA.sub;
-                filteredSub = Pixel(R, G, B).Pixel;
+                A = tmpA.sub;
+                filteredSub = Pixel(R, G, B, A).Pixel;
                 
                 R = tmpR.up(header);
                 G = tmpG.up(header);
                 B = tmpB.up(header);
-                //A = tmpA.up(header);
-                filteredUp = Pixel(R, G, B).Pixel; 
+                A = tmpA.up(header);
+                filteredUp = Pixel(R, G, B, A).Pixel; 
             } 
         }
     }
-    sumNone = cast(int[])(filteredNone.map!(a => a.sum).array);
-    sumSub = cast(int[])(filteredSub.map!(a => a.sum).array);
-    sumUp = cast(int[])(filteredUp.map!(a => a.sum).array);
+     sumNone = filteredNone.sumScanline;
+     sumSub  = filteredSub.sumScanline;
+     sumUp   = filteredUp.sumScanline;
 
-    auto sums = [sumNone, sumSub, sumUp];
-    auto minIndex = sums.front.walkLength.iota.map!(i => transversal(sums,i)).map!(minIndex);
+    int[][] sums   = [sumNone, sumSub, sumUp];
+    int[] minIndex = sums.front.walkLength.iota.map!(idx => transversal(sums,idx)).map!(minIndex).array.to!(int[]);
 
-    foreach(idx, min ; minIndex.array.to!(ubyte[])){
-        switch(min) with(filterTypes){
-            case None:
-                actualData ~= min ~ filteredNone[idx];
-                break;
-            case Sub:
-                actualData ~= min ~ filteredSub[idx];
-                break;
-            case Up:
-                actualData ~= min ~ filteredUp[idx];
-                break;
-            case Average:
-                break;
-            case Paeth:
-                break;
-            default:
-                break; 
-        } 
+    with(filterTypes){
+        foreach(idx, min ; minIndex.array.to!(ubyte[])){
+            switch(min){
+                case None:
+                    actualData ~= min ~ filteredNone[idx];
+                    break;
+                case Sub:
+                    actualData ~= min ~ filteredSub[idx];
+                    break;
+                case Up:
+                    actualData ~= min ~ filteredUp[idx];
+                    break;
+                case Average:
+                    break;
+                case Paeth:
+                    break;
+                default:
+                    break; 
+            } 
+        }
     }
 
     /* end comparison with none, sub, up, ave and paeth*/
