@@ -149,7 +149,7 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
      sumUp   = filteredUp.sumScanline;
 
     int[][] sums   = [sumNone, sumSub, sumUp];
-    int[] minIndex = sums.front.walkLength.iota.map!(idx => transversal(sums,idx)).map!(minIndex).array.to!(int[]);
+    int[] minIndex = sums.joinVertical.map!(minIndex).array.to!(int[]);
 
     with(filterTypes){
         foreach(idx, min ; minIndex.array.to!(ubyte[])){

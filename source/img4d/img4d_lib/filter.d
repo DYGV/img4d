@@ -26,10 +26,8 @@ pure ubyte[][] sub(ubyte[][] src){
 pure ubyte[][] up(ubyte[][] src, ref Header header){
     if(src.empty) return src;
 
-    auto diff = src.front.walkLength.iota
-                  .map!(i => transversal(src, i).array).array
-                  .neighborDifference.chunks(header.height).array;
-    return src.front ~ *cast(ubyte[][]*)&diff;
+    return src.joinVertical
+              .neighborDifference.joinVertical;
 }
 
   /**
@@ -50,6 +48,11 @@ pure ubyte[][] neighborDifference(ubyte[][] src){
                   )
              .array.to!(ubyte[]));
     return difference;
+}
+
+
+pure ubyte[][] joinVertical(T)(T[][] src){
+    return cast(ubyte[][])(src.front.walkLength.iota.map!(i => transversal(src,i).array).array);
 }
 
 auto up(){}
