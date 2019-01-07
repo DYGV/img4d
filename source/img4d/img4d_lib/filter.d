@@ -9,7 +9,7 @@ import std.stdio,
 import std.range.primitives;
 import std.algorithm.mutation;
 
-pure auto inverseSub(ref ubyte[][] scanline){
+pure ref auto inverseSub(ref ubyte[][] scanline){
     return [scanline.front.walkLength.iota
             .map!(i => transversal(scanline, i).chain
             .cumulativeFold!((a,b) => 
@@ -18,12 +18,13 @@ pure auto inverseSub(ref ubyte[][] scanline){
                 : a + b - 256))].join.transposed;
 }
 
-pure ubyte[][] sub(ubyte[][] src){
+pure ubyte[][] sub(ref ubyte[][] src){
     if(src.empty) return src;
+
     return src.neighborDifference;
 }
 
-pure ubyte[][] up(ubyte[][] src, ref Header header){
+pure ubyte[][] up(ref ubyte[][] src){
     if(src.empty) return src;
 
     return src.joinVertical
@@ -51,8 +52,8 @@ pure ubyte[][] neighborDifference(ubyte[][] src){
 }
 
 
-pure ubyte[][] joinVertical(T)(T[][] src){
-    return cast(ubyte[][])(src.front.walkLength.iota.map!(i => transversal(src,i).array).array);
+pure ref auto joinVertical(T)(T[][] src){
+    return (src.front.walkLength.iota.map!(i => transversal(src,i).array).array);
 }
 
 auto up(){}

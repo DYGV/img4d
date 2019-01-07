@@ -126,7 +126,7 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
             if(colorType == grayscale || colorType == grayscaleA) {
                 filteredNone = pix.grayscale;
                 filteredSub = pix.grayscale.sub;
-                filteredUp = pix.grayscale.up(header);
+                filteredUp = pix.grayscale.up;
             }else{
                 filteredNone = pix.Pixel;
 
@@ -136,10 +136,10 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
                 A = tmpA.sub;
                 filteredSub = Pixel(R, G, B, A).Pixel;
                 
-                R = tmpR.up(header);
-                G = tmpG.up(header);
-                B = tmpB.up(header);
-                A = tmpA.up(header);
+                R = tmpR.up;
+                G = tmpG.up;
+                B = tmpB.up;
+                A = tmpA.up;
                 filteredUp = Pixel(R, G, B, A).Pixel; 
             } 
         }

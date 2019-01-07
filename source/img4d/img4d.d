@@ -104,12 +104,12 @@ struct Pixel{
         pure void A(ref ubyte[][] A){ _A = A; }
         pure void grayscale(ref ubyte[][] grayscale){ _grayscale = grayscale; }
 
-        pure ubyte[][] R(){ return _R; }
-        pure ubyte[][] G(){ return _G; }
-        pure ubyte[][] B(){ return _B; }
-        pure ubyte[][] A(){ return _A; }
+        pure ref ubyte[][] R(){ return _R; }
+        pure ref ubyte[][] G(){ return _G; }
+        pure ref ubyte[][] B(){ return _B; }
+        pure ref ubyte[][] A(){ return _A; }
 
-        pure ubyte[][] Pixel(){
+        pure ref ubyte[][] Pixel(){
             if(!_RGB.empty) return _RGB;
             
             if(A.empty){
@@ -130,7 +130,7 @@ struct Pixel{
             return _RGB;
         }
 
-        pure ubyte[][] grayscale(){ return _grayscale; }
+        pure ref ubyte[][] grayscale(){ return _grayscale; }
     }
 
     private:
