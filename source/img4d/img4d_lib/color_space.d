@@ -13,7 +13,7 @@ Pixel toGrayscale(T)(ref T[][][] color){
         color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
     
     double[][] temp;
-    ubyte[][]gray;
+    ubyte[][] gray;
     double[] arr = [0.3, 0.59, 0.11];
 
     color.each!(a=> a.transposed

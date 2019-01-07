@@ -59,14 +59,14 @@ struct Header {
         pure void interlaceMethod(ref int interlaceMethod){ _interlaceMethod = interlaceMethod; }
         pure void crc(ref ubyte[] crc){_crc = crc;}
 
-        pure int width(){ return _width; }
-        pure int height(){ return _height; }
-        pure int bitDepth(){ return  _bitDepth; }
-        pure int colorType(){ return  _colorType; }
-        pure int compressionMethod (){ return  _compressionMethod; }
-        pure int filterMethod(){ return  _filterMethod; }
-        pure int interlaceMethod(){ return  _interlaceMethod; }
-        pure ubyte[] crc(){ return  _crc; }
+        pure ref int width(){ return _width; }
+        pure ref int height(){ return _height; }
+        pure ref int bitDepth(){ return  _bitDepth; }
+        pure ref int colorType(){ return  _colorType; }
+        pure ref int compressionMethod (){ return  _compressionMethod; }
+        pure ref int filterMethod(){ return  _filterMethod; }
+        pure ref int interlaceMethod(){ return  _interlaceMethod; }
+        pure ref ubyte[] crc(){ return  _crc; }
     }
 
     private:
@@ -152,7 +152,7 @@ Pixel decode(ref Header header, string filename){
     }
     
     data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
-    rgb.each!(a => joinRGB ~= a.front.walkLength.iota.map!(i => transversal(a, i).array).array);
+    rgb.each!(a => joinRGB ~= a.joinVertical);
     auto pix = joinRGB.transposed;
     ubyte[][] R = pix[0].array.to!(ubyte[][]);
     ubyte[][] G = pix[1].array.to!(ubyte[][]);
