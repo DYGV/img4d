@@ -28,7 +28,7 @@ int main(){
     
     // convert to grayscale
     Pixel grayPix = actualData.rgbToGrayscale;
-    beforeEncode.colorType = colorType.grayscale;
+    beforeEncode.colorType = colorTypes.grayscale;
     
     // start encode
     ubyte[] encodedData = hdr.encode(grayPix);
