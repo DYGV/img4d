@@ -10,8 +10,7 @@ import std.range.primitives;
 import std.algorithm.mutation;
 
 pure ref auto inverseSub(ref ubyte[][] scanline){
-    return [scanline.front.walkLength.iota
-            .map!(i => transversal(scanline, i).chain
+    return [scanline.joinVertical.map!(
             .cumulativeFold!((a,b) => 
                   a + b < 256
                 ? a + b
@@ -51,9 +50,8 @@ pure ubyte[][] neighborDifference(ubyte[][] src){
     return difference;
 }
 
-
 pure ref auto joinVertical(T)(T[][] src){
-    return (src.front.walkLength.iota.map!(i => transversal(src,i).array).array);
+    return src.front.walkLength.iota.map!(i => transversal(src,i).array).array;
 }
 
 auto up(){}
