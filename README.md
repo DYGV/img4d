@@ -3,7 +3,7 @@
 [![](https://img.shields.io/github/issues/DYGV/img4d.svg)](https://github.com/DYGV/img4d/issues)
 [![](https://img.shields.io/github/stars/DYGV/img4d.svg)](https://github.com/DYGV/img4d/stargazers)  
 
-PNG images Decoder/Encoder in D language.  
+PNG images Decoder/Encoder for D language.  
 **It's defective implemention and I cannot guarantee the operation**.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
 
@@ -22,16 +22,16 @@ int main(){
     int[][][] actualData;
 
     // start decode
-    Pixel parsedData = hdr.decode("png_img/lena.png");
-    if(parsedData.length == 0) {return 0;}
-    parsedData.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
+    Pixel colorPix = hdr.decode("png_img/lena.png");
+    if(colorPix.length == 0) {return 0;}
+    colorPix.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
     
     // convert to grayscale
     Pixel grayPix = actualData.rgbToGrayscale;
     beforeEncode.colorType = colorType.grayscale;
     
     // start encode
-    ubyte[] encodedData = hdr.encode(grayPix.grayscale);
+    ubyte[] encodedData = hdr.encode(grayPix);
     auto file = File("png_img/encoded_lena.png","w");
     file.rawWrite(encodedData);
     file.flush(); 
