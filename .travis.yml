@@ -3,9 +3,5 @@ language: d
 d:
   - dmd
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install imagemagick
-
 script:
   - dub test --compiler=${DC} 

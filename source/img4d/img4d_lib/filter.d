@@ -26,9 +26,11 @@ pure ubyte[][] sub(ref ubyte[][] src){
 pure ubyte[][] up(ref ubyte[][] src){
     if(src.empty) return src;
 
-    return src.joinVertical
-              .neighborDifference.joinVertical;
+    ubyte[][] diff = src.joinVertical
+                        .neighborDifference;
+    return diff.joinVertical;
 }
+
 
   /**
    *  Calculate difference neighbor pixel.
@@ -50,19 +52,21 @@ pure ubyte[][] neighborDifference(ubyte[][] src){
     return difference;
 }
 
-pure ref auto joinVertical(T)(T[][] src){
+pure ref auto joinVertical(T)(ref T[][] src){
     return src.front.walkLength.iota.map!(i => transversal(src,i).array).array;
 }
 
-auto up(){}
+auto inverseUp(){}
 
 auto ave(){}
+auto inverseAve(){}
 
 auto paeth(){}
+auto inversePaeth(){}
 
 unittest{
-    int[][] filtered = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
-    int[][] before   = [[1, 1, 255], [0, 3, 2], [3, 5, 3]];
+    ubyte[][] filtered = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
+    ubyte[][] unFilter   = [[1, 1, 255], [0, 3, 2], [3, 5, 3]];
         
     /*
        sub filter
@@ -77,6 +81,6 @@ unittest{
          2 +   1 =   3 <  256     =>                    3
      */
     filtered.inverseSub.each!((idx,a) =>
-        assert(a.equal(before[idx])));
+        assert(a.equal(unFilter[idx])));
     "unittest of Sub filter was passed".writeln;
 }

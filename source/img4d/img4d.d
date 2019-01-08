@@ -138,7 +138,7 @@ struct Pixel{
         ubyte[] _tmp;
 }
 
-Pixel decode(ref Header header, string filename){
+ref auto decode(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[][][] rgb, joinRGB;
@@ -199,7 +199,7 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-Pixel rgbToGrayscale(T)(ref T[][][] color){ return color.toGrayscale; }
+ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color){ return header.toGrayscale(color); }
 
 pure auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 

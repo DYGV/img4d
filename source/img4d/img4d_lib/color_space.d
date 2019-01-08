@@ -6,12 +6,15 @@ import img4d,
        std.algorithm,
        std.range;
 
-Pixel toGrayscale(T)(ref T[][][] color){
-    uint input_len = color[0][0].length.to!uint; 
-    if (input_len != 3 && input_len != 4) throw new Exception("invalid format.");
-    if (input_len == 4)
+ref auto toGrayscale(T)(ref Header header, ref T[][][] color){
+    with(header){
+        with(colorTypes){
+        if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
+        if (colorType == trueColorA)
         color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
-    
+        }
+    }
+
     double[][] temp;
     ubyte[][] gray;
     double[] arr = [0.3, 0.59, 0.11];
@@ -26,7 +29,7 @@ Pixel toGrayscale(T)(ref T[][][] color){
     temp.chunks(3)
           .map!(v => v.transposed)
           .each!(h => gray ~= h.map!(n => n.sum).array.to!(ubyte[]).array);
-    Pixel pix = Pixel(gray);
-    return pix;
+
+    return Pixel(gray);
 }
 
