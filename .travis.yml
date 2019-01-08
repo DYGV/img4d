@@ -8,4 +8,4 @@ before_install:
   - sudo apt-get install imagemagick
 
 script:
-  - dub run
+  - dub test --compiler=${DC} 
