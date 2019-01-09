@@ -49,10 +49,44 @@ Header readIHDR(ubyte[] header){
     crcCheck(IHDR.crc, chunk);
     return IHDR;
 }
+unittest{
+    ubyte[21] headers =['I', 'H', 'D', 'R', // chunk type
+                        0, 0, 0, 5,         // height
+                        0, 0, 0, 5,         // width
+                        8,                  // bitDepth
+                        2,                  // colorType
+                        0,                  // compressionMethod
+                        0,                  // filterMethod
+                        0,                  // interlaceMethod
+                        2, 13, 177, 178];   // calculated crc
 
+    Header hdr = headers.readIHDR;
+    
+    assert(hdr.height             == headers[4 .. 8].byteToInt);
+    assert(hdr.width              == headers[8 .. 12].byteToInt);
+    assert(hdr.bitDepth           == headers[12]);
+    assert(hdr.colorType          == headers[13]);
+    assert(hdr.compressionMethod  == headers[14]);
+    assert(hdr.filterMethod       == headers[15]);
+    assert(hdr.interlaceMethod    == headers[16]);
+}
+
+
+
+  /**
+   *  convert from the given endianness 
+   *  to the native endianness
+   */
 int byteToInt(ubyte[] data){ return data.peek!int(); }
 
+
+
+  /**
+   *  Cast array to string
+   */
 string byteToString(T)(T[] data){ return cast(string)data; }
+
+
 
 ubyte[] readIDAT(ubyte[] data){
     version(none){
@@ -63,12 +97,16 @@ ubyte[] readIDAT(ubyte[] data){
     return data[4 .. $-4];
 }
 
+
+
 void crcCheck(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
     if (crc != chunk.crc32Of){
           throw new Exception("invalid");
     }
 }
+
+
 
 int paethPredictor(int left, int upper, int upperLeft){
     int paeth = left + upper - upperLeft;
@@ -82,7 +120,11 @@ int paethPredictor(int left, int upper, int upperLeft){
     return upperLeft;
 }
 
+
+
 auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
+
+
 
 ubyte[][] inverseFiltering(ref ubyte[][] data){
     ubyte[][][] rgb;
@@ -150,7 +192,9 @@ ubyte[][] inverseFiltering(ref ubyte[][] data){
     }
     return actualData;
 }
- 
+
+
+
 ubyte[][] parse(ref Header header, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;

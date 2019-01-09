@@ -1,5 +1,5 @@
 module img4d_lib.encode;
-import img4d,
+import img4d,img4d_lib.decode,
        img4d_lib.filter;
 import std.stdio,
        std.array,
