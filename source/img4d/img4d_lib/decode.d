@@ -78,14 +78,20 @@ unittest{
    *  to the native endianness
    */
 int byteToInt(ubyte[] data){ return data.peek!int(); }
-
+unittest{
+    ubyte[] ubyteArray = [0,0,0,5];
+    assert(ubyteArray.byteToInt == 5);
+}
 
 
   /**
    *  Cast array to string
    */
 string byteToString(T)(T[] data){ return cast(string)data; }
-
+unittest{
+    ubyte[] hello = ['H', 'E', 'L', 'L', 'O'];
+    assert(hello.byteToString == "HELLO");
+}
 
 
 ubyte[] readIDAT(ubyte[] data){
@@ -123,7 +129,10 @@ int paethPredictor(int left, int upper, int upperLeft){
 
 
 auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
-
+unittest{
+    assert(100.normalizePixelValue == 100); // 100 < 256 => 100 
+    assert(300.normalizePixelValue == 44);  // 300 > 256 => 300 - 256 = 44
+}
 
 
 ubyte[][] inverseFiltering(ref ubyte[][] data){
