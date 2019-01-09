@@ -1,7 +1,4 @@
-# img4d   [![Status](https://travis-ci.org/DYGV/img4d.svg?branch=master)](https://travis-ci.org/DYGV/img4d)  
-[![](https://img.shields.io/github/license/DYGV/img4d.svg)](https://github.com/DYGV/img4d/blob/master/LICENSE)
-[![](https://img.shields.io/github/issues/DYGV/img4d.svg)](https://github.com/DYGV/img4d/issues)
-[![](https://img.shields.io/github/stars/DYGV/img4d.svg)](https://github.com/DYGV/img4d/stargazers)  
+# img4d [![Status](https://travis-ci.org/DYGV/img4d.svg?branch=master)](https://travis-ci.org/DYGV/img4d)[![Status](https://codecov.io/gh/DYGV/img4d/branch/master/graph/badge.svg)](https://codecov.io/gh/DYGV/img4d)  
 
 PNG images Decoder/Encoder for D language.  
 **It's defective implemention and I cannot guarantee the operation**.  
