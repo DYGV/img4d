@@ -99,7 +99,7 @@ ubyte[][] inverseFiltering(ref ubyte[][] data){
 
         switch(filters[idx]) with(filterTypes){
             case None:
-                scanline.each!(a => a.each!(b => temp ~= b));
+                temp = scanline[0];
             	actualData ~= [temp.array];
                 
             	break;
@@ -216,4 +216,3 @@ ubyte[][] parse(ref Header header, string filename){
     actualData = uncChunks.inverseFiltering;
     return actualData; 
 }
-

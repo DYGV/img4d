@@ -90,13 +90,24 @@ pure auto makeCrc(in ubyte[] data){
     data.crc32Of.each!((idx,a) => crc[3-idx] = a);
     return crc;
 }
+
+
+
   /**
    *  Cast to int[]
    *  and Calculate sum every horizontal line.
    */
 auto sumScanline(ubyte[][] src){
-   return cast(int[])(src.map!(a => a.sum).array);
+    return cast(int[])(src.map!(a => a.sum).array);
 }
+unittest{
+    ubyte[][] src = [[1, 2, 3], [4, 5, 6]];
+    // [1+2+3. 4+5+6] == [6, 15]
+    ubyte[] sum   = [6, 15];
+    assert(src.sumScanline.equal(sum));
+}
+
+
 
   /**
    * Choose optimal filter
@@ -172,7 +183,6 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
             } 
         }
     }
-
     /* end comparison with none, sub, up, ave and paeth*/
     return actualData;
 }

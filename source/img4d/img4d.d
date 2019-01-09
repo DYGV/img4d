@@ -118,6 +118,7 @@ struct Pixel{
                           _tmp ~= [_R[idx][edx], _G[idx][edx], _B[idx][edx]]
                               )
                         );
+
                 _RGB = _tmp.chunks(_R[0].length*3).array;
             }else{
                 _R.each!((idx,a) => 
@@ -167,7 +168,7 @@ ref auto decode(ref Header header, string filename){
     return pixel;
 }
 
-ubyte[] encode(ref Header header,ref Pixel pix){
+ubyte[] encode(ref Header header, ref Pixel pix){
     auto data = header.makeIHDR ~ pix.makeIDAT(header) ~ makeIEND;
     return data;
 }
