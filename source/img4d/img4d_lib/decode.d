@@ -49,27 +49,6 @@ Header readIHDR(ubyte[] header){
     crcCheck(IHDR.crc, chunk);
     return IHDR;
 }
-unittest{
-    ubyte[21] headers =['I', 'H', 'D', 'R', // chunk type
-                        0, 0, 0, 5,         // height
-                        0, 0, 0, 5,         // width
-                        8,                  // bitDepth
-                        2,                  // colorType
-                        0,                  // compressionMethod
-                        0,                  // filterMethod
-                        0,                  // interlaceMethod
-                        2, 13, 177, 178];   // calculated crc
-
-    Header hdr = headers.readIHDR;
-    
-    assert(hdr.height             == headers[4 .. 8].byteToInt);
-    assert(hdr.width              == headers[8 .. 12].byteToInt);
-    assert(hdr.bitDepth           == headers[12]);
-    assert(hdr.colorType          == headers[13]);
-    assert(hdr.compressionMethod  == headers[14]);
-    assert(hdr.filterMethod       == headers[15]);
-    assert(hdr.interlaceMethod    == headers[16]);
-}
 
 
 
@@ -78,20 +57,12 @@ unittest{
    *  to the native endianness
    */
 int byteToInt(ubyte[] data){ return data.peek!int(); }
-unittest{
-    ubyte[] ubyteArray = [0,0,0,5];
-    assert(ubyteArray.byteToInt == 5);
-}
 
 
   /**
    *  Cast array to string
    */
 string byteToString(T)(T[] data){ return cast(string)data; }
-unittest{
-    ubyte[] hello = ['H', 'E', 'L', 'L', 'O'];
-    assert(hello.byteToString == "HELLO");
-}
 
 
 ubyte[] readIDAT(ubyte[] data){
@@ -112,12 +83,6 @@ bool crcCheck(ubyte[] crc, in ubyte[] chunk){
     }
     return true;
 }
-unittest{
-    ubyte[] crc = [2, 13, 177, 178];
-    ubyte[] data = [0x49, 0x48, 0x44, 0x52, 0x0, 0x0, 0x0, 0x5, 
-                  0x0, 0x0, 0x0, 0x5, 0x8, 0x2, 0x0, 0x0, 0x0];
-    assert(crc.crcCheck(data));
-}
 
 
 
@@ -136,10 +101,6 @@ int paethPredictor(int left, int upper, int upperLeft){
 
 
 auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
-unittest{
-    assert(100.normalizePixelValue == 100); // 100 < 256 => 100 
-    assert(300.normalizePixelValue == 44);  // 300 > 256 => 300 - 256 = 44
-}
 
 
 ubyte[][] inverseFiltering(ref ubyte[][] data){

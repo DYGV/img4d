@@ -70,7 +70,6 @@ ubyte[] makeIDAT(ref Pixel pix,ref Header header){
     return IDAT;
 }
 
-
 pure ubyte[] makeAncillary(){
     throw new Exception("Not implemented.");
 }
@@ -92,8 +91,6 @@ pure auto makeCrc(in ubyte[] data){
     return crc;
 }
 
-
-
   /**
    *  Cast to int[]
    *  and Calculate sum every horizontal line.
@@ -101,14 +98,6 @@ pure auto makeCrc(in ubyte[] data){
 auto sumScanline(ubyte[][] src){
     return cast(int[])(src.map!(a => a.sum).array);
 }
-unittest{
-    ubyte[][] src = [[1, 2, 3], [4, 5, 6]];
-    // [1+2+3. 4+5+6] == [6, 15]
-    ubyte[] sum   = [6, 15];
-    assert(src.sumScanline.equal(sum));
-}
-
-
 
   /**
    * Choose optimal filter
@@ -187,52 +176,4 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
     /* end comparison with none, sub, up, ave and paeth*/
     return actualData;
 }
-unittest{
-    ubyte[21] headers =['I', 'H', 'D', 'R', // chunk type
-                        0, 0, 0, 5,         // height
-                        0, 0, 0, 5,         // width
-                        8,                  // bitDepth
-                        0,                  // colorType
-                        0,                  // compressionMethod
-                        0,                  // filterMethod
-                        0,                  // interlaceMethod
-                        168, 4, 121, 57];   // calculated crc
 
-    Header hdr = headers.readIHDR;
-    ubyte[][]  data = [[0, 0, 0, 0, 0],
-                      [1, 2, 3, 4, 5],
-                      [0, 100, 0, 100, 0],
-                      [0, 100, 0, 100, 0],
-                      [1, 0, 1, 0, 1]];
-    Pixel pix = Pixel(data);
-    assert(hdr.chooseFilterType(pix) == 
-            [[0, 0, 0, 0, 0, 0], 
-            [1, 1, 1, 1, 1, 1], 
-            [0, 0, 100, 0, 100, 0], 
-            [2, 0, 0, 0, 0, 0], 
-            [0, 1, 0, 1, 0, 1]]);
-}
-unittest{
-    ubyte[] headers =['I', 'H', 'D', 'R', // chunk type
-                        0, 0, 0, 5,         // height
-                        0, 0, 0, 2,         // width
-                        8,                  // bitDepth
-                        2,                  // colorType
-                        0,                  // compressionMethod
-                        0,                  // filterMethod
-                        0,                  // interlaceMethod
-                        31,8,129,10];
-    Header hdr = headers.readIHDR;
-    ubyte[][]  data = [[0, 0, 0, 0, 0, 0],
-                      [1, 2, 3, 4, 5, 6],
-                      [0, 100, 0, 100, 0, 100],
-                      [0, 100, 0, 100, 0,100],
-                      [1, 0, 1, 0, 1,0]];
-    Pixel pix = Pixel(data, data, data);
-    assert(hdr.chooseFilterType(pix) == [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 0, 0, 100, 100, 100, 0, 0, 0, 100, 100, 100, 0, 0, 0, 100, 100, 100],
-        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0]]);
-
-}
