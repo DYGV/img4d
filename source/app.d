@@ -2,7 +2,8 @@ import img4d;
 import std.stdio,
        std.range,
        std.algorithm.iteration,
-       std.process;
+       std.process,
+       img4d_lib.filter;
 
 int main(){
     Header beforeEncode;
@@ -87,7 +88,7 @@ int main(){
     // auto median = toBinarizeElucidate(binAdaptive, "median");
     // auto medianFilterFile = File("../png_img/median_filter_lena.txt","w");
     // median.each!(a => medianFilterFile.writeln(a));
-    
+
     return 0;
 }
 

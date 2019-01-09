@@ -105,11 +105,18 @@ ubyte[] readIDAT(ubyte[] data){
 
 
 
-void crcCheck(ubyte[] crc, in ubyte[] chunk){
+bool crcCheck(ubyte[] crc, in ubyte[] chunk){
     reverse(crc[]);
     if (crc != chunk.crc32Of){
           throw new Exception("invalid");
     }
+    return true;
+}
+unittest{
+    ubyte[] crc = [2, 13, 177, 178];
+    ubyte[] data = [0x49, 0x48, 0x44, 0x52, 0x0, 0x0, 0x0, 0x5, 
+                  0x0, 0x0, 0x0, 0x5, 0x8, 0x2, 0x0, 0x0, 0x0];
+    assert(crc.crcCheck(data));
 }
 
 
