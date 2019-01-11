@@ -12,9 +12,11 @@ import std.stdio,
        std.algorithm,
        std.range,
        std.math,
+       std.string,
        std.range.primitives,
        std.algorithm.mutation,
-       std.file : exists;
+       std.file,
+       std.algorithm.iteration;
 
 
 
@@ -217,3 +219,15 @@ unittest{
 
 }
 
+
+
+/* parse */
+unittest{
+    Header hdr;
+
+    ubyte[][] colorPix = hdr.parse("png_img/lena.png");
+    string origin = readText("png_img/rgb_lena.txt");
+
+    assert(origin ==  colorPix.join.map!(a => a.to!(string)).join);
+
+}
