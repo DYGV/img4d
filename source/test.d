@@ -229,5 +229,16 @@ unittest{
     string origin = readText("png_img/rgb_lena.txt");
 
     assert(origin ==  colorPix.join.map!(a => a.to!(string)).join);
+}
 
+
+
+/* decode */
+unittest{
+    Header hdr;
+
+    Pixel colorPix = hdr.decode("png_img/lena.png");
+    string origin = readText("png_img/rgb_lena.txt");
+
+    assert(origin ==  colorPix.Pixel.join.map!(a => a.to!(string)).join);
 }
