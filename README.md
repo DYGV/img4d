@@ -4,7 +4,7 @@ PNG images Decoder/Encoder for D language.
 **It's defective implemention and I cannot guarantee the operation**.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
 
-**Please feel free to throw PR or issues.**  
+**Please feel free to throw PRs or issues.**  
 
 # Examples  
 ## decode, convert to grayscale and encode
@@ -37,6 +37,8 @@ int main(){
 }
 ```    
 # Package  
+ [img4d](https://github.com/DYGV/img4d/blob/master/README.md#img4d)  
+ 
  [img4d_lib.decode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdecode)  
  
  [img4d_lib.encode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libencode)  
@@ -46,6 +48,15 @@ int main(){
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
  
  
+## img4d
+-  **ref auto decode(ref Header header, string filename)**  
+-  **ubyte[] encode(ref Header header, ref Pixel pix)**  
+-  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
+-  **ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color)**  
+-  **pure auto toBinary(T)(ref T[][] gray, T threshold=127)**  
+-  **pure auto toBinary(T)(T[][] array)**  
+-  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
+-  **pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)**  
   
 ## img4d_lib.decode  
 -  **Header readIHDR(ubyte[] header)**  
@@ -77,7 +88,8 @@ Return the value which are subtracted 256 if it exceeds 256
 - **int[][] inverseFiltering(string op, string inequality, string inverseOp)(ubyte[][] data)**  
 - **int[][] parse(ref Header info, string filename)**  
 ## img4d_lib.encode  
-- **ubyte[] makeIHDR(in Header info)**  
+
+-  **ubyte[] makeIHDR(in Header info)**  
 Return IHDR which required for encoding  
    - ***Params:***  
 Header info : arranged Header  
@@ -92,22 +104,36 @@ Not implemented
 Return IEND which required for encoding  
 - **auto makeCrc(in ubyte[] data)**  
 Calculate and Return CRC value  
+
+- **auto sumScanline(ubyte[][] src)** 
+- **auto chooseFilterType(ref Header header, ref Pixel pix)**
+
+
 ## img4d_lib.filter  
-- **auto calculate(string op, T)(T lhs, T rhs)**  
-Calculate and Return using template arguments and mixin  
-- **auto sub(string op, string inequality, string inverseOp, T)(T[][] scanline)**  
-Calculate and Return Sub filter(Difference from left pixel)  
-- **auto up()**  
+- **pure ref auto inverseSub(ref ubyte[][] scanline)**  
+- **pure ubyte[][] sub(ref ubyte[][] src)**  
+Calculate and Return Sub filter(Difference from left pixel)
+- **pure ubyte[][] up(ref ubyte[][] src)**  
+- **pure ubyte[][] neighborDifference(ubyte[][] src)**  
+- **pure ref auto joinVertical(T)(ref T[][] src)**
+
+
+- **auto inverseUp()**  
 Not implemented  
 - **auto ave()**  
 Not implemented  
-- **auto paeth()**
+- **auto inverseAve()**  
+Not implemented  
+- **auto paeth()**  
+Not implemented  
+- **auto inversePaeth()**  
 Not implemented  
 ## img4d_lib.color_space  
-- **double[][] toGrayscale(T)(ref T[][][] color)**  
+- **ref auto toGrayscale(T)(ref T[][][] color)**  
 Convert to grayscale by weighting  
 ## img4d_lib.edge  
 - **auto differential(T)(T[][] array, T[][] filter)**  
 - **auto gradient(T)(T[][] Gr, T[][] Gth)**  
 - **auto hysteresis(T)(T[][] src, int t_min, int t_max)**  
+
 
