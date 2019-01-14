@@ -48,7 +48,7 @@ int main(){
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
  
  
-## img4d
+ ## img4d
 -  **ref auto decode(ref Header header, string filename)**  
 -  **ubyte[] encode(ref Header header, ref Pixel pix)**  
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
@@ -105,9 +105,10 @@ Return IEND which required for encoding
 - **auto makeCrc(in ubyte[] data)**  
 Calculate and Return CRC value  
 
-- **auto sumScanline(ubyte[][] src)** 
-- **auto chooseFilterType(ref Header header, ref Pixel pix)**
-
+- **auto sumScanline(ubyte[][] src)**  
+Cast to int[] and Calculate sum every horizontal line  
+- **auto chooseFilterType(ref Header header, ref Pixel pix)**  
+Choose optimal filter and Return filtered pixel
 
 ## img4d_lib.filter  
 - **pure ref auto inverseSub(ref ubyte[][] scanline)**  
@@ -115,8 +116,9 @@ Calculate and Return CRC value
 Calculate and Return Sub filter(Difference from left pixel)
 - **pure ubyte[][] up(ref ubyte[][] src)**  
 - **pure ubyte[][] neighborDifference(ubyte[][] src)**  
-- **pure ref auto joinVertical(T)(ref T[][] src)**
-
+Calculate difference neighbor pixel
+- **pure ref auto joinVertical(T)(ref T[][] src)**  
+Make array vertical
 
 - **auto inverseUp()**  
 Not implemented  
@@ -135,5 +137,5 @@ Convert to grayscale by weighting
 - **auto differential(T)(T[][] array, T[][] filter)**  
 - **auto gradient(T)(T[][] Gr, T[][] Gth)**  
 - **auto hysteresis(T)(T[][] src, int t_min, int t_max)**  
-
+ 
 
