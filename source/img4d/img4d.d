@@ -206,6 +206,8 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
 
 ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color){ return header.toGrayscale(color); }
 
+ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color, bool fastMode){ return header.toGrayscale(color, fastMode); }
+
 pure auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 
 

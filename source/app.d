@@ -21,7 +21,7 @@ int main(){
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
    
-    Pixel grayPix = beforeEncode.rgbToGrayscale(actualData);
+    Pixel grayPix = beforeEncode.rgbToGrayscale(actualData, true);
     beforeEncode.colorType = colorTypes.grayscale;
  
     /*  Canny Edge Detection (Defective State) 
