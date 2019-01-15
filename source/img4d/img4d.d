@@ -204,9 +204,20 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color){ return header.toGrayscale(color); }
-
-ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color, bool fastMode){ return header.toGrayscale(color, fastMode); }
+ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color, bool fastMode = false){
+   with(header){
+        with(colorTypes){
+        if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
+        if (colorType == trueColorA)
+        color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
+        }
+    }
+    if(fastMode){
+        return color.toGrayscale(fastMode); 
+    }else{
+        return color.toGrayscale; 
+    }
+}
 
 pure auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 

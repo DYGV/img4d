@@ -6,15 +6,8 @@ import img4d,
        std.algorithm,
        std.range;
 
-ref auto toGrayscale(T)(ref Header header, ref T[][][] color){
-    with(header){
-        with(colorTypes){
-        if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
-        if (colorType == trueColorA)
-        color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
-        }
-    }
-
+ref auto toGrayscale(T)(ref T[][][] color){
+   
     double[][] temp;
     ubyte[][] gray;
     double[] arr = [0.3, 0.59, 0.11];
@@ -33,15 +26,7 @@ ref auto toGrayscale(T)(ref Header header, ref T[][][] color){
     return Pixel(gray);
 }
 
-ref auto toGrayscale(T)(ref Header header, ref T[][][] color, bool fastMode){
-    with(header){
-        with(colorTypes){
-        if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
-        if (colorType == trueColorA)
-        color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
-        }
-    }
-
+ref auto toGrayscale(T)(ref T[][][] color, bool fastMode){
     ubyte[][] gray = color.map!(a => a.map!(sum).map!(a => a/3).array).array.to!(ubyte[][]);
     return Pixel(gray);
 }
