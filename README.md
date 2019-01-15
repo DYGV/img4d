@@ -19,7 +19,7 @@ int main(){
     int[][][] actualData;
 
     // start decode
-    Pixel colorPix = hdr.decode("png_img/lena.png");
+    Pixel colorPix = hdr.load("png_img/lena.png");
     if(colorPix.length == 0) {return 0;}
     colorPix.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
     
@@ -28,11 +28,8 @@ int main(){
     beforeEncode.colorType = colorTypes.grayscale;
     
     // start encode
-    ubyte[] encodedData = hdr.encode(grayPix);
-    auto file = File("png_img/encoded_lena.png","w");
-    file.rawWrite(encodedData);
-    file.flush(); 
-    
+    bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
+
     return 0;
 }
 ```    
