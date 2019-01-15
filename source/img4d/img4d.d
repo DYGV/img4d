@@ -113,20 +113,9 @@ struct Pixel{
             if(!_RGB.empty) return _RGB;
             
             if(A.empty){
-                _R.each!((idx,a) => 
-                      a.each!((edx,b) => 
-                          _tmp ~= [_R[idx][edx], _G[idx][edx], _B[idx][edx]]
-                              )
-                        );
-
-                _RGB = _tmp.chunks(_R[0].length*3).array;
+                _RGB = [_R.join, _G.join, _B.join].transposed.join.chunks(_R[0].length*3).array;
             }else{
-                _R.each!((idx,a) => 
-                      a.each!((edx,b) => 
-                          _tmp ~= [_R[idx][edx], _G[idx][edx], _B[idx][edx], _A[idx][edx]]
-                              )
-                        );
-                _RGB = _tmp.chunks(_R[0].length*4).array;
+                _RGB = [_R.join, _G.join, _B.join, _A.join].transposed.join.chunks(_R[0].length*4).array;
             }
             return _RGB;
         }

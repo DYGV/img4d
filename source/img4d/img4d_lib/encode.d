@@ -156,6 +156,7 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
 
     with(filterTypes){
         foreach(idx, min ; minIndex.array.to!(ubyte[]).parallel()){
+
             switch(min){
                 case None:
                     actualData[idx] = min ~ filteredNone[idx];
