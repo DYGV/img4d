@@ -17,39 +17,35 @@ pure ref auto inverseSub(ref ubyte[][] scanline){
                 : a + b - 256))].join.transposed;
 }
 
-pure ubyte[][] sub(ref ubyte[][] src){
+pure ref auto sub(ref ubyte[][] src){
     if(src.empty) return src;
 
     return src.neighborDifference;
 }
 
-pure ubyte[][] up(ref ubyte[][] src){
+ref auto up(ref ubyte[][] src){
     if(src.empty) return src;
 
-    ubyte[][] diff = src.joinVertical
-                        .neighborDifference;
-
+    ubyte[][] srcVertical = src.joinVertical;
+    ubyte[][] diff = srcVertical.neighborDifference;
+    
     return diff.joinVertical;
 }
 
   /**
    *  Calculate difference neighbor pixel.
    */
-pure ubyte[][] neighborDifference(ubyte[][] src){
-    ubyte[][] difference;
-    difference.length = src.length;
-    src.each!((idx,a) =>  difference[idx] ~= src[idx].front);
+ref auto neighborDifference(ref ubyte[][] src){
 
-    src.map!(a => a.slide(2))
-         .each!((idx,b) => difference[idx] ~= 
-             b.map!(b=> b.front - b.back)
-             .map!(c =>
-                      c > 0
-                      ? 256 - c 
-                      : c.abs
-                  )
-             .array.to!(ubyte[]));
-    return difference;
+    return src.map!(a => a.slide(2))
+                  .map!(b  => b.front.front ~ 
+                              b.map!(c => c.front - c.back)
+                                          .map!(d =>
+                                                    d > 0
+                                                    ? 256 - d 
+                                                    : d.abs
+                                                ).array.to!(ubyte[])
+                        ).array;
 }
 
   /**
