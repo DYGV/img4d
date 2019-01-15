@@ -23,7 +23,7 @@ pure ref auto sub(ref ubyte[][] src){
     return src.neighborDifference;
 }
 
-ref auto up(ref ubyte[][] src){
+pure ref auto up(ref ubyte[][] src){
     if(src.empty) return src;
 
     ubyte[][] srcVertical = src.joinVertical;
@@ -35,7 +35,7 @@ ref auto up(ref ubyte[][] src){
   /**
    *  Calculate difference neighbor pixel.
    */
-ref auto neighborDifference(ref ubyte[][] src){
+pure ref auto neighborDifference(ref ubyte[][] src){
 
     return src.map!(a => a.slide(2))
                   .map!(b  => b.front.front ~ 
