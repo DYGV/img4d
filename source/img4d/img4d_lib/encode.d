@@ -10,7 +10,7 @@ import std.stdio,
        std.digest.crc,
        std.range,
        std.algorithm;
-
+import std.parallelism : parallel;
 ubyte[] makeIHDR(Header header){
     ubyte depth,
           colorSpaceType,
@@ -151,18 +151,20 @@ auto chooseFilterType(ref Header header, ref Pixel pix){
 
     int[][] sums   = [sumNone, sumSub, sumUp];
     int[] minIndex = sums.joinVertical.map!(minIndex).array.to!(int[]);
+    
+    actualData.length = filteredNone.length;
 
     with(filterTypes){
-        foreach(idx, min ; minIndex.array.to!(ubyte[])){
+        foreach(idx, min ; minIndex.array.to!(ubyte[]).parallel()){
             switch(min){
                 case None:
-                    actualData ~= min ~ filteredNone[idx];
+                    actualData[idx] = min ~ filteredNone[idx];
                     break;
                 case Sub:
-                    actualData ~= min ~ filteredSub[idx];
+                    actualData[idx] = min ~ filteredSub[idx];
                     break;
                 case Up:
-                    actualData ~= min ~ filteredUp[idx];
+                    actualData[idx] = min ~ filteredUp[idx];
                     break;
                 case Average:
                     break;
