@@ -10,7 +10,7 @@ int main(){
     ubyte[][][] actualData;
 
     // start decode
-    Pixel colorPix = beforeEncode.decode("png_img/lena.png");
+    Pixel colorPix = beforeEncode.load("png_img/lena.png");
     if(colorPix.Pixel.length == 0) { return 0; }
     colorPix.Pixel.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);
 
@@ -34,15 +34,12 @@ int main(){
     */
     
     // start encode
-    ubyte[] encodedData = beforeEncode.encode(grayPix);
-    auto file = File("png_img/encoded_lena.png","w");
-    file.rawWrite(encodedData);
-    file.flush(); 
-
+    bool encodedData = beforeEncode.save(grayPix, "png_img/encoded_lena.png");
+   
     //read encoded file
     Header afterEncode;
 
-    auto encodedDataToDecode = afterEncode.decode("png_img/encoded_lena.png");
+    auto encodedDataToDecode = afterEncode.load("png_img/encoded_lena.png");
     writefln("Width  %8d\nHeight  %7d",
           afterEncode.width,
           afterEncode.height);
@@ -59,35 +56,6 @@ int main(){
             diff.writeln;
         }
     }
-
-    // auto rgbFile = File("../png_img/rgb_lena.txt","w");
-    // rgbFile.writeln(actual_data);
-
-  /*
-     covert to grayscale
-   */
-    // auto gray = rgbToGrayscale(actual_data);
-    // auto grayFile = File("../png_img/gray_lena.txt","w");
-    // grayFile.writeln(gray);
-
-  /*
-     convert to binary image by simple thresholding
-   */
-    // auto bin = toBinary(gray);
-    // auto binFile = File("../png_img/bins_simple_lena.txt","w");
-    // binFile.writeln(bin);
-
-  /*
-     convert ot binary image by adaptive threshoding
-   */
-    // auto binAdaptive = toBinarizeElucidate(gray);
-    // auto binAdaptiveFile = File("../png_img/binAdaptive_lena.txt","w");
-    // binAdaptive.each!(a => binAdaptiveFile.writeln(a));
-  
-
-    // auto median = toBinarizeElucidate(binAdaptive, "median");
-    // auto medianFilterFile = File("../png_img/median_filter_lena.txt","w");
-    // median.each!(a => medianFilterFile.writeln(a));
 
     return 0;
 }

@@ -49,8 +49,8 @@ int main(){
  
  
  ## img4d
--  **ref auto decode(ref Header header, string filename)**  
--  **ubyte[] encode(ref Header header, ref Pixel pix)**  
+-  **ref auto load(ref Header header, string filename)**  
+-  **ubyte[] save(ref Header header, ref Pixel pix, string filename)**  
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
 -  **ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color)**  
 -  **pure auto toBinary(T)(ref T[][] gray, T threshold=127)**  

@@ -139,7 +139,7 @@ struct Pixel{
         ubyte[] _tmp;
 }
 
-ref auto decode(ref Header header, string filename){
+ref auto load(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[][][] rgb, joinRGB;
@@ -168,9 +168,13 @@ ref auto decode(ref Header header, string filename){
     return pixel;
 }
 
-ubyte[] encode(ref Header header, ref Pixel pix){
-    auto data = header.makeIHDR ~ pix.makeIDAT(header) ~ makeIEND;
-    return data;
+bool save(ref Header header, ref Pixel pix, string filename){
+    ubyte[] data = header.makeIHDR ~ pix.makeIDAT(header) ~ makeIEND;
+    auto file = File(filename,"w");
+    file.rawWrite(data);
+    file.flush(); 
+
+    return true;
 }
 
 // Canny Edge Detection (Defective)

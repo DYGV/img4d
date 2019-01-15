@@ -237,7 +237,7 @@ unittest{
 unittest{
     Header hdr;
 
-    Pixel colorPix = hdr.decode("png_img/lena.png");
+    Pixel colorPix = hdr.load("png_img/lena.png");
     string origin = readText("png_img/rgb_lena.txt");
 
     assert(origin ==  colorPix.Pixel.join.map!(a => a.to!(string)).join);
