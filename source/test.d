@@ -191,7 +191,6 @@ unittest{
      */
     filtered.inverseSub.each!((idx,a) =>
         assert(a.equal(unFilter[idx])));
-    "unittest of Sub filter was passed".writeln;
 }
 
 
@@ -241,4 +240,20 @@ unittest{
     string origin = readText("png_img/rgb_lena.txt");
 
     assert(origin ==  colorPix.Pixel.join.map!(a => a.to!(string)).join);
+}
+
+
+
+/* makeIEND */
+unittest{
+    assert(makeIEND == [0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130]);
+
+}
+
+
+
+/* makeCrc */
+unittest{
+    ubyte[] data = [73, 69, 78, 68];
+    assert(data.makeCrc == [174, 66, 96, 130]);
 }
