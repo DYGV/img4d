@@ -1,7 +1,6 @@
 # img4d [![Status](https://travis-ci.org/DYGV/img4d.svg?branch=master)](https://travis-ci.org/DYGV/img4d)[![Status](https://codecov.io/gh/DYGV/img4d/branch/master/graph/badge.svg)](https://codecov.io/gh/DYGV/img4d)  
 
 PNG images Decoder/Encoder for D language.  
-**It's defective implemention and I cannot guarantee the operation**.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
 
 **Please feel free to throw PRs or issues.**  
@@ -25,7 +24,7 @@ int main(){
     
     // convert to grayscale
     Pixel grayPix = actualData.rgbToGrayscale;
-    beforeEncode.colorType = colorTypes.grayscale;
+    hdr.colorType = colorTypes.grayscale;
     
     // start encode
     bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
