@@ -102,63 +102,60 @@ int normalizePixelValue(int value){ return value < 256 ? value : value - 256; }
 
 
 ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
-    ubyte[][][] rgb;
-    ubyte[][][] compData;
-    ubyte[] filters;
     ubyte[][] actualData;
-    data.each!(sc => filters ~= sc.front);
-    data.each!(sc => rgb ~= [sc.remove(0).chunks(lengthPerPixel).array]);
+
+    ubyte[] filters = data.map!(sc => sc.front).array;
+    ubyte[][][] rgb = data.map!(a=> a.remove(0).chunks(lengthPerPixel).array).array;
+    
+    actualData.length = filters.length;
 
     foreach(idx, scanline; rgb){
         ubyte[] temp;
-        ubyte[] predictor;
-        ubyte[] actualDataBack;
+        int upIdx = idx -1;
 
         switch(filters[idx]) with(filterTypes){
             case None:
                 temp = scanline[0];
-            	actualData ~= [temp.array];
+            	actualData[idx] = temp;
                 
             	break;
             
             case Sub:
-                actualData ~=  [scanline.inverseSub.join].to!(ubyte[][]); 
+                actualData[idx] =  scanline.inverseSub.join.to!(ubyte[]); 
             	break;
             
             case Up:
-                scanline.each!(a => a.each!(b => temp ~= b));
-                actualData ~= [(temp[] += actualData.back[]).map!(a => a.normalizePixelValue).array].to!(ubyte[][]);
+                temp = scanline.dup.join;
+                actualData[idx] = (temp[] += actualData[upIdx][]).map!(a => a.normalizePixelValue).array.to!(ubyte[]);
 
                 break;
 	    
             case Average:
-                actualDataBack = actualData.back;
-                auto up = actualDataBack.chunks(lengthPerPixel);
-                auto current = scanline.chunks(lengthPerPixel);
-                ubyte[] upPixel = *cast(ubyte[]*)&up;
+                ubyte[][] up = actualData[upIdx].chunks(lengthPerPixel).array;
+                ubyte[][][] current = scanline.chunks(lengthPerPixel).array;
             	scanline.popFront;            		
             	auto sc = scanline.join;
                 up.front.each!((idx,n) =>temp ~= [((n/2) + current.front[0][idx]).normalizePixelValue].to!(ubyte[]));
 
-                upPixel[lengthPerPixel .. $].each!((o,n)=>  
+                up.join[lengthPerPixel .. $].each!((o,n)=>  
                                 temp ~= [(((temp[o] + n)/2) + sc[o]).normalizePixelValue].to!(ubyte[]));
 
-                actualData ~= [temp];
+                actualData[idx] = temp;
                 break;
 
             case Paeth:
                 auto joined = scanline.join;
 
-                actualData.back[0 .. lengthPerPixel]
+                actualData[upIdx][0 .. lengthPerPixel]
                                 .each!((idx,a) => temp ~= [(a + joined[idx]).normalizePixelValue].to!(ubyte[]));
                 
-                actualData.back[lengthPerPixel .. $]
-                              .each!((idx, a) => 
-                              temp ~= [(paethPredictor(temp[idx], a, actualData.back[idx]) 
-                                    + joined[idx + lengthPerPixel])
+                actualData[upIdx][lengthPerPixel .. $]
+                              .each!((i, a) => 
+                              temp ~= [(paethPredictor(temp[i], a, actualData[upIdx][i]) 
+                                    + joined[i + lengthPerPixel])
                               .normalizePixelValue].to!(ubyte[]));
             
-                actualData ~= [temp];
+                actualData[idx] = temp;
                 break;
 
   	    default:
@@ -177,7 +174,7 @@ ref auto ubyte[][] parse(ref Header header, string filename){
 
     if (data.take(sigSize) != [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         throw new Exception("Invalid PNG format.");
-    
+
     int chunkLengthSize = 4;
     int chunkTypeSize   = 4;
     int chunkCrcSize    = 4;

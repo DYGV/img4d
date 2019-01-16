@@ -37,7 +37,7 @@ ref auto ubyte[][] up(ref ubyte[][] src){
    *  Calculate difference neighbor pixel.
    */
 pure 
-ref auto ubyte[][] neighborDifference(ref ubyte[][] src){
+ref auto neighborDifference(ref ubyte[][] src){
 
     return src.map!(a => a.slide(2))
                   .map!(b  => b.front.front ~ 
