@@ -111,7 +111,7 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
 
     foreach(idx, scanline; rgb){
         ubyte[] temp;
-        int upIdx = idx -1;
+        uint upIdx = (idx -1).to!uint;
 
         switch(filters[idx]) with(filterTypes){
             case None:
