@@ -34,12 +34,12 @@ int main(){
     */
     
     // start encode
-    bool encodedData = beforeEncode.save(grayPix, "png_img/encoded_lena.png");
+    bool encodedData = beforeEncode.save(grayPix, "png_img/encoded_lena_1.png");
    
     //read encoded file
     Header afterEncode;
 
-    auto encodedDataToDecode = afterEncode.load("png_img/encoded_lena.png");
+    auto encodedDataToDecode = afterEncode.load("png_img/encoded_lena_1.png");
     writefln("Width  %8d\nHeight  %7d",
           afterEncode.width,
           afterEncode.height);
@@ -47,15 +47,17 @@ int main(){
           afterEncode.bitDepth, 
           afterEncode.colorType);
     
+    afterEncode.save(grayPix, "png_img/encoded_lena_2.png");
+    
     // Verification (compare with original image)
-    version(none){
+    /*version(none){
         executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
         auto diff =  executeShell("cd ../png_img && identify -format \"%[mean]\" diff.png").output;
         if(diff != "0\n"){
             "something is wrong (It doesn't match the original image)".writeln;
             diff.writeln;
         }
-    }
+    }*/
 
     return 0;
 }

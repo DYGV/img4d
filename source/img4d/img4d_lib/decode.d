@@ -180,7 +180,6 @@ ref auto ubyte[][] parse(ref Header header, string filename){
     int chunkCrcSize    = 4;
     int chunkDataSize;
     string chunkType;
-    ubyte[][] actualData;
     ubyte[] uncIDAT;
     const string[] ancillaryChunks = ["tRNS","gAMA","cHRM","sRGB","iCCP","tEXt","zTXt",
                                       "iTXt","bKGD","pHYs","vpAg","sBIT","sPLT","hIST","tIME",
@@ -219,16 +218,7 @@ ref auto ubyte[][] parse(ref Header header, string filename){
         }
     }
     uint numScanline = (uncIDAT.length / header.height).to!uint;
-    auto chunks = uncIDAT.chunks(numScanline).array;
-    ubyte[][] uncChunks = (*cast(ubyte[][]*)&chunks).array;
-    with(header){
-        with(colorTypes){ 
-            if(uncIDAT.empty || colorType == grayscale || colorType == grayscaleA) {
-                return uncChunks;
-            }
-        }
-    }
+    auto uncChunks = uncIDAT.chunks(numScanline).array;
 
-    actualData = uncChunks.inverseFiltering;
-    return actualData; 
+    return  uncChunks.inverseFiltering; 
 }
