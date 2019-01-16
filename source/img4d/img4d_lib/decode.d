@@ -111,7 +111,6 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
 
     foreach(idx, scanline; rgb){
         ubyte[] temp;
-        uint upIdx = (idx -1).to!uint;
 
         switch(filters[idx]) with(filterTypes){
             case None:
@@ -125,12 +124,14 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
             	break;
             
             case Up:
+                uint upIdx = (idx -1).to!uint;
                 temp = scanline.dup.join;
                 actualData[idx] = (temp[] += actualData[upIdx][]).map!(a => a.normalizePixelValue).array.to!(ubyte[]);
 
                 break;
 	    
             case Average:
+                uint upIdx = (idx -1).to!uint;
                 ubyte[][] up = actualData[upIdx].chunks(lengthPerPixel).array;
                 ubyte[][][] current = scanline.chunks(lengthPerPixel).array;
             	scanline.popFront;            		
@@ -144,6 +145,7 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
                 break;
 
             case Paeth:
+                uint upIdx = (idx -1).to!uint;
                 auto joined = scanline.join;
 
                 actualData[upIdx][0 .. lengthPerPixel]
