@@ -6,7 +6,7 @@ import img4d,
        std.algorithm,
        std.range;
 
-ref auto toGrayscale(T)(ref T[][][] color){
+ref auto toGrayscale(ref ubyte[][][] color){
    
     double[][] temp;
     ubyte[][] gray;
@@ -26,7 +26,7 @@ ref auto toGrayscale(T)(ref T[][][] color){
     return Pixel(gray);
 }
 
-ref auto toGrayscale(T)(ref T[][][] color, bool fastMode){
+ref auto toGrayscale(ref ubyte[][][] color, bool fastMode){
     ubyte[][] gray = color.map!(a => a.map!(sum).map!(a => a/3).array).array.to!(ubyte[][]);
     return Pixel(gray);
 }

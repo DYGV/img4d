@@ -190,7 +190,7 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color, bool fastMode = false){
+ref auto rgbToGrayscale(ref Header header, ref ubyte[][][] color, bool fastMode = false){
    with(header){
         with(colorTypes){
         if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");

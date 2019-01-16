@@ -60,7 +60,7 @@ int byteToInt(ubyte[] data){ return data.peek!int(); }
   /**
    *  Cast array to string
    */
-string byteToString(T)(T[] data){ return cast(string)data; }
+string byteToString(ubyte[] data){ return cast(string)data; }
 
 
 ref auto readIDAT(ubyte[] data){
@@ -97,7 +97,7 @@ int paethPredictor(int left, int upper, int upperLeft){
 
 
 
-auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
+int normalizePixelValue(int value){ return value < 256 ? value : value - 256; }
 
 
 ref auto inverseFiltering(ref ubyte[][] data){
