@@ -1,5 +1,5 @@
 module img4d_lib.filter;
-import img4d;
+
 import std.stdio,
        std.array,
        std.conv,
@@ -7,7 +7,8 @@ import std.stdio,
        std.range,
        std.math;
 
-pure ref auto inverseSub(ref ubyte[][] scanline){
+pure 
+ref auto inverseSub(ref ubyte[][] scanline){
     return [scanline.joinVertical.map!(
             .cumulativeFold!((a,b) => 
                   a + b < 256
@@ -15,13 +16,15 @@ pure ref auto inverseSub(ref ubyte[][] scanline){
                 : a + b - 256))].join.transposed;
 }
 
-pure ref auto sub(ref ubyte[][] src){
+pure 
+ref auto ubyte[][] sub(ref ubyte[][] src){
     if(src.empty) return src;
 
     return src.neighborDifference;
 }
 
-pure ref auto up(ref ubyte[][] src){
+pure 
+ref auto ubyte[][] up(ref ubyte[][] src){
     if(src.empty) return src;
 
     ubyte[][] srcVertical = src.joinVertical;
@@ -33,7 +36,8 @@ pure ref auto up(ref ubyte[][] src){
   /**
    *  Calculate difference neighbor pixel.
    */
-pure ref auto neighborDifference(ref ubyte[][] src){
+pure 
+ref auto ubyte[][] neighborDifference(ref ubyte[][] src){
 
     return src.map!(a => a.slide(2))
                   .map!(b  => b.front.front ~ 
@@ -49,7 +53,8 @@ pure ref auto neighborDifference(ref ubyte[][] src){
   /**
    *  To vertical array 
    */
-pure ref auto joinVertical(T)(ref T[][] src){
+pure 
+ref auto T[][] joinVertical(T)(ref T[][] src){
     return src.front.walkLength.iota.map!(i => transversal(src,i).array).array;
 }
 

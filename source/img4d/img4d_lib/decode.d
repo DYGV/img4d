@@ -1,4 +1,5 @@
 module img4d_lib.decode;
+
 import img4d, img4d_lib.filter;
 import std.file : read;
 import std.digest.crc : CRC32, crc32Of;
@@ -11,7 +12,7 @@ import std.stdio,
        std.range,
        std.math;
 
-Header readIHDR(ubyte[] header){
+ref auto Header readIHDR(ubyte[] header){
     if(header.length != 21) throw new Exception("invalid header format");
     ubyte[] chunk = header[0 .. 17];  // Chunk Type + Chunk Data 
     Header IHDR = Header(header[4 .. 8].byteToInt, // width
@@ -63,7 +64,7 @@ int byteToInt(ubyte[] data){ return data.peek!int(); }
 string byteToString(ubyte[] data){ return cast(string)data; }
 
 
-ref auto readIDAT(ubyte[] data){
+ref auto ubyte[] readIDAT(ubyte[] data){
     ubyte[] dataCrc = data[0 .. $-4];
     ubyte[] crc = data[$-4 .. $];
     crcCheck(crc, dataCrc);
@@ -100,7 +101,7 @@ int paethPredictor(int left, int upper, int upperLeft){
 int normalizePixelValue(int value){ return value < 256 ? value : value - 256; }
 
 
-ref auto inverseFiltering(ref ubyte[][] data){
+ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
     ubyte[][][] rgb;
     ubyte[][][] compData;
     ubyte[] filters;
@@ -169,7 +170,7 @@ ref auto inverseFiltering(ref ubyte[][] data){
 
 
 
-ref auto parse(ref Header header, string filename){
+ref auto ubyte[][] parse(ref Header header, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;
     int sigSize   = 8;

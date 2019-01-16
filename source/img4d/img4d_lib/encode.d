@@ -1,4 +1,5 @@
 module img4d_lib.encode;
+
 import img4d,img4d_lib.decode,
        img4d_lib.filter;
 import std.stdio,
@@ -11,7 +12,9 @@ import std.stdio,
        std.range,
        std.algorithm;
 import std.parallelism : parallel;
-ubyte[] makeIHDR(Header header){
+
+pure
+ref auto ubyte[] makeIHDR(Header header){
     ubyte depth,
           colorSpaceType,
           compress,
@@ -40,7 +43,7 @@ ubyte[] makeIHDR(Header header){
     return sig ~ IHDR;
 }
 
-ubyte[] makeIDAT(ref Pixel pix,ref Header header){
+ref auto ubyte[] makeIDAT(ref Pixel pix,ref Header header){
     Compress cmps = new Compress(HeaderFormat.deflate);
     ubyte[] beforeCmpsData, idatData, chunkData, IDAT;
     uint chunkSize;
@@ -70,11 +73,13 @@ ubyte[] makeIDAT(ref Pixel pix,ref Header header){
     return IDAT;
 }
 
-pure ubyte[] makeAncillary(){
+pure 
+ubyte[] makeAncillary(){
     throw new Exception("Not implemented.");
 }
 
-pure ubyte[] makeIEND(){
+pure 
+ubyte[] makeIEND(){
     const ubyte[] chunkIEND = [0x0, 0x0, 0x0, 0x0];
     const ubyte[] chunkType = [0x49, 0x45, 0x4E, 0x44];
     ubyte[] IEND = chunkIEND ~chunkType ~  chunkType.makeCrc;
@@ -85,7 +90,8 @@ pure ubyte[] makeIEND(){
   /**
    *  Calculate from chunk data. 
    */
-pure auto makeCrc(in ubyte[] data){
+pure 
+ref auto makeCrc(in ubyte[] data){
     ubyte[4] crc;
     data.crc32Of.each!((idx,a) => crc[3-idx] = a);
     return crc;
@@ -95,7 +101,8 @@ pure auto makeCrc(in ubyte[] data){
    *  Cast to int[]
    *  and Calculate sum every horizontal line.
    */
-auto sumScanline(ubyte[][] src){
+pure 
+ref auto int[] sumScanline(ref ubyte[][] src){
     return cast(int[])(src.map!(a => a.sum).array);
 }
 
@@ -103,7 +110,7 @@ auto sumScanline(ubyte[][] src){
    * Choose optimal filter
    * and Return filtered pixel.
    */
-auto chooseFilterType(ref Header header, ref Pixel pix){
+ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
     int[] sumNone,
           sumSub,
           sumUp,

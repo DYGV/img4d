@@ -1,4 +1,5 @@
 module img4d.img4d;
+
 import img4d_lib.decode,
        img4d_lib.encode,
        img4d_lib.filter,
@@ -205,7 +206,8 @@ ref auto rgbToGrayscale(ref Header header, ref ubyte[][][] color, bool fastMode 
     }
 }
 
-pure auto toBinary(T)(ref T[][] gray, T threshold=127){
+pure 
+auto toBinary(T)(ref T[][] gray, T threshold=127){
     // Simple thresholding 
 
     T[][] bin;
@@ -213,7 +215,8 @@ pure auto toBinary(T)(ref T[][] gray, T threshold=127){
     return bin;
 }
 
-pure auto toBinary(T)(T[][] array){
+pure 
+auto toBinary(T)(T[][] array){
     uint imageH = array.length;
     uint imageW = array[0].length;
     int vicinityH = 3;
@@ -238,14 +241,16 @@ pure auto toBinary(T)(T[][] array){
     return output;
 }
 
-pure auto differ(T)(ref T[][] origin, ref T[][] target){
+pure 
+auto differ(T)(ref T[][] origin, ref T[][] target){
     T[][] diff;
     origin.each!((idx,a) => diff ~=  (target[idx][] -= a[]).map!(b => abs(b)).array);
 
     return diff;
 }
 
-pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray){
+pure 
+auto mask(T)(ref T[][][] colorTarget, ref T[][] gray){
     T[][] masked;
     masked.length = gray.length;
     gray.each!((idx,a)=> a.each!((edx,b) => masked[idx] ~= b==255 ? colorTarget[idx][edx] : [0, 0, 0]));
