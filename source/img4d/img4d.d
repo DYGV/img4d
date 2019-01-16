@@ -11,9 +11,6 @@ import std.stdio,
        std.conv,
        std.algorithm,
        std.range,
-       std.math,
-       std.range.primitives,
-       std.algorithm.mutation,
        std.file : exists;
 
 int lengthPerPixel;

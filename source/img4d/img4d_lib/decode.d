@@ -8,8 +8,6 @@ import std.stdio,
        std.zlib,
        std.conv,
        std.algorithm,
-       std.range.primitives,
-       std.algorithm.mutation,
        std.range,
        std.math;
 
@@ -65,18 +63,17 @@ int byteToInt(ubyte[] data){ return data.peek!int(); }
 string byteToString(T)(T[] data){ return cast(string)data; }
 
 
-ubyte[] readIDAT(ubyte[] data){
-    version(none){
-        ubyte[] dataCrc = data[0 .. $-4];
-        ubyte[] crc = data[$-4 .. $];
-        crcCheck(crc, dataCrc);
-    }
+ref auto readIDAT(ubyte[] data){
+    ubyte[] dataCrc = data[0 .. $-4];
+    ubyte[] crc = data[$-4 .. $];
+    crcCheck(crc, dataCrc);
+
     return data[4 .. $-4];
 }
 
 
 
-bool crcCheck(ubyte[] crc, in ubyte[] chunk){
+bool crcCheck(ref ubyte[] crc, ref ubyte[] chunk){
     reverse(crc[]);
     if (crc != chunk.crc32Of){
           throw new Exception("invalid");
@@ -103,7 +100,7 @@ int paethPredictor(int left, int upper, int upperLeft){
 auto normalizePixelValue(T)(T value){ return value < 256 ? value : value - 256; }
 
 
-ubyte[][] inverseFiltering(ref ubyte[][] data){
+ref auto inverseFiltering(ref ubyte[][] data){
     ubyte[][][] rgb;
     ubyte[][][] compData;
     ubyte[] filters;
@@ -172,7 +169,7 @@ ubyte[][] inverseFiltering(ref ubyte[][] data){
 
 
 
-ubyte[][] parse(ref Header header, string filename){
+ref auto parse(ref Header header, string filename){
     ubyte[] data = cast(ubyte[])filename.read;
     int idx       = 0;
     int sigSize   = 8;
@@ -207,7 +204,7 @@ ubyte[][] parse(ref Header header, string filename){
             
             case "IDAT":
                 int endIdx = chunkDataSize + chunkCrcSize;
-                ubyte[] idat = data[idx .. idx + endIdx].readIDAT;
+                ubyte[] idat = data[idx .. idx + chunkTypeSize + endIdx].readIDAT;
                 idx += chunkLengthSize + endIdx;
                 uncIDAT ~= cast(ubyte[])uc.uncompress(idat.dup);
                 break;

@@ -6,8 +6,6 @@ import std.stdio,
        std.algorithm,
        std.range,
        std.math;
-import std.range.primitives;
-import std.algorithm.mutation;
 
 pure ref auto inverseSub(ref ubyte[][] scanline){
     return [scanline.joinVertical.map!(
