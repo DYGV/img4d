@@ -110,11 +110,11 @@ struct Pixel{
         pure ref ubyte[][] Pixel(){
             if(!_RGB.empty) return _RGB;
             
-            if(A.empty){
-                _RGB = [_R.join, _G.join, _B.join].transposed.join.chunks(_R[0].length*3).array;
-            }else{
-                _RGB = [_R.join, _G.join, _B.join, _A.join].transposed.join.chunks(_R[0].length*4).array;
-            }
+            _RGB = 
+                (A.empty)
+                    ? [_R.join, _G.join, _B.join].transposed.join.chunks(_R[0].length*3).array
+                    : [_R.join, _G.join, _B.join, _A.join].transposed.join.chunks(_R[0].length*4).array;
+            
             return _RGB;
         }
 
@@ -126,17 +126,29 @@ struct Pixel{
         ubyte[] _tmp;
 }
 
+bool isColorNoneAlpha(int colorType){
+    alias type = colorType;
+    with(colorTypes){
+        return (type == trueColor || type == indexColor) ? true : false;
+    }
+}
+
+bool isGrayscale(int colorType){
+    alias type = colorType;
+    with(colorTypes){
+        return (type == grayscale || type == grayscaleA) ? true : false;
+    }
+}
+
 ref auto load(ref Header header, string filename){
     if(!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[][][] rgb, joinRGB;
     auto data = parse(header, filename);
     
-    Pixel pixel;
-    if(header.colorType == colorTypes.grayscale || header.colorType == colorTypes.grayscaleA){
+    if(header.colorType.isGrayscale){
         alias grayscale = data;
-        pixel = Pixel(grayscale);
-        return pixel;
+        return Pixel(grayscale);
     }
     
     data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
@@ -147,12 +159,10 @@ ref auto load(ref Header header, string filename){
     ubyte[][] B = pix[2].array.to!(ubyte[][]);
     ubyte[][] A = pix[3].array.to!(ubyte[][]);
     
-    if(header.colorType == colorTypes.trueColor || header.colorType == colorTypes.indexColor){
-        pixel = Pixel(R, G, B);
-    }else{
-        pixel = Pixel(R, G, B, A);
-    }
-    return pixel;
+    return
+      (header.colorType.isColorNoneAlpha)
+          ? Pixel(R, G, B)
+          : Pixel(R, G, B, A);
 }
 
 bool save(ref Header header, ref Pixel pix, string filename){
@@ -197,11 +207,11 @@ ref auto rgbToGrayscale(ref Header header, ref ubyte[][][] color, bool fastMode 
       if (colorType == trueColorA)
         color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
     }
-    if(fastMode){
-        return color.toGrayscale(fastMode); 
-    }else{
-        return color.toGrayscale; 
-    }
+
+    return 
+        (fastMode == true)
+        ? color.toGrayscale(fastMode)
+        : color.toGrayscale;
 }
 
 pure 

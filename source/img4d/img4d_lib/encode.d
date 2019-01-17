@@ -51,14 +51,11 @@ ref auto ubyte[] makeIDAT(ref Pixel pix,ref Header header){
     const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
     ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
 
-    with(header){
-        with(colorTypes){
-            if(colorType == grayscale || colorType == grayscaleA){
-                byteData.length = pix.grayscale.length;
-            }else{
-                byteData.length = pix.R.length;    
-            }
-        }
+    with(header) with(colorTypes){
+        byteData.length =
+            (colorType.isGrayscale)
+                ? pix.grayscale.length
+                : pix.R.length;
     }
 
     beforeCmpsData = header.chooseFilterType(pix).join;

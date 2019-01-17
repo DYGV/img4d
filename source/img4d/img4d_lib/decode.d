@@ -120,11 +120,11 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data, bool gray=false){
             	break;
             
             case Sub:
-                if(gray){
-                    actualData[idx] =  scanline.inverseSub(true).join.to!(ubyte[]);
-                }else{
-                    actualData[idx] = scanline.inverseSub.join.to!(ubyte[]);
-                }
+                actualData[idx] = 
+                    (gray)
+                        ? scanline.inverseSub(true).join.to!(ubyte[])
+                        : scanline.inverseSub.join.to!(ubyte[]);
+
                 break;
             
             case Up:
@@ -227,10 +227,11 @@ ref auto ubyte[][] parse(ref Header header, string filename){
     auto uncChunks = uncIDAT.chunks(numScanline).array;
     
     with(colorTypes) with(header){
-        if((colorType != grayscale) && (colorType != grayscaleA)){
-            return uncChunks.inverseFiltering;
-        }else{
-            return uncChunks.inverseFiltering(true);
-        }
+
+    return 
+        ((colorType != grayscale) && (colorType != grayscaleA))
+            ? uncChunks.inverseFiltering
+            : uncChunks.inverseFiltering(true);
+    
     }
 }
