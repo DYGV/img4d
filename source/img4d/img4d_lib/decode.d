@@ -101,7 +101,7 @@ int paethPredictor(int left, int upper, int upperLeft){
 int normalizePixelValue(int value){ return value < 256 ? value : value - 256; }
 
 
-ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
+ref auto ubyte[][] inverseFiltering(ref ubyte[][] data, bool gray=false){
     ubyte[][] actualData;
 
     ubyte[] filters = data.map!(sc => sc.front).array;
@@ -120,8 +120,12 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data){
             	break;
             
             case Sub:
-                actualData[idx] =  scanline.inverseSub.join.to!(ubyte[]); 
-            	break;
+                if(gray){
+                    actualData[idx] =  scanline.inverseSub(true).join.to!(ubyte[]);
+                }else{
+                    actualData[idx] = scanline.inverseSub.join.to!(ubyte[]);
+                }
+                break;
             
             case Up:
                 uint upIdx = (idx -1).to!uint;
@@ -221,6 +225,12 @@ ref auto ubyte[][] parse(ref Header header, string filename){
     }
     uint numScanline = (uncIDAT.length / header.height).to!uint;
     auto uncChunks = uncIDAT.chunks(numScanline).array;
-
-    return  uncChunks.inverseFiltering; 
+    
+    with(colorTypes) with(header){
+        if((colorType != grayscale) && (colorType != grayscaleA)){
+            return uncChunks.inverseFiltering;
+        }else{
+            return uncChunks.inverseFiltering(true);
+        }
+    }
 }

@@ -17,6 +17,15 @@ ref auto inverseSub(ref ubyte[][] scanline){
 }
 
 pure 
+ref auto inverseSub(ref ubyte[][] scanline, bool gray){
+    return [scanline.map!(
+            .cumulativeFold!((a,b) => 
+                  a + b < 256
+                ? a + b
+                : a + b - 256))].join.transposed;
+}
+
+pure 
 ref auto ubyte[][] sub(ref ubyte[][] src){
     if(src.empty) return src;
 

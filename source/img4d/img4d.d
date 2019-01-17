@@ -192,12 +192,10 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
 }
 
 ref auto rgbToGrayscale(ref Header header, ref ubyte[][][] color, bool fastMode = false){
-   with(header){
-        with(colorTypes){
-        if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
-        if (colorType == trueColorA)
+   with(header) with(colorTypes){
+      if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
+      if (colorType == trueColorA)
         color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
-        }
     }
     if(fastMode){
         return color.toGrayscale(fastMode); 

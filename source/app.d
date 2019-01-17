@@ -46,8 +46,8 @@ int main(){
     writefln("Bit Depth  %4d\nColor Type  %3d\n",
           afterEncode.bitDepth, 
           afterEncode.colorType);
-    
-    afterEncode.save(grayPix, "png_img/encoded_lena_2.png");
+
+    afterEncode.save(encodedDataToDecode, "png_img/encoded_lena_2.png");
     
     // Verification (compare with original image)
     /*version(none){
