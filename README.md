@@ -44,9 +44,11 @@ int main(){
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
  
  
- ## img4d
+## img4d
 -  **ref auto load(ref Header header, string filename)**  
 -  **ubyte[] save(ref Header header, ref Pixel pix, string filename)**  
+-  **bool isGrayscale(int colorType)**
+-  **bool isColorNoneAlpha(int colorType)**
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
 -  **ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color)**  
 -  **pure auto toBinary(T)(ref T[][] gray, T threshold=127)**  
@@ -108,6 +110,7 @@ Choose optimal filter and Return filtered pixel
 
 ## img4d_lib.filter  
 - **pure ref auto inverseSub(ref ubyte[][] scanline)**  
+- **ref auto inverseSub(ref ubyte[][] scanline, bool gray)**
 - **pure ubyte[][] sub(ref ubyte[][] src)**  
 Calculate and Return Sub filter(Difference from left pixel)
 - **pure ubyte[][] up(ref ubyte[][] src)**  
