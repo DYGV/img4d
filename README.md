@@ -7,30 +7,29 @@ Please see current status on [commit page](https://github.com/DYGV/img4d/commits
 
 # Examples  
 ## decode, convert to grayscale and encode
+### import required some modules
 ```D
 import img4d;
 import std.stdio,
        std.range,
        std.algorithm.iteration;
-
-int main(){
-    Header hdr;
-    int[][][] actualData;
-
-    // start decode
-    Pixel colorPix = hdr.load("png_img/lena.png");
-    if(colorPix.length == 0) {return 0;}
-    colorPix.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
-    
-    // convert to grayscale
-    Pixel grayPix = actualData.rgbToGrayscale;
-    hdr.colorType = colorTypes.grayscale;
-    
-    // start encode
-    bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
-
-    return 0;
-}
+```
+### load(decode)
+```D
+Header hdr;
+int[][][] actualData;
+Pixel colorPix = hdr.load("png_img/lena.png");
+```
+### rgb to grayscale
+```D
+colorPix.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
+Pixel grayPix = actualData.rgbToGrayscale;
+hdr.colorType = colorTypes.grayscale;
+```
+### 
+### save(encode)
+```D
+bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 ```    
 # Package  
  [img4d](https://github.com/DYGV/img4d/blob/master/README.md#img4d)  
