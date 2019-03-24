@@ -17,11 +17,11 @@ import std.stdio,
 ### load(decode)
 ```D
 Header hdr;
-int[][][] actualData;
 Pixel colorPix = hdr.load("png_img/lena.png");
 ```
 ### rgb to grayscale
 ```D
+int[][][] actualData;
 colorPix.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
 Pixel grayPix = actualData.rgbToGrayscale;
 hdr.colorType = colorTypes.grayscale;
