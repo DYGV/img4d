@@ -201,11 +201,13 @@ auto canny(T)(T[][] actualData, int tMin, int tMax){
     return edge;
 }
 
-ref auto rgbToGrayscale(ref Header header, ref ubyte[][][] color, bool fastMode = false){
-   with(header) with(colorTypes){
-      if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
-      if (colorType == trueColorA)
-        color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
+ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false){
+    ubyte[][][] color;
+    with(header) with(colorTypes){
+        if (colorType != trueColor && colorType != trueColorA) throw new Exception("invalid format.");
+        pix.Pixel.each!(n  => color ~= n.chunks(lengthPerPixel).array);
+        if (colorType == trueColorA)
+            color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
     }
 
     return 

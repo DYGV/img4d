@@ -12,8 +12,7 @@ int main(){
     // start decode
     Pixel colorPix = beforeEncode.load("png_img/lena.png");
     if(colorPix.Pixel.length == 0) { return 0; }
-    colorPix.Pixel.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);
-
+    
     writefln("Width  %8d\nHeight  %7d",
           beforeEncode.width,
           beforeEncode.height);
@@ -21,12 +20,11 @@ int main(){
           beforeEncode.bitDepth, 
           beforeEncode.colorType);
    
-    Pixel grayPix = beforeEncode.rgbToGrayscale(actualData, true);
+    Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
     beforeEncode.colorType = colorTypes.grayscale;
  
     /*  Canny Edge Detection (Defective State) 
-    auto gray = rgbToGrayscale(actualData);
-    auto edge = canny(gray,80,150);
+    auto edge = canny(grayPix,80,150);
     auto edgeFile = File("../png_img/edge_lena.txt","w");
     edge.each!(a => edgeFile.writeln(a));
     edgeFile.flush();
