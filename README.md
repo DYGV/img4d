@@ -24,10 +24,7 @@ Pixel colorPix = hdr.load("png_img/lena.png");
 ```
 ### rgb to grayscale
 ```D
-int[][][] actualData;
-colorPix.each!(n  => actualData ~= n.chunks(lengthPerPixel).array);  
-Pixel grayPix = actualData.rgbToGrayscale;
-hdr.colorType = colorTypes.grayscale;
+Pixel grayPix = hdr.rgbToGrayscale(colorPix, true);
 ```
 ### 
 ### save(encode)
@@ -52,7 +49,7 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 -  **bool isGrayscale(int colorType)**
 -  **bool isColorNoneAlpha(int colorType)**
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
--  **ref auto rgbToGrayscale(T)(ref Header header, ref T[][][] color)**  
+-  **ref auto rgbToGrayscale(T)(ref Header header, ref Pixel pix, bool fastMode=false)**  
 -  **pure auto toBinary(T)(ref T[][] gray, T threshold=127)**  
 -  **pure auto toBinary(T)(T[][] array)**  
 -  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
