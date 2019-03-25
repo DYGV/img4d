@@ -21,8 +21,7 @@ int main(){
           beforeEncode.colorType);
    
     Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
-    beforeEncode.colorType = colorTypes.grayscale;
- 
+
     /*  Canny Edge Detection (Defective State) 
     auto edge = canny(grayPix,80,150);
     auto edgeFile = File("../png_img/edge_lena.txt","w");
