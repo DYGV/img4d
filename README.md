@@ -10,7 +10,7 @@ Please see current status on [commit page](https://github.com/DYGV/img4d/commits
 
 # Examples  
 ## decode, convert to grayscale and encode
-### import required some modules
+### import some required modules
 ```D
 import img4d;
 import std.stdio,
