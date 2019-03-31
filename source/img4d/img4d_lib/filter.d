@@ -69,7 +69,32 @@ ref auto T[][] joinVertical(T)(ref T[][] src){
 
 auto inverseUp(){}
 
-auto ave(){}
+
+    /**
+     *  Average(x) = Raw(x) - floor((Raw(x-bpp)+Prior(x))/2)
+     */
+auto ave(ubyte[][] src){
+    if(src.length == 0) return src;
+    ubyte[][] joinTemp;
+    auto output = [src.front];
+    
+    foreach(idx, scanline;src[1 .. $]){
+    	ubyte[] up = src[idx];
+    	ubyte[] current = scanline;
+	ubyte upFirst = up.front / 2;
+    	up.popFront;
+
+    	joinTemp = [up, current];
+    	auto verticalJoined = joinTemp.joinVertical;
+    	ubyte[] ave  = [upFirst] ~  verticalJoined.map!(a => (a.front + a.back)/2).array.to!(ubyte[]);
+  	
+	joinTemp = [ave, current];
+	verticalJoined =  joinTemp.joinVertical;
+	output ~= [verticalJoined.neighborDifference().map!(a => a.back).array.to!(ubyte[])];
+    }
+    return output;
+}
+
 auto inverseAve(){}
 
 auto paeth(){}

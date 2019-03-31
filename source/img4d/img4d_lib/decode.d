@@ -138,13 +138,18 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data, bool gray=false){
                 uint upIdx = (idx -1).to!uint;
                 ubyte[][] up = actualData[upIdx].chunks(lengthPerPixel).array;
                 ubyte[][][] current = scanline.chunks(lengthPerPixel).array;
-            	scanline.popFront;            		
-            	auto sc = scanline.join;
-                up.front.each!((idx,n) =>temp ~= [((n/2) + current.front[0][idx]).normalizePixelValue].to!(ubyte[]));
-
-                up.join[lengthPerPixel .. $].each!((o,n)=>  
+            	if(gray){
+		    scanline.front.popFront;
+		    auto sc = scanline.join;
+		    temp ~= up.front.front / 2;
+		    up.front[1 .. $].each!((o,n) =>temp ~= [((temp[o]+n)/2 + sc[o]).normalizePixelValue].to!(ubyte[]));
+		}else{
+		    scanline.popFront;
+            	    auto sc = scanline.join;
+               	    up.front.each!((idx,n) =>temp ~= [((n/2) + current.front[0][idx]).normalizePixelValue].to!(ubyte[]));
+                    up.join[lengthPerPixel .. $].each!((o,n)=>  
                                 temp ~= [(((temp[o] + n)/2) + sc[o]).normalizePixelValue].to!(ubyte[]));
-
+		}
                 actualData[idx] = temp;
                 break;
 

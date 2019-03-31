@@ -209,7 +209,7 @@ ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false)
         if (colorType == trueColorA)
             color.each!((idx,a) => a.each!((edx,b) => color[idx][edx] = b.remove(3)));
     }
-    header.colorType = colorTypes.grayscale;
+
     return 
         (fastMode == true)
         ? color.toGrayscale(fastMode)

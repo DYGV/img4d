@@ -4,7 +4,7 @@
 [![coverage](https://codecov.io/gh/DYGV/img4d/branch/master/graph/badge.svg)](https://codecov.io/gh/DYGV/img4d)  
 
 PNG images Decoder/Encoder for D language.  
-Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master)  
+Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master) or [dub page](https://code.dlang.org/packages/img4d)  
 
 **Please feel free to throw PRs or issues.**  
 
@@ -25,6 +25,8 @@ Pixel colorPix = hdr.load("png_img/lena.png");
 ### rgb to grayscale
 ```D
 Pixel grayPix = hdr.rgbToGrayscale(colorPix, true);
+hdr.colorType = colorTypes.grayscale;
+
 ```
 ### 
 ### save(encode)

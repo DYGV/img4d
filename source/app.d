@@ -7,7 +7,6 @@ import std.stdio,
 
 int main(){
     Header beforeEncode;
-    ubyte[][][] actualData;
 
     // start decode
     Pixel colorPix = beforeEncode.load("png_img/lena.png");
@@ -21,7 +20,8 @@ int main(){
           beforeEncode.colorType);
    
     Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
-
+    beforeEncode.colorType = colorTypes.grayscale;
+    
     /*  Canny Edge Detection (Defective State) 
     auto edge = canny(grayPix,80,150);
     auto edgeFile = File("../png_img/edge_lena.txt","w");
@@ -36,7 +36,8 @@ int main(){
     //read encoded file
     Header afterEncode;
 
-    auto encodedDataToDecode = afterEncode.load("png_img/encoded_lena_1.png");
+    Pixel encodedDataToDecode = afterEncode.load("png_img/encoded_lena_1.png");
+    
     writefln("Width  %8d\nHeight  %7d",
           afterEncode.width,
           afterEncode.height);

@@ -132,6 +132,8 @@ ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
                 filteredNone = pix.grayscale;
                 filteredSub = pix.grayscale.sub;
                 filteredUp = pix.grayscale.up;
+		filteredAve = pix.grayscale.ave;
+
             }else{
                 filteredNone = pix.Pixel;
 
@@ -146,16 +148,23 @@ ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
                 B = tmpB.up;
                 A = tmpA.up;
                 filteredUp = Pixel(R, G, B, A).Pixel; 
+		
+		R = tmpR.ave;
+                G = tmpG.ave;
+                B = tmpB.ave;
+                A = tmpA.ave;
+                filteredAve = Pixel(R, G, B, A).Pixel;
             } 
         }
     }
      sumNone = filteredNone.sumScanline;
      sumSub  = filteredSub.sumScanline;
      sumUp   = filteredUp.sumScanline;
+     sumAve   = filteredAve.sumScanline;
 
-    int[][] sums   = [sumNone, sumSub, sumUp];
+    int[][] sums   = [sumNone, sumSub, sumUp, sumAve];
     int[] minIndex = sums.joinVertical.map!(minIndex).array.to!(int[]);
-    
+
     actualData.length = filteredNone.length;
 
     with(filterTypes){
@@ -172,6 +181,7 @@ ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
                     actualData[idx] = min ~ filteredUp[idx];
                     break;
                 case Average:
+		    actualData[idx] = min ~ filteredAve[idx];
                     break;
                 case Paeth:
                     break;
