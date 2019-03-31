@@ -113,6 +113,7 @@ ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
           sumUp,
           sumAve,
           sumPaeth;
+          
     ubyte [][] R, G, B, A,
               actualData,
               filteredNone,
@@ -132,7 +133,7 @@ ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
                 filteredNone = pix.grayscale;
                 filteredSub = pix.grayscale.sub;
                 filteredUp = pix.grayscale.up;
-		filteredAve = pix.grayscale.ave;
+                filteredAve = pix.grayscale.ave;
 
             }else{
                 filteredNone = pix.Pixel;
@@ -181,7 +182,7 @@ ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix){
                     actualData[idx] = min ~ filteredUp[idx];
                     break;
                 case Average:
-		    actualData[idx] = min ~ filteredAve[idx];
+                    actualData[idx] = min ~ filteredAve[idx];
                     break;
                 case Paeth:
                     break;

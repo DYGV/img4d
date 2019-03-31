@@ -16,6 +16,8 @@ import std.stdio,
 
 int lengthPerPixel;
 
+enum{ R, G, B, A }
+
 enum filterTypes{
     None,
     Sub,
@@ -33,7 +35,6 @@ enum colorTypes{
 }
 
 struct Header {
-
     this(in int width, in int height, in int bitDepth, in int colorType,
         in int compressionMethod, in int filterMethod, in int interlaceMethod, ubyte[] crc){
         
@@ -79,6 +80,7 @@ struct Header {
 }
 
 struct Pixel{
+
     this(ref ubyte[][] R, ref ubyte[][] G, ref ubyte[][] B){
         _R = R;
         _G = G;
@@ -154,10 +156,10 @@ ref auto load(ref Header header, string filename){
     data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
     rgb.each!(a => joinRGB ~= a.joinVertical);
     auto pix = joinRGB.transposed;
-    ubyte[][] R = pix[0].array.to!(ubyte[][]);
-    ubyte[][] G = pix[1].array.to!(ubyte[][]);
-    ubyte[][] B = pix[2].array.to!(ubyte[][]);
-    ubyte[][] A = pix[3].array.to!(ubyte[][]);
+    ubyte[][] R = pix[R].array.to!(ubyte[][]);
+    ubyte[][] G = pix[B].array.to!(ubyte[][]);
+    ubyte[][] B = pix[B].array.to!(ubyte[][]);
+    ubyte[][] A = pix[A].array.to!(ubyte[][]);
     
     return
       (header.colorType.isColorNoneAlpha)

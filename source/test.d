@@ -232,22 +232,9 @@ unittest{
 
 
 
-/* decode */
-unittest{
-    Header hdr;
-
-    Pixel colorPix = hdr.load("png_img/lena.png");
-    string origin = readText("png_img/rgb_lena.txt");
-
-    assert(origin ==  colorPix.Pixel.join.map!(a => a.to!(string)).join);
-}
-
-
-
 /* makeIEND */
 unittest{
     assert(makeIEND == [0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130]);
-
 }
 
 

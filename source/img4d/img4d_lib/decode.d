@@ -18,11 +18,11 @@ ref auto Header readIHDR(ubyte[] header){
     Header IHDR = Header(header[4 .. 8].byteToInt, // width
                         header[8 .. 12].byteToInt,  // height
                         header[12],  // bitDepth
-			header[13],  // colorType
+                        header[13],  // colorType
                         header[14],  // compressionMethod
-			header[15],  // filterMethod
+                        header[15],  // filterMethod
                         header[16],  // interlaceMethod
-			header[17 .. 21]  // crc
+                        header[17 .. 21]  // crc
 			);
 
     switch(IHDR.colorType) with(colorTypes){
@@ -114,7 +114,7 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data, bool gray=false){
 
         switch(filters[idx]) with(filterTypes){
             case None:
-                temp = scanline[0];
+                temp = scanline.front;
             	actualData[idx] = temp;
                 
             	break;
@@ -139,17 +139,17 @@ ref auto ubyte[][] inverseFiltering(ref ubyte[][] data, bool gray=false){
                 ubyte[][] up = actualData[upIdx].chunks(lengthPerPixel).array;
                 ubyte[][][] current = scanline.chunks(lengthPerPixel).array;
             	if(gray){
-		    scanline.front.popFront;
-		    auto sc = scanline.join;
-		    temp ~= up.front.front / 2;
-		    up.front[1 .. $].each!((o,n) =>temp ~= [((temp[o]+n)/2 + sc[o]).normalizePixelValue].to!(ubyte[]));
-		}else{
-		    scanline.popFront;
+		            scanline.front.popFront;
+		            auto sc = scanline.join;
+		            temp ~= up.front.front / 2;
+		            up.front[1 .. $].each!((o,n) =>temp ~= [((temp[o]+n)/2 + sc[o]).normalizePixelValue].to!(ubyte[]));
+		        }else{
+		            scanline.popFront;
             	    auto sc = scanline.join;
                	    up.front.each!((idx,n) =>temp ~= [((n/2) + current.front[0][idx]).normalizePixelValue].to!(ubyte[]));
                     up.join[lengthPerPixel .. $].each!((o,n)=>  
-                                temp ~= [(((temp[o] + n)/2) + sc[o]).normalizePixelValue].to!(ubyte[]));
-		}
+                    temp ~= [(((temp[o] + n)/2) + sc[o]).normalizePixelValue].to!(ubyte[]));
+		        }
                 actualData[idx] = temp;
                 break;
 
