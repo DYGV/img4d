@@ -275,7 +275,8 @@ ref auto load(ref Header header, string filename)
 
 bool save(ref Header header, ref Pixel pix, string filename)
 {
-    ubyte[] data = header.makeIHDR ~ pix.makeIDAT(header) ~ makeIEND;
+    Encode encode = new Encode(header, pix);
+    ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ encode.makeIEND;
     auto file = File(filename, "w");
     file.rawWrite(data);
     file.flush();

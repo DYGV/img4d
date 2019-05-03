@@ -5,185 +5,198 @@ import std.stdio, std.array, std.bitmanip, std.conv, std.zlib, std.digest,
     std.digest.crc, std.range, std.algorithm;
 import std.parallelism : parallel;
 
-pure ref auto ubyte[] makeIHDR(Header header)
+class Encode
 {
-    ubyte depth, colorSpaceType, compress, filterType, adam7;
+    Header header;
+    Pixel pixel;
 
-    with (header)
+    this(ref Header header, ref Pixel pixel)
     {
-        depth = bitDepth.to!ubyte;
-        colorSpaceType = colorType.to!ubyte;
-        compress = compressionMethod.to!ubyte;
-        filterType = filterMethod.to!ubyte;
-        adam7 = interlaceMethod.to!ubyte;
+        this.header = header;
+        this.pixel = pixel;
     }
 
-    const ubyte[] sig = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
-    const ubyte[] bodyLenIHDR = [0x0, 0x0, 0x0, 0x0D];
-    ubyte[] chunkIHDR = [
-        0x49, 0x48, 0x44, 0x52, // "IHDR"
-        0x0, 0x0, 0x0, 0x00, // width
-        0x0, 0x0, 0x0, 0x00, // height
-        depth,
-        colorSpaceType, compress, filterType, adam7
-    ];
-    chunkIHDR[4 .. 8].append!uint(header.width);
-    chunkIHDR[8 .. 12].append!uint(header.height);
-
-    ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ chunkIHDR.makeCrc;
-    return sig ~ IHDR;
-}
-
-ref auto ubyte[] makeIDAT(ref Pixel pix, ref Header header)
-{
-    Compress cmps = new Compress(HeaderFormat.deflate);
-    ubyte[] beforeCmpsData, idatData, chunkData, IDAT;
-    uint chunkSize;
-    ubyte[][] byteData;
-    const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
-    ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
-
-    with (header) with (colorTypes)
+    pure ref auto ubyte[] makeIHDR()
     {
-        byteData.length = (colorType.isGrayscale) ? pix.grayscale.length : pix.R.length;
+        ubyte depth, colorSpaceType, compress, filterType, adam7;
+
+        with (this.header)
+        {
+            depth = bitDepth.to!ubyte;
+            colorSpaceType = colorType.to!ubyte;
+            compress = compressionMethod.to!ubyte;
+            filterType = filterMethod.to!ubyte;
+            adam7 = interlaceMethod.to!ubyte;
+        }
+
+        const ubyte[] sig = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+        const ubyte[] bodyLenIHDR = [0x0, 0x0, 0x0, 0x0D];
+        ubyte[] chunkIHDR = [
+            0x49, 0x48, 0x44, 0x52, // "IHDR"
+            0x0, 0x0, 0x0, 0x00, // width
+            0x0, 0x0, 0x0, 0x00, // height
+            depth, colorSpaceType, compress, filterType, adam7
+        ];
+        chunkIHDR[4 .. 8].append!uint(this.header.width);
+        chunkIHDR[8 .. 12].append!uint(this.header.height);
+
+        ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ this.makeCrc(chunkIHDR);
+        return sig ~ IHDR;
     }
 
-    beforeCmpsData = header.chooseFilterType(pix).join;
-    idatData ~= cast(ubyte[]) cmps.compress(beforeCmpsData);
-    idatData ~= cast(ubyte[]) cmps.flush();
-    chunkSize = idatData.length.to!uint;
+    ref auto ubyte[] makeIDAT()
+    {
+        Compress cmps = new Compress(HeaderFormat.deflate);
+        ubyte[] beforeCmpsData, idatData, chunkData, IDAT;
+        uint chunkSize;
+        ubyte[][] byteData;
+        const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
+        ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
 
-    bodyLenIDAT[0 .. 4].append!uint(chunkSize);
-    chunkData = chunkType ~ idatData;
-    IDAT = bodyLenIDAT ~ chunkData ~ chunkData.makeCrc;
+        with (this.header) with (colorTypes)
+        {
+            byteData.length = (colorType.isGrayscale)
+                ? this.pixel.grayscale.length : this.pixel.R.length;
+        }
 
-    return IDAT;
-}
+        beforeCmpsData = this.chooseFilterType.join;
+        idatData ~= cast(ubyte[]) cmps.compress(beforeCmpsData);
+        idatData ~= cast(ubyte[]) cmps.flush();
+        chunkSize = idatData.length.to!uint;
 
-pure ubyte[] makeAncillary()
-{
-    throw new Exception("Not implemented.");
-}
+        bodyLenIDAT[0 .. 4].append!uint(chunkSize);
+        chunkData = chunkType ~ idatData;
+        IDAT = bodyLenIDAT ~ chunkData ~ this.makeCrc(chunkData);
 
-pure ubyte[] makeIEND()
-{
-    const ubyte[] chunkIEND = [0x0, 0x0, 0x0, 0x0];
-    const ubyte[] chunkType = [0x49, 0x45, 0x4E, 0x44];
-    ubyte[] IEND = chunkIEND ~ chunkType ~ chunkType.makeCrc;
+        return IDAT;
+    }
 
-    return IEND;
-}
+    pure ubyte[] makeAncillary()
+    {
+        throw new Exception("Not implemented.");
+    }
 
-/**
+    pure ubyte[] makeIEND()
+    {
+        const ubyte[] chunkIEND = [0x0, 0x0, 0x0, 0x0];
+        const ubyte[] chunkType = [0x49, 0x45, 0x4E, 0x44];
+        ubyte[] IEND = chunkIEND ~ chunkType ~ this.makeCrc(chunkType);
+
+        return IEND;
+    }
+
+    /**
    *  Calculate from chunk data. 
    */
-pure ref auto makeCrc(in ubyte[] data)
-{
-    ubyte[4] crc;
-    data.crc32Of.each!((idx, a) => crc[3 - idx] = a);
-    return crc;
-}
+    pure ref auto makeCrc(in ubyte[] data)
+    {
+        ubyte[4] crc;
+        data.crc32Of.each!((idx, a) => crc[3 - idx] = a);
+        return crc;
+    }
 
-/**
+    /**
    *  Cast to int[]
    *  and Calculate sum every horizontal line.
    */
-pure ref auto int[] sumScanline(ref ubyte[][] src)
-{
-    return cast(int[])(src.map!(a => a.sum).array);
-}
+    pure ref auto int[] sumScanline(ref ubyte[][] src)
+    {
+        return cast(int[])(src.map!(a => a.sum).array);
+    }
 
-/**
+    /**
    * Choose optimal filter
    * and Return filtered pixel.
    */
-ref auto ubyte[][] chooseFilterType(ref Header header, ref Pixel pix)
-{
-    int[] sumNone, sumSub, sumUp, sumAve, sumPaeth;
-
-    ubyte[][] R, G, B, A, actualData, filteredNone, filteredSub, filteredUp,
-        filteredAve, filteredPaeth;
-
-    /* begin comparison with none, sub, up, ave and paeth*/
-    ubyte[][] tmpR = pix.R;
-    ubyte[][] tmpG = pix.G;
-    ubyte[][] tmpB = pix.B;
-    ubyte[][] tmpA = pix.A;
-    with (header)
+    ref auto ubyte[][] chooseFilterType()
     {
-        with (colorTypes)
+        int[] sumNone, sumSub, sumUp, sumAve, sumPaeth;
+
+        ubyte[][] R, G, B, A, actualData, filteredNone, filteredSub,
+            filteredUp, filteredAve, filteredPaeth;
+
+        /* begin comparison with none, sub, up, ave and paeth*/
+        ubyte[][] tmpR = this.pixel.R;
+        ubyte[][] tmpG = this.pixel.G;
+        ubyte[][] tmpB = this.pixel.B;
+        ubyte[][] tmpA = this.pixel.A;
+        with (this.header)
         {
-            if (colorType == grayscale || colorType == grayscaleA)
+            with (colorTypes)
             {
-                filteredNone = pix.grayscale;
-                filteredSub = pix.grayscale.sub;
-                filteredUp = pix.grayscale.up;
-                filteredAve = pix.grayscale.ave;
+                if (colorType == grayscale || colorType == grayscaleA)
+                {
+                    filteredNone = this.pixel.grayscale;
+                    filteredSub = this.pixel.grayscale.sub;
+                    filteredUp = this.pixel.grayscale.up;
+                    filteredAve = this.pixel.grayscale.ave;
 
-            }
-            else
-            {
-                filteredNone = pix.Pixel;
+                }
+                else
+                {
+                    filteredNone = this.pixel.Pixel;
 
-                R = tmpR.sub;
-                G = tmpG.sub;
-                B = tmpB.sub;
-                A = tmpA.sub;
-                filteredSub = Pixel(R, G, B, A).Pixel;
+                    R = tmpR.sub;
+                    G = tmpG.sub;
+                    B = tmpB.sub;
+                    A = tmpA.sub;
+                    filteredSub = Pixel(R, G, B, A).Pixel;
 
-                R = tmpR.up;
-                G = tmpG.up;
-                B = tmpB.up;
-                A = tmpA.up;
-                filteredUp = Pixel(R, G, B, A).Pixel;
+                    R = tmpR.up;
+                    G = tmpG.up;
+                    B = tmpB.up;
+                    A = tmpA.up;
+                    filteredUp = Pixel(R, G, B, A).Pixel;
 
-                R = tmpR.ave;
-                G = tmpG.ave;
-                B = tmpB.ave;
-                A = tmpA.ave;
-                filteredAve = Pixel(R, G, B, A).Pixel;
+                    R = tmpR.ave;
+                    G = tmpG.ave;
+                    B = tmpB.ave;
+                    A = tmpA.ave;
+                    filteredAve = Pixel(R, G, B, A).Pixel;
+                }
             }
         }
-    }
-    sumNone = filteredNone.sumScanline;
-    sumSub = filteredSub.sumScanline;
-    sumUp = filteredUp.sumScanline;
-    sumAve = filteredAve.sumScanline;
+        sumNone = this.sumScanline(filteredNone);
+        sumSub = this.sumScanline(filteredSub);
+        sumUp = this.sumScanline(filteredUp);
+        sumAve = this.sumScanline(filteredAve);
 
-    int[][] sums = [sumNone, sumSub, sumUp, sumAve];
-    int[] minIndex = sums.joinVertical
-        .map!(minIndex)
-        .array
-        .to!(int[]);
+        int[][] sums = [sumNone, sumSub, sumUp, sumAve];
+        int[] minIndex = sums.joinVertical
+            .map!(minIndex)
+            .array
+            .to!(int[]);
 
-    actualData.length = filteredNone.length;
+        actualData.length = filteredNone.length;
 
-    with (filterTypes)
-    {
-        foreach (idx, min; minIndex.array.to!(ubyte[]).parallel())
+        with (filterTypes)
         {
-
-            switch (min)
+            foreach (idx, min; minIndex.array.to!(ubyte[]).parallel())
             {
-            case None:
-                actualData[idx] = min ~ filteredNone[idx];
-                break;
-            case Sub:
-                actualData[idx] = min ~ filteredSub[idx];
-                break;
-            case Up:
-                actualData[idx] = min ~ filteredUp[idx];
-                break;
-            case Average:
-                actualData[idx] = min ~ filteredAve[idx];
-                break;
-            case Paeth:
-                break;
-            default:
-                break;
+
+                switch (min)
+                {
+                case None:
+                    actualData[idx] = min ~ filteredNone[idx];
+                    break;
+                case Sub:
+                    actualData[idx] = min ~ filteredSub[idx];
+                    break;
+                case Up:
+                    actualData[idx] = min ~ filteredUp[idx];
+                    break;
+                case Average:
+                    actualData[idx] = min ~ filteredAve[idx];
+                    break;
+                case Paeth:
+                    break;
+                default:
+                    break;
+                }
             }
         }
+        /* end comparison with none, sub, up, ave and paeth*/
+        return actualData;
     }
-    /* end comparison with none, sub, up, ave and paeth*/
-    return actualData;
+
 }
