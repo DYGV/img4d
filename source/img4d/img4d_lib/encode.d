@@ -130,7 +130,6 @@ class Encode
                     filteredSub = this.pixel.grayscale.sub;
                     filteredUp = this.pixel.grayscale.up;
                     filteredAve = this.pixel.grayscale.ave;
-
                 }
                 else
                 {

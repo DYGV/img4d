@@ -9,6 +9,8 @@ import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range,
 /* readIHDR */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
         0, 0, 0, 5, // height
         0, 0, 0, 5, // width
@@ -19,10 +21,10 @@ unittest
         0, // interlaceMethod
         2, 13, 177, 178]; // calculated crc
 
-    Header hdr = headers.readIHDR;
+    hdr = decode.readIHDR(headers);
 
-    assert(hdr.height == headers[4 .. 8].byteToInt);
-    assert(hdr.width == headers[8 .. 12].byteToInt);
+    assert(hdr.height == decode.byteToInt(headers[4 .. 8]));
+    assert(hdr.width == decode.byteToInt(headers[8 .. 12]));
     assert(hdr.bitDepth == headers[12]);
     assert(hdr.colorType == headers[13]);
     assert(hdr.compressionMethod == headers[14]);
@@ -33,37 +35,47 @@ unittest
 /* byteToInt */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[] ubyteArray = [0, 0, 0, 5];
-    assert(ubyteArray.byteToInt == 5);
+    assert(decode.byteToInt(ubyteArray) == 5);
 }
 
 /* byteToString */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[] hello = ['H', 'E', 'L', 'L', 'O'];
-    assert(hello.byteToString == "HELLO");
+    assert(decode.byteToString(hello) == "HELLO");
 }
 
 /* crcCheck */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[] crc = [2, 13, 177, 178];
     ubyte[] data = [
         0x49, 0x48, 0x44, 0x52, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x5, 0x8, 0x2, 0x0, 0x0, 0x0
     ];
-    assert(crc.crcCheck(data));
+    assert(decode.crcCheck(crc, data));
 }
 
 /* normalizePixelValue */
 unittest
 {
-    assert(100.normalizePixelValue == 100); // 100 < 256 => 100 
-    assert(300.normalizePixelValue == 44); // 300 > 256 => 300 - 256 = 44
+    Header hdr;
+    Decode decode = new Decode(hdr);
+    assert(decode.normalizePixelValue(100) == 100); // 100 < 256 => 100 
+    assert(decode.normalizePixelValue(300) == 44); // 300 > 256 => 300 - 256 = 44
 }
 
 /* sumScanline */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
         0, 0, 0, 5, // height
         0, 0, 0, 5, // width
@@ -74,7 +86,7 @@ unittest
         0, // interlaceMethod
         168, 4, 121, 57]; // calculated crc
 
-    Header hdr = headers.readIHDR;
+    hdr = decode.readIHDR(headers);
     ubyte[][] sample_pix_data = [[1, 2, 3]];
     ubyte[][] src = [[1, 2, 3], [4, 5, 6]]; // [1+2+3. 4+5+6] == [6, 15]
     ubyte[] sum = [6, 15];
@@ -87,6 +99,8 @@ unittest
 /* chooseFilterType grayscale */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
         0, 0, 0, 5, // height
         0, 0, 0, 5, // width
@@ -97,7 +111,7 @@ unittest
         0, // interlaceMethod
         168, 4, 121, 57]; // calculated crc
 
-    Header hdr = headers.readIHDR;
+    hdr = decode.readIHDR(headers);
     ubyte[][] data = [[0, 0, 0, 0, 0], [1, 2, 3, 4, 5], [
         0, 100, 0, 100, 0
     ], [0, 100, 0, 100, 0], [1, 0, 1, 0, 1]];
@@ -110,6 +124,8 @@ unittest
 /* chooseFilterType color */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[] headers = ['I', 'H', 'D', 'R', // chunk type
         0, 0, 0, 5, // height
         0, 0, 0, 2, // width
@@ -119,7 +135,7 @@ unittest
         0, // filterMethod
         0, // interlaceMethod
         31, 8, 129, 10];
-    Header hdr = headers.readIHDR;
+    hdr = decode.readIHDR(headers);
     ubyte[][] data = [[0, 0, 0, 0, 0, 0], [1, 2, 3, 4, 5, 6], [
         0, 100, 0, 100, 0, 100
     ], [0, 100, 0, 100, 0, 100], [1, 0, 1, 0, 1, 0]];
@@ -130,7 +146,6 @@ unittest
             0, 0, 100, 100, 100, 0, 0, 0, 100, 100, 100, 0, 0, 0, 100, 100, 100],
             [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1,
             1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0]]);
-
 }
 
 /* joinVertical */
@@ -146,9 +161,7 @@ unittest
 {
     ubyte[][] beforeCalculateDiff = [[1, 2, 3], [9, 3, 0]];
     assert(beforeCalculateDiff.map!(a => a.slide(2).array).equal([[[1, 2], [2,
-            3]], [[9, 3], [3, 0]]]));
-
-    // front - back < 0 => abs(front - back)
+            3]], [[9, 3], [3, 0]]])); // front - back < 0 => abs(front - back)
     // front - back > 0 => 256 - (front - back)
     ubyte[][] diff = [[1, 1, 1], [9, 250, 253]];
     assert(beforeCalculateDiff.neighborDifference.equal(diff));
@@ -158,9 +171,7 @@ unittest
 unittest
 {
     ubyte[][] filtered = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
-    ubyte[][] unFilter = [[1, 1, 255], [0, 3, 2], [3, 5, 3]];
-
-    /*
+    ubyte[][] unFilter = [[1, 1, 255], [0, 3, 2], [3, 5, 3]]; /*
        sub filter
        the first pixel is intact  =>                1,1,1
 
@@ -186,8 +197,7 @@ unittest
 /* up */
 unittest
 {
-    ubyte[][] beforeCalculateUp = [[1, 2, 3], [1, 5, 2]];
-    // joinVertical => [[1, 1],[2, 5],[3, 2]]
+    ubyte[][] beforeCalculateUp = [[1, 2, 3], [1, 5, 2]]; // joinVertical => [[1, 1],[2, 5],[3, 2]]
     // neighborDifference
     // =>
     // front - back < 0 => abs(front - back)
@@ -195,23 +205,23 @@ unittest
 
     ubyte[][] upFiltered = [[1, 2, 3], [0, 3, 255]];
     assert(beforeCalculateUp.up.equal(upFiltered));
-
 }
 
 /* parse */
 unittest
 {
     Header hdr;
-
-    ubyte[][] colorPix = hdr.parse("png_img/lena.png");
+    Decode decode = new Decode(hdr);
+    ubyte[][] colorPix = decode.parse("png_img/lena.png");
     string origin = readText("png_img/rgb_lena.txt");
-
     assert(origin == colorPix.join.map!(a => a.to!(string)).join);
 }
 
 /* makeIEND */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
         0, 0, 0, 5, // height
         0, 0, 0, 5, // width
@@ -222,7 +232,7 @@ unittest
         0, // interlaceMethod
         168, 4, 121, 57]; // calculated crc
 
-    Header hdr = headers.readIHDR;
+    hdr = decode.readIHDR(headers);
     ubyte[][] sample_pix_data = [[1, 2, 3]];
     Pixel pix = Pixel(sample_pix_data);
     Encode encode = new Encode(hdr, pix);
@@ -233,6 +243,8 @@ unittest
 /* makeCrc */
 unittest
 {
+    Header hdr;
+    Decode decode = new Decode(hdr);
     ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
         0, 0, 0, 5, // height
         0, 0, 0, 5, // width
@@ -243,7 +255,7 @@ unittest
         0, // interlaceMethod
         168, 4, 121, 57]; // calculated crc
 
-    Header hdr = headers.readIHDR;
+    hdr = decode.readIHDR(headers);
     ubyte[][] sample_pix_data = [[1, 2, 3]];
     Pixel pix = Pixel(sample_pix_data);
     Encode encode = new Encode(hdr, pix);

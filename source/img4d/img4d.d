@@ -254,8 +254,10 @@ ref auto load(ref Header header, string filename)
     if (!exists(filename))
         throw new Exception("Not found the file.");
     ubyte[][][] rgb, joinRGB;
-    auto data = parse(header, filename);
 
+    Decode decode = new Decode(header);
+    auto data = decode.parse(filename);
+    header = decode.hdr;
     if (header.colorType.isGrayscale)
     {
         alias grayscale = data;
