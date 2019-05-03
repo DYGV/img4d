@@ -64,10 +64,24 @@ unittest
 /* sumScanline */
 unittest
 {
-    ubyte[][] src = [[1, 2, 3], [4, 5, 6]];
-    // [1+2+3. 4+5+6] == [6, 15]
+    ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
+        0, 0, 0, 5, // height
+        0, 0, 0, 5, // width
+        8, // bitDepth
+        0, // colorType
+        0, // compressionMethod
+        0, // filterMethod
+        0, // interlaceMethod
+        168, 4, 121, 57]; // calculated crc
+
+    Header hdr = headers.readIHDR;
+    ubyte[][] sample_pix_data = [[1, 2, 3]];
+    ubyte[][] src = [[1, 2, 3], [4, 5, 6]]; // [1+2+3. 4+5+6] == [6, 15]
     ubyte[] sum = [6, 15];
-    assert(src.sumScanline.equal(sum));
+    Pixel pix = Pixel(sample_pix_data);
+    Encode encode = new Encode(hdr, pix);
+
+    assert(encode.sumScanline(src).equal(sum));
 }
 
 /* chooseFilterType grayscale */
@@ -88,8 +102,9 @@ unittest
         0, 100, 0, 100, 0
     ], [0, 100, 0, 100, 0], [1, 0, 1, 0, 1]];
     Pixel pix = Pixel(data);
-    assert(hdr.chooseFilterType(pix) == [[0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1,
-            1], [0, 0, 100, 0, 100, 0], [2, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1]]);
+    Encode encode = new Encode(hdr, pix);
+    assert(encode.chooseFilterType == [[0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1],
+            [0, 0, 100, 0, 100, 0], [2, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 1]]);
 }
 
 /* chooseFilterType color */
@@ -109,7 +124,8 @@ unittest
         0, 100, 0, 100, 0, 100
     ], [0, 100, 0, 100, 0, 100], [1, 0, 1, 0, 1, 0]];
     Pixel pix = Pixel(data, data, data);
-    assert(hdr.chooseFilterType(pix) == [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    Encode encode = new Encode(hdr, pix);
+    assert(encode.chooseFilterType == [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0,
             0, 0, 100, 100, 100, 0, 0, 0, 100, 100, 100, 0, 0, 0, 100, 100, 100],
             [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1,
@@ -196,12 +212,42 @@ unittest
 /* makeIEND */
 unittest
 {
-    assert(makeIEND == [0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130]);
+    ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
+        0, 0, 0, 5, // height
+        0, 0, 0, 5, // width
+        8, // bitDepth
+        0, // colorType
+        0, // compressionMethod
+        0, // filterMethod
+        0, // interlaceMethod
+        168, 4, 121, 57]; // calculated crc
+
+    Header hdr = headers.readIHDR;
+    ubyte[][] sample_pix_data = [[1, 2, 3]];
+    Pixel pix = Pixel(sample_pix_data);
+    Encode encode = new Encode(hdr, pix);
+
+    assert(encode.makeIEND == [0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130]);
 }
 
 /* makeCrc */
 unittest
 {
+    ubyte[21] headers = ['I', 'H', 'D', 'R', // chunk type
+        0, 0, 0, 5, // height
+        0, 0, 0, 5, // width
+        8, // bitDepth
+        0, // colorType
+        0, // compressionMethod
+        0, // filterMethod
+        0, // interlaceMethod
+        168, 4, 121, 57]; // calculated crc
+
+    Header hdr = headers.readIHDR;
+    ubyte[][] sample_pix_data = [[1, 2, 3]];
+    Pixel pix = Pixel(sample_pix_data);
+    Encode encode = new Encode(hdr, pix);
+
     ubyte[] data = [73, 69, 78, 68];
-    assert(data.makeCrc == [174, 66, 96, 130]);
+    assert(encode.makeCrc(data) == [174, 66, 96, 130]);
 }
