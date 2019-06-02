@@ -62,33 +62,33 @@ auto inverseUp()
 /**
    *  Average(x) = Raw(x) - floor((Raw(x-bpp)+Prior(x))/2)
    */
-auto ave(ubyte[][] src)
+ubyte[][] ave(immutable ubyte[][] src)
 {
   if (src.length == 0)
-    return src;
-  ubyte[][] joinTemp;
-  auto output = [src.front];
-
+  {
+    return src.to!(ubyte[][]);
+  }
+  ubyte[][] output = src.to!(ubyte[][]).dup;
+  // src[0][1 .. $].each!((idx,a) => output[0][idx+1] = (a - (output[0][idx])/2).normalizePixelValues)
   foreach (idx, scanline; src[1 .. $])
   {
-    ubyte[] up = src[idx];
-    ubyte[] current = scanline;
-    ubyte upFirst = up.front / 2;
-    up.popFront;
-
-    joinTemp = [up, current];
-    auto verticalJoined = joinTemp.joinVertical;
-    ubyte[] ave = [upFirst] ~ verticalJoined.map!(a => (a.front + a.back) / 2)
-      .array
-      .to!(ubyte[]);
-
-    joinTemp = [ave, current];
-    verticalJoined = joinTemp.joinVertical;
-    output ~= [verticalJoined.neighborDifference().map!(a => a.back)
-      .array
-      .to!(ubyte[])];
+    scanline.each!((edx, a) => output[idx + 1][edx] = edx == 0 ? (a - (src[idx].front / 2)).normalizePixelValue
+        : (a - (src[idx][edx] + src[idx + 1][edx - 1]) / 2).normalizePixelValue);
   }
   return output;
+}
+
+ubyte normalizePixelValue(int value)
+{
+  if (value < 0)
+  {
+    value += 256;
+  }
+  else if (value >= 256)
+  {
+    value -= 256;
+  }
+  return value.to!ubyte;
 }
 
 auto inverseAve()
