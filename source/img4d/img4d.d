@@ -268,7 +268,7 @@ ref auto load(ref Header header, string filename)
     rgb.each!(a => joinRGB ~= a.joinVertical);
     auto pix = joinRGB.transposed;
     ubyte[][] R = pix[R].array.to!(ubyte[][]);
-    ubyte[][] G = pix[B].array.to!(ubyte[][]);
+    ubyte[][] G = pix[G].array.to!(ubyte[][]);
     ubyte[][] B = pix[B].array.to!(ubyte[][]);
     ubyte[][] A = pix[A].array.to!(ubyte[][]);
 
