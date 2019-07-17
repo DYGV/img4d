@@ -121,15 +121,10 @@ Calculate difference neighbor pixel
 Make array vertical
 
 - **auto inverseUp()**  
-Not implemented  
 - **auto ave()**  
-Not implemented  
 - **auto inverseAve()**  
-Not implemented  
 - **auto paeth()**  
-Not implemented  
 - **auto inversePaeth()**  
-Not implemented  
 ## img4d_lib.color_space  
 - **ref auto toGrayscale(T)(ref T[][][] color)**  
 Convert to grayscale by weighting  
