@@ -131,7 +131,7 @@ class Decode
             switch (filters[idx]) with (filterTypes)
             {
             case None:
-                temp = scanline.front;
+                temp = scanline.join;
                 actualData[idx] = temp;
 
                 break;
