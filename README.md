@@ -26,7 +26,6 @@ Pixel colorPix = hdr.load("png_img/lena.png");
 ```D
 Pixel grayPix = hdr.rgbToGrayscale(colorPix, true);
 hdr.colorType = colorTypes.grayscale;
-
 ```
 ### 
 ### save(encode)
