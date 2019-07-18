@@ -97,20 +97,22 @@ auto inverseAve()
 auto paeth()
 {
 }
-template paethPredictor(){
-    int paethPredictor(int upper,int left=0, int upperLeft=0){
-        int paeth = left + upper - upperLeft;
-        int paethLeft = abs(paeth - left);
-        int paethUpper = abs(paeth - upper);
-        int paethUpperLeft = abs(paeth - upperLeft);
-        if (paethLeft <= paethUpper && paethLeft <= paethUpperLeft)
-            return left;
-        if (paethUpper <= paethUpperLeft)
-            return upper;
-        return upperLeft;
-    }
-}
 
+template paethPredictor()
+{
+  int paethPredictor(int upper, int left = 0, int upperLeft = 0)
+  {
+    int paeth = left + upper - upperLeft;
+    int paethLeft = abs(paeth - left);
+    int paethUpper = abs(paeth - upper);
+    int paethUpperLeft = abs(paeth - upperLeft);
+    if (paethLeft <= paethUpper && paethLeft <= paethUpperLeft)
+      return left;
+    if (paethUpper <= paethUpperLeft)
+      return upper;
+    return upperLeft;
+  }
+}
 
 auto inversePaeth()
 {

@@ -1,5 +1,6 @@
 module img4d;
 
-public{
+public
+{
     import img4d.img4d;
 }

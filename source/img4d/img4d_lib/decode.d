@@ -97,7 +97,6 @@ class Decode
         return true;
     }
 
-
     int normalizePixelValue(int value)
     {
         return value < 256 ? value : value - 256;
@@ -109,7 +108,7 @@ class Decode
 
         ubyte[] filters = data.map!(sc => sc.front).array;
         ubyte[][][] rgb = data.map!(a => a.remove(0).chunks(lengthPerPixel).array).array;
-	
+
         actualData.length = filters.length;
 
         foreach (idx, scanline; rgb)
@@ -168,7 +167,7 @@ class Decode
                 break;
 
             case Paeth:
-		mixin paethPredictor;
+                mixin paethPredictor;
                 uint upIdx = (idx - 1).to!uint;
                 auto joined = scanline.join;
 
@@ -176,8 +175,8 @@ class Decode
                         a) => temp ~= [this.normalizePixelValue(a + joined[idx])].to!(ubyte[]));
 
                 actualData[upIdx][lengthPerPixel .. $].each!((i,
-                        a) => temp ~= [this.normalizePixelValue(paethPredictor(
-                        a,temp[i], actualData[upIdx][i]) + joined[i + lengthPerPixel])].to!(ubyte[]));
+                        a) => temp ~= [this.normalizePixelValue(paethPredictor(a,
+                        temp[i], actualData[upIdx][i]) + joined[i + lengthPerPixel])].to!(ubyte[]));
 
                 actualData[idx] = temp;
                 break;
