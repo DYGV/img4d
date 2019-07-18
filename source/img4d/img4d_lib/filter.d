@@ -69,7 +69,6 @@ ubyte[][] ave(immutable ubyte[][] src)
     return src.to!(ubyte[][]);
   }
   ubyte[][] output = src.to!(ubyte[][]).dup;
-  // src[0][1 .. $].each!((idx,a) => output[0][idx+1] = (a - (output[0][idx])/2).normalizePixelValues)
   foreach (idx, scanline; src[1 .. $])
   {
     scanline.each!((edx, a) => output[idx + 1][edx] = edx == 0 ? (a - (src[idx].front / 2)).normalizePixelValue
@@ -98,6 +97,20 @@ auto inverseAve()
 auto paeth()
 {
 }
+template paethPredictor(){
+    int paethPredictor(int upper,int left=0, int upperLeft=0){
+        int paeth = left + upper - upperLeft;
+        int paethLeft = abs(paeth - left);
+        int paethUpper = abs(paeth - upper);
+        int paethUpperLeft = abs(paeth - upperLeft);
+        if (paethLeft <= paethUpper && paethLeft <= paethUpperLeft)
+            return left;
+        if (paethUpper <= paethUpperLeft)
+            return upper;
+        return upperLeft;
+    }
+}
+
 
 auto inversePaeth()
 {

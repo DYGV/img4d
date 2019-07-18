@@ -15,8 +15,8 @@ int main()
       writefln("Width  %8d\nHeight  %7d", beforeEncode.width, beforeEncode.height);
       writefln("Bit Depth  %4d\nColor Type  %3d\n", beforeEncode.bitDepth, beforeEncode.colorType);
 
-      Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
-      beforeEncode.colorType = colorTypes.grayscale;
+      // Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
+      // beforeEncode.colorType = colorTypes.grayscale;
 
       /*  Canny Edge Detection (Defective State) 
     auto edge = canny(grayPix,80,150);
@@ -27,7 +27,7 @@ int main()
     */
 
       // start encode
-      bool encodedData = beforeEncode.save(grayPix, "png_img/encoded_lena_1.png");
+      bool encodedData = beforeEncode.save(colorPix, "png_img/encoded_lena_1.png");
 
       //read encoded file
       Header afterEncode;

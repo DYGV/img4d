@@ -97,18 +97,6 @@ class Decode
         return true;
     }
 
-    int paethPredictor(int left, int upper, int upperLeft)
-    {
-        int paeth = left + upper - upperLeft;
-        int paethLeft = abs(paeth - left);
-        int paethUpper = abs(paeth - upper);
-        int paethUpperLeft = abs(paeth - upperLeft);
-        if (paethLeft <= paethUpper && paethLeft <= paethUpperLeft)
-            return left;
-        if (paethUpper <= paethUpperLeft)
-            return upper;
-        return upperLeft;
-    }
 
     int normalizePixelValue(int value)
     {
@@ -121,7 +109,7 @@ class Decode
 
         ubyte[] filters = data.map!(sc => sc.front).array;
         ubyte[][][] rgb = data.map!(a => a.remove(0).chunks(lengthPerPixel).array).array;
-
+	
         actualData.length = filters.length;
 
         foreach (idx, scanline; rgb)
@@ -180,6 +168,7 @@ class Decode
                 break;
 
             case Paeth:
+		mixin paethPredictor;
                 uint upIdx = (idx - 1).to!uint;
                 auto joined = scanline.join;
 
@@ -187,8 +176,8 @@ class Decode
                         a) => temp ~= [this.normalizePixelValue(a + joined[idx])].to!(ubyte[]));
 
                 actualData[upIdx][lengthPerPixel .. $].each!((i,
-                        a) => temp ~= [this.normalizePixelValue(paethPredictor(temp[i],
-                        a, actualData[upIdx][i]) + joined[i + lengthPerPixel])].to!(ubyte[]));
+                        a) => temp ~= [this.normalizePixelValue(paethPredictor(
+                        a,temp[i], actualData[upIdx][i]) + joined[i + lengthPerPixel])].to!(ubyte[]));
 
                 actualData[idx] = temp;
                 break;
