@@ -130,6 +130,7 @@ class Encode
                     filteredSub = this.pixel.grayscale.sub;
                     filteredUp = this.pixel.grayscale.up;
                     filteredAve = this.pixel.grayscale.to!(immutable ubyte[][]).ave;
+		    filteredPaeth = this.pixel.grayscale.to!(immutable ubyte[][]).paeth;
                 }
                 else
                 {
@@ -152,6 +153,14 @@ class Encode
                     B = tmpB.to!(immutable ubyte[][]).ave;
                     A = tmpA.to!(immutable ubyte[][]).ave;
                     filteredAve = Pixel(R, G, B, A).Pixel;
+
+		    R = tmpR.to!(immutable ubyte[][]).paeth;
+                    G = tmpG.to!(immutable ubyte[][]).paeth;
+                    B = tmpB.to!(immutable ubyte[][]).paeth;
+                    A = tmpA.to!(immutable ubyte[][]).paeth;
+                    filteredPaeth = Pixel(R, G, B, A).Pixel;
+
+
                 }
             }
         }
@@ -159,8 +168,10 @@ class Encode
         sumSub = this.sumScanline(filteredSub);
         sumUp = this.sumScanline(filteredUp);
         sumAve = this.sumScanline(filteredAve);
+	sumPaeth = this.sumScanline(filteredPaeth);
 
-        int[][] sums = [sumNone, sumSub, sumUp, sumAve];
+
+        int[][] sums = [sumNone, sumSub, sumUp, sumAve, sumPaeth];
         int[] minIndex = sums.joinVertical
             .map!(minIndex)
             .array
@@ -188,6 +199,7 @@ class Encode
                     actualData[idx] = min ~ filteredAve[idx];
                     break;
                 case Paeth:
+		    actualData[idx] = min ~ filteredPaeth[idx];
                     break;
                 default:
                     break;
