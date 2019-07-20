@@ -95,7 +95,7 @@ auto inverseAve()
 }
 
 //  Paeth(x) = Raw(x) - PaethPredictor(Raw(x-bpp), Prior(x), Prior(x-bpp))
-ubyte[][]  paeth(immutable ubyte[][] src)
+ubyte[][] paeth(immutable ubyte[][] src)
 {
   if (src.length == 0)
     return src.to!(ubyte[][]);
@@ -103,10 +103,9 @@ ubyte[][]  paeth(immutable ubyte[][] src)
   ubyte[][] output = src.to!(ubyte[][]).dup;
   foreach (idx, scanline; src[1 .. $])
   {
-    scanline.each!((edx, a) => output[idx + 1][edx] = 
-		edx == 0 
-		? (a - paethPredictor(src[idx].front)).normalizePixelValue
-        	: (a - paethPredictor(src[idx][edx] , src[idx + 1][edx - 1], src[idx][edx-1])).normalizePixelValue);
+    scanline.each!((edx, a) => output[idx + 1][edx] = edx == 0 ? (a - paethPredictor(src[idx].front))
+        .normalizePixelValue : (a - paethPredictor(src[idx][edx],
+          src[idx + 1][edx - 1], src[idx][edx - 1])).normalizePixelValue);
   }
   return output;
 }
