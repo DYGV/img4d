@@ -14,23 +14,44 @@ pure ref auto inverseSub(ref ubyte[][] scanline, bool gray)
     .join.transposed;
 }
 
-pure ref auto ubyte[][] sub(ref ubyte[][] src)
+ref auto ubyte[][] sub(ref ubyte[][] src)
 {
-  if (src.empty)
-    return src;
-
-  return src.neighborDifference;
+  ubyte[][] output;
+  output.length = src.length;
+  foreach (idx, scanline; src)
+  {
+    foreach (edx, sc; scanline)
+    {
+      if (edx == 0)
+      {
+        output[idx] ~= sc;
+      }
+      else
+      {
+        output[idx] ~= (sc - scanline[edx - 1]).normalizePixelValue;
+      }
+    }
+  }
+  return output;
 }
 
-pure ref auto ubyte[][] up(ref ubyte[][] src)
+ref auto ubyte[][] up(ref ubyte[][] src)
 {
-  if (src.empty)
-    return src;
-
-  ubyte[][] srcVertical = src.joinVertical;
-  ubyte[][] diff = srcVertical.neighborDifference;
-
-  return diff.joinVertical;
+  ubyte[][] output;
+  output.length = src.length;
+  foreach (idx, scanline; src)
+  {
+    if (idx == 0)
+    {
+      output[idx] ~= scanline;
+    }
+    else
+    {
+      scanline.each!((edx, a) => output[idx] ~= (a - src[idx - 1][edx])
+          .normalizePixelValue.to!ubyte);
+    }
+  }
+  return output;
 }
 
 /**
@@ -62,16 +83,20 @@ auto inverseUp()
 /**
    *  Average(x) = Raw(x) - floor((Raw(x-bpp)+Prior(x))/2)
    */
-ubyte[][] ave(immutable ubyte[][] src)
+ubyte[][] ave(ref ubyte[][] src)
 {
   if (src.length == 0)
   {
-    return src.to!(ubyte[][]);
+    return src;
   }
-  ubyte[][] output = src.to!(ubyte[][]).dup;
+
+  ubyte[][] output;
+  output.length = src.length;
+  output.front = src.front;
+
   foreach (idx, scanline; src[1 .. $])
   {
-    scanline.each!((edx, a) => output[idx + 1][edx] = edx == 0 ? (a - (src[idx].front / 2)).normalizePixelValue
+    scanline.each!((edx, a) => output[idx + 1] ~= edx == 0 ? (a - (src[idx].front / 2)).normalizePixelValue
         : (a - (src[idx][edx] + src[idx + 1][edx - 1]) / 2).normalizePixelValue);
   }
   return output;
@@ -95,17 +120,19 @@ auto inverseAve()
 }
 
 //  Paeth(x) = Raw(x) - PaethPredictor(Raw(x-bpp), Prior(x), Prior(x-bpp))
-ubyte[][] paeth(immutable ubyte[][] src)
+ubyte[][] paeth(ref ubyte[][] src)
 {
   if (src.length == 0)
-    return src.to!(ubyte[][]);
+    return src;
+  ubyte[][] output;
+  output.length = src.length;
+  output.front = src.front;
 
-  ubyte[][] output = src.to!(ubyte[][]).dup;
   foreach (idx, scanline; src[1 .. $])
   {
-    scanline.each!((edx, a) => output[idx + 1][edx] = edx == 0 ? (a - paethPredictor(src[idx].front))
-        .normalizePixelValue : (a - paethPredictor(src[idx][edx],
-          src[idx + 1][edx - 1], src[idx][edx - 1])).normalizePixelValue);
+    scanline.each!((edx, a) => output[idx + 1] ~= edx == 0 ? (a - paethPredictor(src[idx].front)).normalizePixelValue
+        : (a - paethPredictor(src[idx][edx], src[idx + 1][edx - 1], src[idx][edx - 1]))
+        .normalizePixelValue);
   }
   return output;
 }

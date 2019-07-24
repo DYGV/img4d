@@ -129,8 +129,8 @@ class Encode
                     filteredNone = this.pixel.grayscale;
                     filteredSub = this.pixel.grayscale.sub;
                     filteredUp = this.pixel.grayscale.up;
-                    filteredAve = this.pixel.grayscale.to!(immutable ubyte[][]).ave;
-                    filteredPaeth = this.pixel.grayscale.to!(immutable ubyte[][]).paeth;
+                    filteredAve = this.pixel.grayscale.ave;
+                    filteredPaeth = this.pixel.grayscale.paeth;
                 }
                 else
                 {
@@ -148,18 +148,17 @@ class Encode
                     A = tmpA.up;
                     filteredUp = Pixel(R, G, B, A).Pixel;
 
-                    R = tmpR.to!(immutable ubyte[][]).ave;
-                    G = tmpG.to!(immutable ubyte[][]).ave;
-                    B = tmpB.to!(immutable ubyte[][]).ave;
-                    A = tmpA.to!(immutable ubyte[][]).ave;
+                    R = tmpR.ave;
+                    G = tmpG.ave;
+                    B = tmpB.ave;
+                    A = tmpA.ave;
                     filteredAve = Pixel(R, G, B, A).Pixel;
 
-                    R = tmpR.to!(immutable ubyte[][]).paeth;
-                    G = tmpG.to!(immutable ubyte[][]).paeth;
-                    B = tmpB.to!(immutable ubyte[][]).paeth;
-                    A = tmpA.to!(immutable ubyte[][]).paeth;
+                    R = tmpR.paeth;
+                    G = tmpG.paeth;
+                    B = tmpB.paeth;
+                    A = tmpA.paeth;
                     filteredPaeth = Pixel(R, G, B, A).Pixel;
-
                 }
             }
         }
