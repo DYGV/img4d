@@ -15,19 +15,11 @@ int main()
   writefln("Width  %8d\nHeight  %7d", beforeEncode.width, beforeEncode.height);
   writefln("Bit Depth  %4d\nColor Type  %3d\n", beforeEncode.bitDepth, beforeEncode.colorType);
 
-  // Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
-  // beforeEncode.colorType = colorTypes.grayscale;
-
-  /*  Canny Edge Detection (Defective State) 
-    auto edge = canny(grayPix,80,150);
-    auto edgeFile = File("../png_img/edge_lena.txt","w");
-    edge.each!(a => edgeFile.writeln(a));
-    edgeFile.flush();
-    executeShell("cd ../png_img && python generate_img.py");
-    */
+  Pixel grayPix = beforeEncode.rgbToGrayscale(colorPix, true);
+  beforeEncode.colorType = colorTypes.grayscale;
 
   // start encode
-  bool encodedData = beforeEncode.save(colorPix, "png_img/encoded_lena_1.png");
+  bool encodedData = beforeEncode.save(grayPix, "png_img/encoded_lena_1.png");
 
   //read encoded file
   Header afterEncode;
@@ -36,18 +28,6 @@ int main()
 
   writefln("Width  %8d\nHeight  %7d", afterEncode.width, afterEncode.height);
   writefln("Bit Depth  %4d\nColor Type  %3d\n", afterEncode.bitDepth, afterEncode.colorType);
-
-  afterEncode.save(encodedDataToDecode, "png_img/encoded_lena_2.png");
-
-  // Verification (compare with original image)
-  /*version(none){
-        executeShell("cd ../png_img && composite -compose difference lena.png encoded_lena.png diff.png");
-        auto diff =  executeShell("cd ../png_img && identify -format \"%[mean]\" diff.png").output;
-        if(diff != "0\n"){
-            "something is wrong (It doesn't match the original image)".writeln;
-            diff.writeln;
-        }
-    }*/
 
   return 0;
 }
