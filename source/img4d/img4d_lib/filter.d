@@ -1,6 +1,7 @@
 module img4d_lib.filter;
 
 import std.stdio, std.array, std.conv, std.algorithm, std.range, std.math;
+import std.parallelism : parallel;
 
 pure ref auto inverseSub(ref ubyte[][] scanline)
 {
@@ -18,7 +19,7 @@ ref auto ubyte[][] sub(ref ubyte[][] src)
 {
   ubyte[][] output;
   output.length = src.length;
-  foreach (idx, scanline; src)
+  foreach (idx, scanline; src.parallel)
   {
     foreach (edx, sc; scanline)
     {
@@ -39,7 +40,7 @@ ref auto ubyte[][] up(ref ubyte[][] src)
 {
   ubyte[][] output;
   output.length = src.length;
-  foreach (idx, scanline; src)
+  foreach (idx, scanline; src.parallel)
   {
     if (idx == 0)
     {
@@ -94,7 +95,7 @@ ubyte[][] ave(ref ubyte[][] src)
   output.length = src.length;
   output.front = src.front;
 
-  foreach (idx, scanline; src[1 .. $])
+  foreach (idx, scanline; src[1 .. $].parallel)
   {
     scanline.each!((edx, a) => output[idx + 1] ~= edx == 0 ? (a - (src[idx].front / 2)).normalizePixelValue
         : (a - (src[idx][edx] + src[idx + 1][edx - 1]) / 2).normalizePixelValue);
@@ -120,7 +121,7 @@ auto inverseAve()
 }
 
 //  Paeth(x) = Raw(x) - PaethPredictor(Raw(x-bpp), Prior(x), Prior(x-bpp))
-ubyte[][] paeth(ref ubyte[][] src)
+ref auto ubyte[][] paeth(ref ubyte[][] src)
 {
   if (src.length == 0)
     return src;
@@ -128,7 +129,7 @@ ubyte[][] paeth(ref ubyte[][] src)
   output.length = src.length;
   output.front = src.front;
 
-  foreach (idx, scanline; src[1 .. $])
+  foreach (idx, scanline; src[1 .. $].parallel)
   {
     scanline.each!((edx, a) => output[idx + 1] ~= edx == 0 ? (a - paethPredictor(src[idx].front)).normalizePixelValue
         : (a - paethPredictor(src[idx][edx], src[idx + 1][edx - 1], src[idx][edx - 1]))

@@ -53,12 +53,6 @@ class Encode
         const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
         ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
 
-        with (this.header) with (colorTypes)
-        {
-            byteData.length = (colorType.isGrayscale)
-                ? this.pixel.grayscale.length : this.pixel.R.length;
-        }
-
         beforeCmpsData = this.chooseFilterType.join;
         idatData ~= cast(ubyte[]) cmps.compress(beforeCmpsData);
         idatData ~= cast(ubyte[]) cmps.flush();
@@ -178,7 +172,7 @@ class Encode
 
         with (filterTypes)
         {
-            foreach (idx, min; minIndex.array.to!(ubyte[]).parallel())
+            foreach (idx, min; minIndex.array.to!(ubyte[]).parallel)
             {
 
                 switch (min)

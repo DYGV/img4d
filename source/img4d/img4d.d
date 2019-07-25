@@ -208,15 +208,32 @@ struct Pixel
             return _A;
         }
 
-        pure ref ubyte[][] Pixel()
+        ref ubyte[][] Pixel()
         {
             if (!_RGB.empty)
                 return _RGB;
+            _RGB.length = R.length;
+            if (A.empty)
+            {
+                foreach (idx; 0 .. R.length)
+                {
+                    foreach (edx; 0 .. R.front.length)
+                    {
+                        _RGB[idx] ~= [R[idx][edx]] ~ [G[idx][edx]] ~ [B[idx][edx]];
+                    }
+                }
+            }
+            else
+            {
+                foreach (idx; 0 .. R.length)
+                {
+                    foreach (edx; 0 .. R.front.length)
+                    {
+                        _RGB[idx] ~= [R[idx][edx]] ~ [G[idx][edx]] ~ [B[idx][edx]] ~ [A[idx][edx]];
+                    }
+                }
 
-            _RGB = (A.empty) ? [_R.join, _G.join, _B.join].transposed.join.chunks(_R[0].length * 3)
-                .array : [_R.join, _G.join, _B.join, _A.join].transposed.join.chunks(_R[0].length * 4)
-                .array;
-
+            }
             return _RGB;
         }
 
