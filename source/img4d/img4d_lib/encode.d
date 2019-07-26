@@ -5,10 +5,24 @@ import std.stdio, std.array, std.bitmanip, std.conv, std.zlib, std.digest,
     std.digest.crc, std.range, std.algorithm;
 import std.parallelism : parallel;
 
+mixin template bitOperator()
+{
+    void set32bitInt(ref ubyte[4] buf, uint data)
+    {
+        buf = [(data >> 24) & 0xff, (data >> 16) & 0xff, (data >> 8) & 0xff, (data >> 0) & 0xff];
+    }
+
+    uint read32bitInt(in ubyte[] buf)
+    {
+        return ((buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | (buf[3] << 0));
+    }
+}
+
 class Encode
 {
     Header header;
     Pixel pixel;
+    mixin bitOperator;
 
     this(ref Header header, ref Pixel pixel)
     {
@@ -16,7 +30,7 @@ class Encode
         this.pixel = pixel;
     }
 
-    pure ref auto ubyte[] makeIHDR()
+    ref auto ubyte[] makeIHDR()
     {
         ubyte depth, colorSpaceType, compress, filterType, adam7;
 
@@ -37,8 +51,8 @@ class Encode
             0x0, 0x0, 0x0, 0x00, // height
             depth, colorSpaceType, compress, filterType, adam7
         ];
-        chunkIHDR[4 .. 8].append!uint(this.header.width);
-        chunkIHDR[8 .. 12].append!uint(this.header.height);
+        set32bitInt(chunkIHDR[4 .. 8], this.header.width);
+        set32bitInt(chunkIHDR[8 .. 12], this.header.height);
 
         ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ this.makeCrc(chunkIHDR);
         return sig ~ IHDR;
@@ -58,7 +72,7 @@ class Encode
         idatData ~= cast(ubyte[]) cmps.flush();
         chunkSize = idatData.length.to!uint;
 
-        bodyLenIDAT[0 .. 4].append!uint(chunkSize);
+        set32bitInt(bodyLenIDAT[0 .. 4], chunkSize);
         chunkData = chunkType ~ idatData;
         IDAT = bodyLenIDAT ~ chunkData ~ this.makeCrc(chunkData);
 

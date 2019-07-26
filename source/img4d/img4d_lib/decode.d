@@ -3,10 +3,12 @@ module img4d_lib.decode;
 import img4d, img4d_lib.filter;
 import std.file : read;
 import std.digest.crc : CRC32, crc32Of;
-import std.stdio, std.array, std.bitmanip, std.zlib, std.conv, std.algorithm, std.range, std.math;
+import std.stdio, std.array, std.bitmanip, std.zlib, std.conv, std.algorithm,
+    std.range, std.math, img4d_lib.encode;
 
 class Decode
 {
+    mixin bitOperator;
     Header header;
     this(ref Header header)
     {
@@ -26,8 +28,8 @@ class Decode
         if (header.length != 21)
             throw new Exception("invalid header format");
         ubyte[] chunk = header[0 .. 17]; // Chunk Type + Chunk Data 
-        this.header = Header(this.byteToInt(header[4 .. 8]), // width
-                this.byteToInt(header[8 .. 12]), // height
+        this.header = Header(read32bitInt(header[4 .. 8]), // width
+                read32bitInt(header[8 .. 12]), // height
                 header[12], // bitDepth
                 header[13], // colorType
                 header[14], // compressionMethod
@@ -62,15 +64,6 @@ class Decode
     }
 
     /**
-   *  convert from the given endianness 
-   *  to the native endianness
-   */
-    int byteToInt(ubyte[] data)
-    {
-        return data.peek!int();
-    }
-
-    /**
    *  Cast array to string
    */
     string byteToString(ubyte[] data)
@@ -97,7 +90,7 @@ class Decode
         return true;
     }
 
-    int normalizePixelValue(int value)
+    int normalizePixelValue(in int value)
     {
         return value < 256 ? value : value - 256;
     }
@@ -110,7 +103,7 @@ class Decode
         ubyte[][][] rgb = data.map!(a => a.remove(0).chunks(lengthPerPixel).array).array;
 
         actualData.length = filters.length;
-
+        mixin paethPredictor;
         foreach (idx, scanline; rgb)
         {
             ubyte[] temp;
@@ -118,9 +111,7 @@ class Decode
             switch (filters[idx]) with (filterTypes)
             {
             case None:
-                temp = scanline.join;
-                actualData[idx] = temp;
-
+                actualData[idx] = scanline.join;
                 break;
 
             case Sub:
@@ -155,7 +146,8 @@ class Decode
                 else
                 {
                     scanline.popFront;
-                    auto sc = scanline.join;
+                    ubyte[] sc = scanline.join;
+
                     up.front.each!((idx,
                             n) => temp ~= [this.normalizePixelValue((n / 2) + current.front[0][idx])].to!(
                             ubyte[]));
@@ -167,9 +159,9 @@ class Decode
                 break;
 
             case Paeth:
-                mixin paethPredictor;
                 uint upIdx = (idx - 1).to!uint;
-                auto joined = scanline.join;
+                ubyte[] joined;
+                scanline.each!(a => joined ~= a);
 
                 actualData[upIdx][0 .. lengthPerPixel].each!((idx,
                         a) => temp ~= [this.normalizePixelValue(a + joined[idx])].to!(ubyte[]));
@@ -213,7 +205,8 @@ class Decode
         UnCompress uc = new UnCompress(HeaderFormat.deflate);
         while (idx >= 0)
         {
-            chunkDataSize = this.byteToInt(data[idx .. idx + chunkLengthSize]);
+            uint back_idx = idx + chunkLengthSize;
+            chunkDataSize = read32bitInt(data[idx .. back_idx]);
             idx += chunkLengthSize;
             chunkType = this.byteToString(data[idx .. idx + chunkTypeSize]);
 
