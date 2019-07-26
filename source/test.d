@@ -20,23 +20,12 @@ unittest  // decode.d
         0, // interlaceMethod
         2, 13, 177, 178]; // calculated crc
 
-    // byteToInt
-    ubyte[] ubyteArray = [0, 0, 0, 5];
-    assert(decode.byteToInt(ubyteArray) == 5);
-
     // byteToString
     ubyte[] hello = ['H', 'E', 'L', 'L', 'O'];
     assert(decode.byteToString(hello) == "HELLO");
 
     // readIHDR
     hdr = decode.readIHDR(headers);
-    assert(hdr.height == decode.byteToInt(headers[4 .. 8]));
-    assert(hdr.width == decode.byteToInt(headers[8 .. 12]));
-    assert(hdr.bitDepth == headers[12]);
-    assert(hdr.colorType == headers[13]);
-    assert(hdr.compressionMethod == headers[14]);
-    assert(hdr.filterMethod == headers[15]);
-    assert(hdr.interlaceMethod == headers[16]);
 
     // parse
     ubyte[][] colorPix = decode.parse("png_img/lena.png");
