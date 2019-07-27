@@ -122,7 +122,7 @@ class Decode
 
             case Up:
                 uint upIdx = (idx - 1).to!uint;
-                temp = scanline.dup.join;
+                temp = scanline.join;
                 actualData[idx] = (temp[] += actualData[upIdx][]).map!(
                         a => this.normalizePixelValue(a))
                     .array
