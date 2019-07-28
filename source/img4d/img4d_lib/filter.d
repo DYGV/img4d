@@ -58,7 +58,7 @@ ref auto ubyte[][] up(ref ubyte[][] src)
 /**
    *  Calculate difference neighbor pixel.
    */
-ref auto neighborDifference(ref ubyte[][] src)	
+ref auto neighborDifference(ref ubyte[][] src)
 {
   return src.map!(a => a.slide(2))
     .map!(b => b.front.front ~ b.map!(c => c.front - c.back)
@@ -158,7 +158,7 @@ template paethPredictor()
   */
 int abs(int num)
 {
-        return (num^(num >> 31)) - (num >> 31);
+  return (num ^ (num >> 31)) - (num >> 31);
 }
 
 auto inversePaeth()
