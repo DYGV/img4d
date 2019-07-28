@@ -1,6 +1,6 @@
 module img4d_lib.filter;
 
-import std.stdio, std.array, std.conv, std.algorithm, std.range, std.math;
+import std.stdio, std.array, std.conv, std.algorithm, std.range;
 import std.parallelism : parallel;
 
 pure ref auto inverseSub(ref ubyte[][] scanline)
@@ -58,9 +58,8 @@ ref auto ubyte[][] up(ref ubyte[][] src)
 /**
    *  Calculate difference neighbor pixel.
    */
-pure ref auto neighborDifference(ref ubyte[][] src)
+ref auto neighborDifference(ref ubyte[][] src)	
 {
-
   return src.map!(a => a.slide(2))
     .map!(b => b.front.front ~ b.map!(c => c.front - c.back)
         .map!(d => d > 0 ? 256 - d : d.abs)
@@ -143,15 +142,23 @@ template paethPredictor()
   int paethPredictor(int upper, int left = 0, int upperLeft = 0)
   {
     int paeth = left + upper - upperLeft;
-    int paethLeft = abs(paeth - left);
-    int paethUpper = abs(paeth - upper);
-    int paethUpperLeft = abs(paeth - upperLeft);
+    int paethLeft = (paeth - left).abs;
+    int paethUpper = (paeth - upper).abs;
+    int paethUpperLeft = (paeth - upperLeft).abs;
     if (paethLeft <= paethUpper && paethLeft <= paethUpperLeft)
       return left;
     if (paethUpper <= paethUpperLeft)
       return upper;
     return upperLeft;
   }
+}
+
+/**
+  * calculate absolute value by using bitshift
+  */
+int abs(int num)
+{
+        return (num^(num >> 31)) - (num >> 31);
 }
 
 auto inversePaeth()
