@@ -53,7 +53,6 @@ class Encode
         ];
         set32bitInt(chunkIHDR[4 .. 8], this.header.width);
         set32bitInt(chunkIHDR[8 .. 12], this.header.height);
-
         ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ this.makeCrc(chunkIHDR);
         return sig ~ IHDR;
     }
@@ -79,9 +78,12 @@ class Encode
         return IDAT;
     }
 
-    pure ubyte[] makeAncillary()
+    auto makeAncillary(int chunk_length, ubyte[] chunk_type, ubyte[] chunk_data)
     {
-        throw new Exception("Not implemented.");
+        ubyte[4] length;
+        set32bitInt(length, chunk_length);
+        ubyte[] to_crc_data = chunk_type ~ chunk_data;
+        return length ~ to_crc_data ~ makeCrc(to_crc_data);
     }
 
     pure ubyte[] makeIEND()
