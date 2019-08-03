@@ -11,10 +11,37 @@ mixin template bitOperator()
     {
         buf = [(data >> 24) & 0xff, (data >> 16) & 0xff, (data >> 8) & 0xff, (data >> 0) & 0xff];
     }
+    void set32bitInt(ref ubyte[2] buf, uint data)
+    {
+        buf = [(data >> 8) & 0xff, (data >> 0) & 0xff];
+    }
 
     uint read32bitInt(in ubyte[] buf)
     {
         return ((buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | (buf[3] << 0));
+    }
+}
+
+mixin template makeChunk(){
+  import  std.conv, std.digest.crc, std.range, std.algorithm;
+
+  auto makeChunk(ubyte[] chunk_type, ubyte[] chunk_data)
+    {
+      mixin bitOperator;
+      ubyte[4] length;
+      set32bitInt(length, chunk_data.length.to!int);
+      ubyte[] to_crc_data = chunk_type ~ chunk_data;
+      return length ~ to_crc_data ~ makeCrc(to_crc_data);
+    }
+  
+  /**
+   *  Calculate from chunk data. 
+   */
+  auto makeCrc(ubyte[] data)
+    {
+        ubyte[4] crc;
+        data.crc32Of.each!((idx, a) => crc[3 - idx] = a);
+        return crc;
     }
 }
 
@@ -23,6 +50,7 @@ class Encode
     Header header;
     Pixel pixel;
     mixin bitOperator;
+    mixin makeChunk;
 
     this(ref Header header, ref Pixel pixel)
     {
@@ -53,7 +81,7 @@ class Encode
         ];
         set32bitInt(chunkIHDR[4 .. 8], this.header.width);
         set32bitInt(chunkIHDR[8 .. 12], this.header.height);
-        ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ this.makeCrc(chunkIHDR);
+        ubyte[] IHDR = bodyLenIHDR ~ chunkIHDR ~ makeCrc(chunkIHDR);
         return sig ~ IHDR;
     }
 
@@ -73,7 +101,7 @@ class Encode
 
         set32bitInt(bodyLenIDAT[0 .. 4], chunkSize);
         chunkData = chunkType ~ idatData;
-        IDAT = bodyLenIDAT ~ chunkData ~ this.makeCrc(chunkData);
+        IDAT = bodyLenIDAT ~ chunkData ~ makeCrc(chunkData);
 
         return IDAT;
     }
@@ -86,23 +114,13 @@ class Encode
         return length ~ to_crc_data ~ makeCrc(to_crc_data);
     }
 
-    pure ubyte[] makeIEND()
+    ubyte[] makeIEND()
     {
         const ubyte[] chunkIEND = [0x0, 0x0, 0x0, 0x0];
-        const ubyte[] chunkType = [0x49, 0x45, 0x4E, 0x44];
-        ubyte[] IEND = chunkIEND ~ chunkType ~ this.makeCrc(chunkType);
+        ubyte[] chunkType = [0x49, 0x45, 0x4E, 0x44];
+        ubyte[] IEND = chunkIEND ~ chunkType ~ makeCrc(chunkType);
 
         return IEND;
-    }
-
-    /**
-   *  Calculate from chunk data. 
-   */
-    pure ref auto makeCrc(in ubyte[] data)
-    {
-        ubyte[4] crc;
-        data.crc32Of.each!((idx, a) => crc[3 - idx] = a);
-        return crc;
     }
 
     /**
