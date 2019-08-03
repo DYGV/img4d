@@ -307,7 +307,7 @@ bool save(ref Header header, ref Pixel pix, string filename)
 bool save(ref Header header, ref Pixel pix, string filename, ubyte[] ancillary_chunks)
 {
     Encode encode = new Encode(header, pix);
-    ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ ancillary_chunks ~ encode.makeIEND;
+    ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT  ~ encode.makeIEND;
     auto file = File(filename, "w");
     file.rawWrite(data);
     file.flush();
