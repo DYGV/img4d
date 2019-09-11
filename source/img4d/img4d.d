@@ -4,6 +4,9 @@ import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter,
     img4d_lib.color_space, img4d_lib.edge;
 
 import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range, std.file : exists;
+import img4d_lib.dft;
+import std.complex;
+import std.math;
 
 int lengthPerPixel;
 
@@ -356,6 +359,39 @@ ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false)
     }
 
     return (fastMode == true) ? color.toGrayscale(fastMode) : color.toGrayscale;
+}
+
+// deprecated (take a lot of time because of using dft)
+ubyte[][] psd(ubyte[][] data, ref Header hdr){
+	Complex!(double)[][] _dft;
+	_dft.length = hdr.height;
+
+	for(int i=0;i<hdr.height;i++){
+		_dft[i] = dft(data[i].to!(Complex!(double)[]), hdr.width);
+	}
+	_dft = transpose(_dft, hdr.height, hdr.width);
+
+	for(int i=0;i<hdr.height;i++){
+		_dft[i] = dft(_dft[i], hdr.width);
+	}
+	_dft = transpose(_dft, hdr.height, hdr.width);
+
+	ubyte[][] dest = uninitializedArray!(ubyte[][])(hdr.height, hdr.width);
+	for(int i=0;i<hdr.height;++i){
+	    for(int j=0;j<hdr.width;++j){
+		    double _power_spectrum =  (10 * floor(log(_dft[i][j].abs)));
+		    ubyte power_spectrum;
+		    if(pix < 0){
+			power_spectrum = 0;
+		    }else if(pix > 255){
+			power_spectrum = 255;
+		    }else{
+			 power_spectrum = _power_spectrum.to!ubyte;
+		    }
+		    dest[i][j] = power_spectrum;
+	    }
+	}
+	return dest.shift( hdr.height, hdr.width);
 }
 
 pure auto toBinary(T)(ref T[][] gray, T threshold = 127)
