@@ -297,7 +297,7 @@ ref auto load(ref Header header, string filename)
 
 bool save(ref Header header, ref Pixel pix, string filename)
 {
-    
+
     Encode encode = new Encode(header, pix);
     ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ encode.makeIEND;
     auto file = File(filename, "w");
@@ -310,7 +310,7 @@ bool save(ref Header header, ref Pixel pix, string filename)
 bool save(ref Header header, ref Pixel pix, string filename, ubyte[] ancillary_chunks)
 {
     Encode encode = new Encode(header, pix);
-    ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT  ~ encode.makeIEND;
+    ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT ~ encode.makeIEND;
     auto file = File(filename, "w");
     file.rawWrite(data);
     file.flush();
@@ -362,36 +362,46 @@ ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false)
 }
 
 // deprecated (take a lot of time because of using dft)
-ubyte[][] psd(ubyte[][] data, ref Header hdr){
-	Complex!(double)[][] _dft;
-	_dft.length = hdr.height;
+ubyte[][] psd(ubyte[][] data, ref Header hdr)
+{
+    Complex!(double)[][] _dft;
+    _dft.length = hdr.height;
 
-	for(int i=0;i<hdr.height;i++){
-		_dft[i] = dft(data[i].to!(Complex!(double)[]), hdr.width);
-	}
-	_dft = transpose(_dft, hdr.height, hdr.width);
+    for (int i = 0; i < hdr.height; i++)
+    {
+        _dft[i] = dft(data[i].to!(Complex!(double)[]), hdr.width);
+    }
+    _dft = transpose(_dft, hdr.height, hdr.width);
 
-	for(int i=0;i<hdr.height;i++){
-		_dft[i] = dft(_dft[i], hdr.width);
-	}
-	_dft = transpose(_dft, hdr.height, hdr.width);
+    for (int i = 0; i < hdr.height; i++)
+    {
+        _dft[i] = dft(_dft[i], hdr.width);
+    }
+    _dft = transpose(_dft, hdr.height, hdr.width);
 
-	ubyte[][] dest = uninitializedArray!(ubyte[][])(hdr.height, hdr.width);
-	for(int i=0;i<hdr.height;++i){
-	    for(int j=0;j<hdr.width;++j){
-		    double _power_spectrum =  (10 * floor(log(_dft[i][j].abs)));
-		    ubyte power_spectrum;
-		    if(pix < 0){
-			power_spectrum = 0;
-		    }else if(pix > 255){
-			power_spectrum = 255;
-		    }else{
-			 power_spectrum = _power_spectrum.to!ubyte;
-		    }
-		    dest[i][j] = power_spectrum;
-	    }
-	}
-	return dest.shift( hdr.height, hdr.width);
+    ubyte[][] dest = uninitializedArray!(ubyte[][])(hdr.height, hdr.width);
+    for (int i = 0; i < hdr.height; ++i)
+    {
+        for (int j = 0; j < hdr.width; ++j)
+        {
+            double _power_spectrum = (10 * floor(log(_dft[i][j].abs)));
+            ubyte power_spectrum;
+            if (_power_spectrum < 0)
+            {
+                power_spectrum = 0;
+            }
+            else if (_power_spectrum > 255)
+            {
+                power_spectrum = 255;
+            }
+            else
+            {
+                power_spectrum = _power_spectrum.to!ubyte;
+            }
+            dest[i][j] = power_spectrum;
+        }
+    }
+    return dest.shift(hdr.height, hdr.width);
 }
 
 pure auto toBinary(T)(ref T[][] gray, T threshold = 127)
