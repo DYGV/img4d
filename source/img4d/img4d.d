@@ -472,3 +472,18 @@ int[ubyte] pixelHistgram(ubyte[][] data)
     }
     return hist;
 }
+
+ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)
+{
+    double pixel_max = data.join.maxElement.to!double;
+
+    for (int i = 0; i < hdr.height; i++)
+    {
+        for (int j = 0; j < hdr.width; j++)
+        {
+            data[i][j] = floor(pixel_max * pow(data[i][j].to!double / pixel_max, 1 / gamma))
+                .to!ubyte;
+        }
+    }
+    return data;
+}
