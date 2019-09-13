@@ -461,3 +461,14 @@ pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)
 
     return masked;
 }
+
+int[ubyte] pixelHistgram(ubyte[][] data)
+{
+    ubyte[] joined_data = data.join;
+    int[ubyte] hist;
+    foreach (idx, h; joined_data)
+    {
+        hist[h]++;
+    }
+    return hist;
+}
