@@ -1,7 +1,6 @@
 # img4d  
-[![licence](https://img.shields.io/github/license/DYGV/img4d.svg)](https://img.shields.io/github/license/DYGV/img4d.svg)
-[![status](https://travis-ci.org/DYGV/img4d.svg?branch=master)](https://travis-ci.org/DYGV/img4d)
-[![coverage](https://codecov.io/gh/DYGV/img4d/branch/master/graph/badge.svg)](https://codecov.io/gh/DYGV/img4d)  
+[![licence](https://img.shields.io/github/license/DYGV/img4d.svg)](https://img.shields.io/github/license/DYGV/img4d.svg) 
+[![status](https://travis-ci.org/DYGV/img4d.svg?branch=master)](https://travis-ci.org/DYGV/img4d) 
 
 PNG images Decoder/Encoder for D language.  
 Please see current status on [commit page](https://github.com/DYGV/img4d/commits/master) or [dub page](https://code.dlang.org/packages/img4d)  
