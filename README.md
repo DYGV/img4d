@@ -92,25 +92,23 @@ Return the value which are subtracted 256 if it exceeds 256
 - **ubyte[][] parse(ref Header info, string filename)**  
 ## img4d_lib.encode  
 
--  **ubyte[] makeIHDR(in Header info)**  
+-  **void set32bitInt(ref ubyte[4] buf, uint data)** 
+-  **void set32bitInt(ref ubyte[2] buf, uint data)** 
+-  **uint read32bitInt(in ubyte[] buf)** 
+-  **auto makeChunk(ubyte[] chunk_type, ubyte[] chunk_data)**
+-  **ubyte[] makeIHDR()**  
 Return IHDR which required for encoding  
-   - ***Params:***  
-Header info : arranged Header  
-- **ubyte[] makeIDAT(T)(T[][] actualData, in Header info)**  
+- **ubyte[] makeIDAT()**  
 Return IDAT which required for encoding  
-   - ***Params:***  
-T[][] actualData : IDAT chunk data  
-Header info   : arranged Header  
-- **ubyte[] makeAncillary()**  
-Not implemented  
+- **auto makeAncillary(int chunk_length, ubyte[] chunk_type, ubyte[] chunk_data)**  
 - **ubyte[] makeIEND()**  
 Return IEND which required for encoding  
-- **auto makeCrc(in ubyte[] data)**  
+- **auto makeCrc(ubyte[] data)**  
 Calculate and Return CRC value  
 
-- **auto sumScanline(ubyte[][] src)**  
+- **int[] sumScanline(ref ubyte[][] src)**  
 Cast to int[] and Calculate sum every horizontal line  
-- **auto chooseFilterType(ref Header header, ref Pixel pix)**  
+- **ubyte[][] chooseFilterType()**  
 Choose optimal filter and Return filtered pixel
 
 ## img4d_lib.filter  
