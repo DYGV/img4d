@@ -47,6 +47,7 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 ## img4d
 -  **ref auto load(ref Header header, string filename)**  
 -  **ubyte[] save(ref Header header, ref Pixel pix, string filename)**  
+-  **bool save(ref Header header, ref Pixel pix, string filename, ubyte[] ancillary_chunks)** 
 -  **bool isGrayscale(int colorType)**
 -  **bool isColorNoneAlpha(int colorType)**
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
@@ -55,6 +56,9 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 -  **pure auto toBinary(T)(T[][] array)**  
 -  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
 -  **pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)**  
+- **ubyte[][] psd(ubyte[][] data, ref Header hdr)** 
+-  **int[ubyte] pixelHistgram(ubyte[][] data)** 
+-  **ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)** 
   
 ## img4d_lib.decode  
 -  **Header readIHDR(ubyte[] header)**  
