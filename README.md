@@ -43,7 +43,8 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
  
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
  
- 
+ [img4d_lib.dft](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdft) 
+   
 ## img4d
 -  **ref auto load(ref Header header, string filename)**  
 -  **ubyte[] save(ref Header header, ref Pixel pix, string filename)**  
@@ -85,10 +86,10 @@ ubyte[] chunk : Byte array to be CRC calculated
   
 - **int paethPredictor(int left, int upper, int upperLeft)**  
 Calculate and Return Paeth-Predictor  
-- **auto normalizePixelValue(T)(T value)**  
+- **int normalizePixelValue(int value)**  
 Return the value which are subtracted 256 if it exceeds 256  
-- **int[][] inverseFiltering(string op, string inequality, string inverseOp)(ubyte[][] data)**  
-- **int[][] parse(ref Header info, string filename)**  
+- **auto ubyte[][] inverseFiltering(ref ubyte[][] data, bool gray = false)**  
+- **ubyte[][] parse(ref Header info, string filename)**  
 ## img4d_lib.encode  
 
 -  **ubyte[] makeIHDR(in Header info)**  
@@ -136,4 +137,7 @@ Convert to grayscale by weighting
 - **auto gradient(T)(T[][] Gr, T[][] Gth)**  
 - **auto hysteresis(T)(T[][] src, int t_min, int t_max)**  
  
-
+## img4d_lib.dft
+-  **Complex!(double)[] dft(Complex!(double)[] data, int num)**  
+-  **Complex!(double)[][] transpose(Complex!(double)[][] matrix, int h, int w)** 
+-  **ubyte[][] shift(ubyte[][] data, int h, int w)**
