@@ -36,6 +36,7 @@ Complex!(double)[][] transpose(Complex!(double)[][] matrix, int h, int w)
 	return transposed;
 }
 
+// move each quadrant
 ubyte[][] shift(ubyte[][] data, int h, int w)
 {
 	ubyte[][] dest = uninitializedArray!(ubyte[][])(h, w);
@@ -48,16 +49,10 @@ ubyte[][] shift(ubyte[][] data, int h, int w)
 	{
 		for (int j = 0; j < c_w; j++)
 		{
-			dest[c_h + i][c_w + j] = upside[i][j];
-			dest[i][c_w + j] = downside[i][j];
-		}
-	}
-	for (int i = 0; i < c_h; i++)
-	{
-		for (int j = 0; j < c_w; j++)
-		{
-			dest[c_h + i][j] = upside[i][c_w + j];
-			dest[i][j] = downside[i][c_w + j];
+			dest[c_h + i][c_w + j] = upside[i][j]; // 4 <- 2
+			dest[i][c_w + j] = downside[i][j]; // 1 <- 3
+			dest[c_h + i][j] = upside[i][c_w + j]; // 3 <- 1
+			dest[i][j] = downside[i][c_w + j]; //  2 <- 4
 		}
 	}
 	return dest;
