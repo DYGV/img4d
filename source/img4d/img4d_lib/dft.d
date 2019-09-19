@@ -7,12 +7,13 @@ Complex!(double)[] dft(Complex!(double)[] data, int num)
 {
 	Complex!(double)[] dft_arr;
 	dft_arr.length = num;
+	double pi = PI.to!double;
+
 	for (int i = 0; i < num; i++)
 	{
 		dft_arr[i] = complex(0);
 		for (int j = 0; j < num; j++)
 		{
-			double pi = PI.to!double;
 			double re = data[j].re * cos(2 * pi * i * j / num);
 			double im = -data[j].re * sin(2 * pi * i * j / num) + data[j].im * cos(2 * pi
 					* i * j / num);
