@@ -59,7 +59,8 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 -  **pure auto toBinary(T)(T[][] array)**  
 -  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
 -  **pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)**  
-- **ubyte[][] psd(ubyte[][] data, ref Header hdr)** 
+-  **Complex!(double)[][] dft(ubyte[][] data, Header hdr)** 
+-  **ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)** 
 -  **int[ubyte] pixelHistgram(ubyte[][] data)** 
 -  **ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)** 
   
@@ -138,6 +139,6 @@ Convert to grayscale by weighting
 - **auto hysteresis(T)(T[][] src, int t_min, int t_max)**  
  
 ## img4d_lib.dft
--  **Complex!(double)[] dft(Complex!(double)[] data, int num)**  
+-  **Complex!(double)[] _dft(Complex!(double)[] data, int num)**  
 -  **Complex!(double)[][] transpose(Complex!(double)[][] matrix, int h, int w)** 
 -  **ubyte[][] shift(ubyte[][] data, int h, int w)**

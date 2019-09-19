@@ -3,7 +3,7 @@ module img4d_lib.dft;
 import std.stdio, std.array, std.conv, std.range, std.algorithm, std.math, std.complex;
 import std.parallelism : parallel;
 
-Complex!(double)[] dft(Complex!(double)[] data, int num)
+Complex!(double)[] _dft(Complex!(double)[] data, int num)
 {
 	Complex!(double)[] dft_arr;
 	dft_arr.length = num;
