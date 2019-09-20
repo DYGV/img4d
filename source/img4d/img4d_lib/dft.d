@@ -3,20 +3,28 @@ module img4d_lib.dft;
 import std.stdio, std.array, std.conv, std.range, std.algorithm, std.math, std.complex;
 import std.parallelism : parallel;
 
-Complex!(double)[] _dft(Complex!(double)[] data, int num)
+Complex!(double)[] _dft(Complex!(double)[] data, int num, bool dft)
 {
 	Complex!(double)[] dft_arr;
 	dft_arr.length = num;
 	double pi = PI.to!double;
+	double im, re = 0;
 
 	for (int i = 0; i < num; i++)
 	{
 		dft_arr[i] = complex(0);
 		for (int j = 0; j < num; j++)
 		{
-			double re = data[j].re * cos(2 * pi * i * j / num);
-			double im = -data[j].re * sin(2 * pi * i * j / num) + data[j].im * cos(2 * pi
-					* i * j / num);
+			if (dft)
+			{
+				re = data[j].re * cos(2 * pi * i * j / num) + data[j].im * sin(2 * pi * i * j / num);
+				im = -data[j].re * sin(2 * pi * i * j / num) + data[j].im * cos(2 * pi * i * j / num);
+			}
+			else
+			{
+				re = data[j].re * cos(2 * pi * i * j / num) - data[j].im * sin(2 * pi * i * j / num);
+				im = data[j].re * sin(2 * pi * i * j / num) + data[j].im * cos(2 * pi * i * j / num);
+			}
 			dft_arr[i] += complex(re, im);
 		}
 	}

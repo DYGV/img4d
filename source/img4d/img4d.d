@@ -361,20 +361,20 @@ ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false)
     return (fastMode == true) ? color.toGrayscale(fastMode) : color.toGrayscale;
 }
 
-Complex!(double)[][] dft(ubyte[][] data, Header hdr)
+Complex!(double)[][] dft(T)(T[][] data, Header hdr, bool isDFT = true)
 {
     Complex!(double)[][] dft_matrix;
     dft_matrix.length = hdr.height;
 
     for (int i = 0; i < hdr.height; i++)
     {
-        dft_matrix[i] = _dft(data[i].to!(Complex!(double)[]), hdr.width);
+        dft_matrix[i] = _dft(data[i].to!(Complex!(double)[]), hdr.width, isDFT);
     }
     dft_matrix = transpose(dft_matrix, hdr.height, hdr.width);
 
     for (int i = 0; i < hdr.height; i++)
     {
-        dft_matrix[i] = _dft(dft_matrix[i], hdr.width);
+        dft_matrix[i] = _dft(dft_matrix[i], hdr.width, isDFT);
     }
     dft_matrix = transpose(dft_matrix, hdr.height, hdr.width);
     return dft_matrix;
