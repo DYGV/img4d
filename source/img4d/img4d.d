@@ -380,11 +380,10 @@ Complex!(double)[][] dft(T)(T[][] data, Header hdr, bool isDFT = true)
     return dft_matrix;
 }
 
-auto lpf(Complex!(double)[][] dft_matrix, Header hdr)
+auto lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
 {
     Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
     int center = hdr.height / 2;
-    int radius = 50;
     for (int i = 0; i < hdr.height; i++)
     {
         for (int j = 0; j < hdr.width; j++)
@@ -402,11 +401,10 @@ auto lpf(Complex!(double)[][] dft_matrix, Header hdr)
     return dest;
 }
 
-auto hpf(Complex!(double)[][] dft_matrix, Header hdr)
+auto hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
 {
     Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
     int center = hdr.height / 2;
-    int radius = 50;
     for (int i = 0; i < hdr.height; i++)
     {
         for (int j = 0; j < hdr.width; j++)
