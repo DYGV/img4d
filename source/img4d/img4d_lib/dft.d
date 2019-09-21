@@ -46,9 +46,9 @@ Complex!(double)[][] transpose(Complex!(double)[][] matrix, int h, int w)
 }
 
 // move each quadrant
-ubyte[][] shift(ubyte[][] data, int h, int w)
+T[][] shift(T)(T[][] data, int h, int w)
 {
-	ubyte[][] dest = uninitializedArray!(ubyte[][])(h, w);
+	T[][] dest = uninitializedArray!(T[][])(h, w);
 	int c_h = h / 2;
 	int c_w = w / 2;
 	auto upside = data[0 .. c_h];

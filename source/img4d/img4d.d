@@ -380,6 +380,50 @@ Complex!(double)[][] dft(T)(T[][] data, Header hdr, bool isDFT = true)
     return dft_matrix;
 }
 
+auto lpf(Complex!(double)[][] dft_matrix, Header hdr)
+{
+    Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
+    int center = hdr.height / 2;
+    int radius = 50;
+    for (int i = 0; i < hdr.height; i++)
+    {
+        for (int j = 0; j < hdr.width; j++)
+        {
+            if ((i - center) * (i - center) + (j - center) * (j - center) < radius * radius)
+            {
+                dest[i][j] = dft_matrix[i][j];
+            }
+            else
+            {
+                dest[i][j] = complex(0, 0);
+            }
+        }
+    }
+    return dest;
+}
+
+auto hpf(Complex!(double)[][] dft_matrix, Header hdr)
+{
+    Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
+    int center = hdr.height / 2;
+    int radius = 50;
+    for (int i = 0; i < hdr.height; i++)
+    {
+        for (int j = 0; j < hdr.width; j++)
+        {
+            if ((i - center) * (i - center) + (j - center) * (j - center) < radius * radius)
+            {
+                dest[i][j] = complex(0, 0);
+            }
+            else
+            {
+                dest[i][j] = dft_matrix[i][j];
+            }
+        }
+    }
+    return dest;
+}
+
 // deprecated (take a lot of time because of using dft)
 ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)
 {
