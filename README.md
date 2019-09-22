@@ -60,6 +60,9 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 -  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
 -  **pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)**  
 -  **Complex!(double)[][] dft(ubyte[][] data, Header hdr)** 
+-  **Complex!(double)[][] lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)** 
+-  **Complex!(double)[][] hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)** 
+-  **Complex!(double)[][] bpf(Complex!(double)[][] dft_matrix, Header hdr, int radius_low = 20, int radius_high = 50)** 
 -  **ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)** 
 -  **int[ubyte] pixelHistgram(ubyte[][] data)** 
 -  **ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)** 
