@@ -380,7 +380,7 @@ Complex!(double)[][] dft(T)(T[][] data, Header hdr, bool isDFT = true)
     return dft_matrix;
 }
 
-auto lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
+Complex!(double)[][] lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
 {
     Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
     int center = hdr.height / 2;
@@ -401,7 +401,7 @@ auto lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
     return dest;
 }
 
-auto hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
+Complex!(double)[][] hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
 {
     Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
     int center = hdr.height / 2;
@@ -420,6 +420,31 @@ auto hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
         }
     }
     return dest;
+}
+
+Complex!(double)[][] bpf(Complex!(double)[][] dft_matrix, Header hdr,
+        int radius_low = 20, int radius_high = 50)
+{
+    Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
+
+    int center = hdr.height / 2;
+    for (int i = 0; i < hdr.height; i++)
+    {
+        for (int j = 0; j < hdr.width; j++)
+        {
+            auto r_circle = (i - center) * (i - center) + (j - center) * (j - center);
+            if ((r_circle < radius_high * radius_high) & (r_circle > radius_low * radius_low))
+            {
+                dest[i][j] = dft_matrix[i][j];
+            }
+            else
+            {
+                dest[i][j] = complex(0, 0);
+            }
+        }
+    }
+    return dest;
+
 }
 
 // deprecated (take a lot of time because of using dft)
