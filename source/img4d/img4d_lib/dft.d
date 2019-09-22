@@ -7,7 +7,7 @@ Complex!(double)[] _dft(Complex!(double)[] data, int num, bool dft)
 {
 	Complex!(double)[] dft_arr;
 	dft_arr.length = num;
-	double pi = PI.to!double;
+	double pi = PI;
 	double im, re = 0;
 
 	for (int i = 0; i < num; i++)

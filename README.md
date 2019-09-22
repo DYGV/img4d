@@ -124,12 +124,7 @@ Calculate and Return Sub filter(Difference from left pixel)
 Calculate difference neighbor pixel
 - **pure ref auto joinVertical(T)(ref T[][] src)**  
 Make array vertical
-
-- **auto inverseUp()**  
-- **auto ave()**  
-- **auto inverseAve()**  
-- **auto paeth()**  
-- **auto inversePaeth()**  
+ 
 ## img4d_lib.color_space  
 - **ref auto toGrayscale(T)(ref T[][][] color)**  
 Convert to grayscale by weighting  

@@ -76,10 +76,6 @@ pure ref auto T[][] joinVertical(T)(ref T[][] src)
   return src.front.walkLength.iota.map!(i => transversal(src, i).array).array;
 }
 
-auto inverseUp()
-{
-}
-
 /**
    *  Average(x) = Raw(x) - floor((Raw(x-bpp)+Prior(x))/2)
    */
@@ -113,10 +109,6 @@ ubyte normalizePixelValue(int value)
     value -= 256;
   }
   return value.to!ubyte;
-}
-
-auto inverseAve()
-{
 }
 
 //  Paeth(x) = Raw(x) - PaethPredictor(Raw(x-bpp), Prior(x), Prior(x-bpp))
@@ -159,8 +151,4 @@ template paethPredictor()
 int abs(int num)
 {
   return (num ^ (num >> 31)) - (num >> 31);
-}
-
-auto inversePaeth()
-{
 }
