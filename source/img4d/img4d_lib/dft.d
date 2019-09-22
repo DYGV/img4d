@@ -13,12 +13,11 @@ Complex!(double)[] _dft(Complex!(double)[] data, int num, bool dft)
 	for (int i = 0; i < num; i++)
 	{
 		dft_arr[i] = complex(0);
-
+		double theta = 2 * pi * i / num;
 		for (int j = 0; j < num; j++)
 		{
-			double theta = 2 * pi * i * j / num;
-			double sin_theta = sin(theta);
-			double cos_theta = cos(theta);
+			double sin_theta = sin(j * theta);
+			double cos_theta = cos(j * theta);
 			if (dft)
 			{
 				re = data[j].re * cos_theta + data[j].im * sin_theta;
