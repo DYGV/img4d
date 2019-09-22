@@ -69,3 +69,8 @@ T[][] shift(T)(T[][] data, int h, int w)
 	}
 	return dest;
 }
+
+ubyte fit_to_ubyte(in double value)
+{
+	return (value < 0 ? 0 : value > 255 ? 255 : value).to!ubyte;
+}
