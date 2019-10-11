@@ -564,6 +564,7 @@ enum MatchingType
     SSD,
     SAD,
     NCC,
+    ZNCC,
 }
 
 auto templateMatching(Header templateHeader, Header inputHeader,
@@ -582,6 +583,9 @@ auto templateMatching(Header templateHeader, Header inputHeader,
             break;
 	case NCC:
 	    pos = template_matching.NCC();
+	    break;
+	case ZNCC:
+	    pos = template_matching.ZNCC();
 	    break;
         default:
             break;

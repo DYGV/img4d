@@ -1,7 +1,7 @@
 module img4d_lib.template_matching;
 
 import img4d;
-import std.stdio, std.array, std.math;
+import std.stdio, std.array, std.math,std.algorithm.iteration;
 
 class TemplateMatching
 {
@@ -102,6 +102,44 @@ class TemplateMatching
 					xpos = i;
 					ypos = j;
 					max_ncc = ncc;
+				}
+			}
+		}
+		return [xpos, ypos];
+	}
+
+	int[] ZNCC()
+	{
+		double max_zncc = -1;
+		int xpos = 0, ypos = 0;
+		double ave_input = this.inputImage.map!(sum).sum/this.input_height*this.input_width;
+		double ave_template = this.templateImage.map!(sum).sum/this.template_height*this.template_width;
+
+		for (int i = 0; i < this.input_height - this.template_height; i++)
+		{
+			for (int j = 0; j < this.input_width - this.template_width; j++)
+			{
+				double zncc = 0,
+				       vector = 0,
+				       _magnitude_1 = 0,
+				       _magnitude_2 = 0;
+				for (int h = 0; h < this.template_height; h++)
+				{
+					for (int w = 0; w < this.template_width; w++)
+					{
+						vector += (this.inputImage[i + h][j + w] - ave_input) * (this.templateImage[h][w] - ave_template);
+						double magnitude_1 = this.inputImage[i + h][j + w] - ave_input;
+						double magnitude_2 = this.templateImage[h][w] - ave_template;
+						_magnitude_1 += magnitude_1 * magnitude_1;
+						_magnitude_2 += magnitude_2 * magnitude_2;
+					}
+				}
+				zncc = vector / sqrt(_magnitude_1 * _magnitude_2);
+				if (max_zncc < zncc)
+				{
+					xpos = i;
+					ypos = j;
+					max_zncc = zncc;
 				}
 			}
 		}
