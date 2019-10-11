@@ -559,6 +559,20 @@ ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)
     return data;
 }
 
+auto rectangle(ref ubyte[][] src, int[] pos, int[] size)
+{
+    for (int i = pos[0]; i < pos[0] + size[0]; i++)
+    {
+        for (int j = pos[1]; j < pos[1] + size[1]; j++)
+        {
+            src[pos[0]][j] = 255;
+            src[pos[0] + size[1]][j] = 255;
+            src[i][pos[1]] = 255;
+            src[i][pos[1] + size[1]] = 255;
+        }
+    }
+}
+
 enum MatchingType
 {
     SSD,
@@ -575,20 +589,20 @@ auto templateMatching(Header templateHeader, Header inputHeader,
     int[] pos;
     switch (type) with (MatchingType)
     {
-        case SSD:
-            pos = template_matching.SSD();
-            break;
-        case SAD:
-            pos = template_matching.SAD();
-            break;
-	case NCC:
-	    pos = template_matching.NCC();
-	    break;
-	case ZNCC:
-	    pos = template_matching.ZNCC();
-	    break;
-        default:
-            break;
+    case SSD:
+        pos = template_matching.SSD();
+        break;
+    case SAD:
+        pos = template_matching.SAD();
+        break;
+    case NCC:
+        pos = template_matching.NCC();
+        break;
+    case ZNCC:
+        pos = template_matching.ZNCC();
+        break;
+    default:
+        break;
     }
     return pos;
 }
