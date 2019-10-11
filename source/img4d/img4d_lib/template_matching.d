@@ -43,7 +43,7 @@ class TemplateMatching
 				}
 			}
 		}
-		return [min_ssd, xpos, ypos];
+		return [xpos, ypos];
 	}
 
 	int[] SAD()
@@ -71,7 +71,41 @@ class TemplateMatching
 				}
 			}
 		}
-		return [min_sad, xpos, ypos];
+		return [xpos, ypos];
+	}
+	int[] NCC()
+	{
+		double max_ncc = 0;
+		int xpos = 0, ypos = 0;
+		for (int i = 0; i < this.input_height - this.template_height; i++)
+		{
+			for (int j = 0; j < this.input_width - this.template_width; j++)
+			{
+				double ncc = 0,
+				       vector = 0,
+				       _magnitude_1 = 0,
+				       _magnitude_2 = 0;
+				for (int h = 0; h < this.template_height; h++)
+				{
+					for (int w = 0; w < this.template_width; w++)
+					{
+						vector += this.inputImage[i + h][j + w] * this.templateImage[h][w];
+						double magnitude_1 = this.inputImage[i + h][j + w];
+						double magnitude_2 = this.templateImage[h][w];
+						_magnitude_1 += magnitude_1 * magnitude_1;
+						_magnitude_2 += magnitude_2 * magnitude_2;
+					}
+				}
+				ncc = vector / sqrt(_magnitude_1 * _magnitude_2);
+				if (max_ncc < ncc)
+				{
+					xpos = i;
+					ypos = j;
+					max_ncc = ncc;
+				}
+			}
+		}
+		return [xpos, ypos];
 	}
 
 }
