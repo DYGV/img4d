@@ -33,6 +33,10 @@ class TemplateMatching
 					{
 						int diff = this.inputImage[i + h][j + w] - this.templateImage[h][w];
 						ssd += diff * diff;
+						if(ssd > min_ssd)
+						{
+						    break;
+						}
 					}
 				}
 				if (min_ssd > ssd)
@@ -61,6 +65,10 @@ class TemplateMatching
 					{
 						int diff = this.inputImage[i + h][j + w] - this.templateImage[h][w];
 						sad += abs(diff);
+						if(sad > min_sad)
+						{
+						    break;
+						}
 					}
 				}
 				if (min_sad > sad)
