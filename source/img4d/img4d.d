@@ -1,7 +1,7 @@
 module img4d.img4d;
 
 import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter,
-    img4d_lib.color_space, img4d_lib.edge;
+    img4d_lib.color_space, img4d_lib.edge, img4d_lib.template_matching;
 
 import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range, std.file : exists;
 import img4d_lib.dft;
@@ -557,4 +557,30 @@ ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)
         }
     }
     return data;
+}
+
+enum MatchingType
+{
+    SSD,
+    SAD,
+}
+
+auto templateMatching(Header templateHeader, Header inputHeader,
+        ubyte[][] templateImage, ubyte[][] inputImage, int type)
+{
+    TemplateMatching template_matching = new TemplateMatching(templateHeader,
+            inputHeader, templateImage, inputImage);
+    int[] pos;
+    switch (type) with (MatchingType)
+    {
+        case SSD:
+            pos = template_matching.SSD();
+            break;
+        case SAD:
+            pos = template_matching.SAD();
+            break;
+        default:
+            break;
+    }
+    return pos;
 }

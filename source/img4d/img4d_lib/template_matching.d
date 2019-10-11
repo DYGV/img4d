@@ -1,0 +1,77 @@
+module img4d_lib.template_matching;
+
+import img4d;
+import std.stdio, std.array, std.math;
+
+class TemplateMatching
+{
+	int template_height, template_width, input_height, input_width;
+	ubyte[][] templateImage, inputImage;
+
+	this(Header templateHeader, Header inputHeader, ubyte[][] templateImage, ubyte[][] inputImage)
+	{
+		this.template_height = templateHeader.height;
+		this.template_width = templateHeader.width;
+		this.input_height = inputHeader.height;
+		this.input_width = inputHeader.width;
+		this.templateImage = templateImage;
+		this.inputImage = inputImage;
+	}
+
+	int[] SSD()
+	{
+		int min_ssd = int.max;
+		int xpos = 0, ypos = 0;
+		for (int i = 0; i < this.input_height - this.template_height; i++)
+		{
+			for (int j = 0; j < this.input_width - this.template_width; j++)
+			{
+				int ssd = 0;
+				for (int h = 0; h < this.template_height; h++)
+				{
+					for (int w = 0; w < this.template_width; w++)
+					{
+						int diff = this.inputImage[i + h][j + w] - this.templateImage[h][w];
+						ssd += diff * diff;
+					}
+				}
+				if (min_ssd > ssd)
+				{
+					xpos = i;
+					ypos = j;
+					min_ssd = ssd;
+				}
+			}
+		}
+		return [min_ssd, xpos, ypos];
+	}
+
+	int[] SAD()
+	{
+		int min_sad = int.max;
+		int xpos = 0, ypos = 0;
+		for (int i = 0; i < this.input_height - this.template_height; i++)
+		{
+			for (int j = 0; j < this.input_width - this.template_width; j++)
+			{
+				int sad = 0;
+				for (int h = 0; h < this.template_height; h++)
+				{
+					for (int w = 0; w < this.template_width; w++)
+					{
+						int diff = this.inputImage[i + h][j + w] - this.templateImage[h][w];
+						sad += abs(diff);
+					}
+				}
+				if (min_sad > sad)
+				{
+					xpos = i;
+					ypos = j;
+					min_sad = sad;
+				}
+			}
+		}
+		return [min_sad, xpos, ypos];
+	}
+
+}
