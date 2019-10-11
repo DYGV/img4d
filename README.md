@@ -69,6 +69,9 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
 -  **ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)** 
 -  **int[ubyte] pixelHistgram(ubyte[][] data)** 
 -  **ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)** 
+-  **auto rectangle(ref ubyte[][] src, int[] pos, int[] size)** 
+-  **auto templateMatching(Header templateHeader, Header inputHeader, ubyte[][] templateImage, ubyte[][] inputImage, int type)** 
+
   
 ## img4d_lib.decode  
 -  **Header readIHDR(ubyte[] header)**  
