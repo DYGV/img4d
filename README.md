@@ -45,7 +45,7 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
  
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
  
- [img4d_lib.dft](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdft) 
+ [img4d_lib.fourier](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libfourier) 
  
  [img4d_lib.template_matching](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libtemplate_matching) 
    
@@ -142,7 +142,7 @@ Convert to grayscale by weighting
 - **auto gradient(T)(T[][] Gr, T[][] Gth)**  
 - **auto hysteresis(T)(T[][] src, int t_min, int t_max)**  
  
-## img4d_lib.dft
+## img4d_lib.fourier  
 -  **Complex!(double)[] _dft(Complex!(double)[] data, int num)**  
 -  **Complex!(double)[][] transpose(Complex!(double)[][] matrix, int h, int w)** 
 -  **ubyte[][] shift(ubyte[][] data, int h, int w)**  

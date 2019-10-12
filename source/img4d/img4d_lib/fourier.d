@@ -1,4 +1,4 @@
-module img4d_lib.dft;
+module img4d_lib.fourier;
 
 import std.stdio, std.array, std.conv, std.range, std.algorithm, std.math, std.complex;
 import std.parallelism : parallel;
