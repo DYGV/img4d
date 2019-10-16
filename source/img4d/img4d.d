@@ -363,20 +363,22 @@ ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false)
 
 Complex!(double)[][] dft(T)(T[][] data, Header hdr, bool isDFT = true)
 {
+
     Complex!(double)[][] dft_matrix;
     dft_matrix.length = hdr.height;
+    Fourier fourier = new Fourier(hdr);
 
     for (int i = 0; i < hdr.height; i++)
     {
-        dft_matrix[i] = _dft(data[i].to!(Complex!(double)[]), hdr.width, isDFT);
+        dft_matrix[i] = fourier.dft(data[i].to!(Complex!(double)[]), isDFT);
     }
-    dft_matrix = transpose(dft_matrix, hdr.height, hdr.width);
+    dft_matrix = fourier.transpose(dft_matrix);
 
     for (int i = 0; i < hdr.height; i++)
     {
-        dft_matrix[i] = _dft(dft_matrix[i], hdr.width, isDFT);
+        dft_matrix[i] = fourier.dft(dft_matrix[i], isDFT);
     }
-    dft_matrix = transpose(dft_matrix, hdr.height, hdr.width);
+    dft_matrix = fourier.transpose(dft_matrix);
     return dft_matrix;
 }
 
@@ -472,7 +474,8 @@ ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)
             dest[i][j] = power_spectrum;
         }
     }
-    return dest.shift(hdr.height, hdr.width);
+    Fourier fourier = new Fourier(hdr);
+    return fourier.shift(dest);
 }
 
 pure auto toBinary(T)(ref T[][] gray, T threshold = 127)
