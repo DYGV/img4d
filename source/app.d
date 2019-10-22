@@ -19,7 +19,6 @@ int main()
   writefln("Bit Depth  %4d\nColor Type  %3d\n", img.header.bitDepth, img.header.colorType);
 
   Pixel grayPix = img.rgbToGrayscale(colorPix, true);
-  img.header.colorType = colorTypes.grayscale;
 
   // start encode (you can save image with ancillary chunks)
   ubyte[] chunk_type = [116, 73, 77, 69]; // "tIME"

@@ -363,7 +363,7 @@ class Img4d
             if (colorType == trueColorA)
                 color.each!((idx, a) => a.each!((edx, b) => color[idx][edx] = b.remove(3)));
         }
-
+        this.header.colorType = colorTypes.grayscale;
         return (fastMode == true) ? color.toGrayscale(fastMode) : color.toGrayscale;
     }
 
