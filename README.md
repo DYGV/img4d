@@ -12,12 +12,9 @@ Please see current status on [commit page](https://github.com/DYGV/img4d/commits
 |---|---|---|---|
 |![lena](https://user-images.githubusercontent.com/8480644/65213958-208c2e80-dae3-11e9-9bb4-fc5b7b2618f3.png)|![gray_lena](https://user-images.githubusercontent.com/8480644/65214007-4285b100-dae3-11e9-95b8-d5863a2c0369.png)|![gamma_0.5](https://user-images.githubusercontent.com/8480644/65214075-7eb91180-dae3-11e9-950f-3d48cef34447.png)|![lena_psd](https://user-images.githubusercontent.com/8480644/65214083-8aa4d380-dae3-11e9-9fe8-b51dd6c7a582.png)|
 ## decode, convert to grayscale and encode
-### import some required modules
+### import required modules
 ```D
 import img4d;
-import std.stdio,
-       std.range,
-       std.algorithm.iteration;
 ```
 ### load(decode)
 ```D
