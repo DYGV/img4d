@@ -21,18 +21,17 @@ import std.stdio,
 ```
 ### load(decode)
 ```D
-Header hdr;
-Pixel colorPix = hdr.load("png_img/lena.png");
+Img4d img = new Img4d();
+Pixel colorPix = img.load("png_img/lena.png");
 ```
 ### rgb to grayscale
 ```D
-Pixel grayPix = hdr.rgbToGrayscale(colorPix, true);
-hdr.colorType = colorTypes.grayscale;
+Pixel grayPix = img.rgbToGrayscale(colorPix, true);
 ```
 ### 
 ### save(encode)
 ```D
-bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
+ bool encodedData = img.save(grayPix, "png_img/encoded_lena_1.png", chunk);
 ```    
 # Package  
  [img4d](https://github.com/DYGV/img4d/blob/master/README.md#img4d)  
@@ -49,29 +48,30 @@ bool encodedData = hdr.save(grayPix, "png_img/encoded_lena.png");
  
  [img4d_lib.template_matching](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libtemplate_matching) 
    
+[img4d_lib.quality_evaluation](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libquality_evaluation) 
    
 ## img4d
--  **ref auto load(ref Header header, string filename)**  
--  **ubyte[] save(ref Header header, ref Pixel pix, string filename)**  
--  **bool save(ref Header header, ref Pixel pix, string filename, ubyte[] ancillary_chunks)** 
+-  **ref auto load(string filename)**  
+-  **ubyte[] save(ref Pixel pix, string filename)**  
+-  **bool save(ref Pixel pix, string filename, ubyte[] ancillary_chunks)** 
 -  **bool isGrayscale(int colorType)**
 -  **bool isColorNoneAlpha(int colorType)**
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
--  **ref auto rgbToGrayscale(T)(ref Header header, ref Pixel pix, bool fastMode=false)**  
+-  **ref auto rgbToGrayscale(T)(ref Pixel pix, bool fastMode=false)**  
 -  **pure auto toBinary(T)(ref T[][] gray, T threshold=127)**  
 -  **pure auto toBinary(T)(T[][] array)**  
 -  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
 -  **pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)**  
 -  **Complex!(double)[][] dft(ubyte[][] data, Header hdr)** 
--  **Complex!(double)[][] lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)** 
--  **Complex!(double)[][] hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)** 
--  **Complex!(double)[][] bpf(Complex!(double)[][] dft_matrix, Header hdr, int radius_low = 20, int radius_high = 50)** 
--  **ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)** 
+-  **Complex!(double)[][] lpf(Complex!(double)[][] dft_matrix, int radius = 50)** 
+-  **Complex!(double)[][] hpf(Complex!(double)[][] dft_matrix, int radius = 50)** 
+-  **Complex!(double)[][] bpf(Complex!(double)[][] dft_matrix, int radius_low = 20, int radius_high = 50)** 
+-  **ubyte[][] psd(Complex!(double)[][] dft_matrix)** 
 -  **int[ubyte] pixelHistgram(ubyte[][] data)** 
--  **ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)** 
+-  **ubyte[][] gammaCorrection(ubyte[][] data, double gamma)** 
 -  **auto rectangle(ref ubyte[][] src, int[] pos, int[] size)** 
 -  **auto templateMatching(Header templateHeader, Header inputHeader, ubyte[][] templateImage, ubyte[][] inputImage, int type)** 
-
+-  **auto qualityEvaluation(ubyte[][] img_reference, ubyte[][] img_evaluation, QualityEvaluationType type)**  
   
 ## img4d_lib.decode  
 -  **Header readIHDR(ubyte[] header)**  
@@ -153,3 +153,20 @@ Convert to grayscale by weighting
 -  **int[] SAD**  
 -  **int[] NCC**  
 -  **int[] ZNCC**  
+
+## img4d_lib.quality_evaluation
+-  **this(Header hdr, ubyte[][] img_reference, ubyte[][] img_evaluation)**  
+-  **double PixelSquare(ubyte[][] img)**  
+calculate squared sum of each pixel
+-  **double SE()**  
+Squared Error
+-  **double MSE()**  
+Mean Squared Error
+-  **double NormalizedMSE()**  
+Normalized Squared Error
+-  **double SNR()**  
+Signal-to-Noise Ratio
+-  **double PSNR()**  
+Peak signal-to-noise ratio
+-  **auto SSIM()**  
+Not implemented
