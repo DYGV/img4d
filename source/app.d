@@ -1,6 +1,5 @@
 import img4d;
-import std.stdio, std.range, std.algorithm.iteration, std.datetime.systime,
-  img4d_lib.filter, img4d_lib.encode;
+import std.stdio, std.datetime.systime,img4d_lib.filter, img4d_lib.encode;
 
 mixin bitOperator;
 mixin makeChunk;
