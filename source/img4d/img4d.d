@@ -625,6 +625,7 @@ class Img4d
         NormalizedMSE,
         SNR,
         PSNR,
+        MSSIM,
     }
 
     auto qualityEvaluation(ubyte[][] img_reference, ubyte[][] img_evaluation,
@@ -646,6 +647,9 @@ class Img4d
             break;
         case PSNR:
             score = quality_evaluation.PSNR;
+            break;
+        case MSSIM:
+            score = quality_evaluation.MSSIM;
             break;
         default:
             break;
