@@ -251,395 +251,406 @@ private:
     ubyte[] _tmp;
 }
 
-bool isColorNoneAlpha(int colorType)
+class Img4d
 {
-    alias type = colorType;
-    with (colorTypes)
+    Header header;
+
+    bool isColorNoneAlpha(int colorType)
     {
-        return (type == trueColor || type == indexColor) ? true : false;
-    }
-}
-
-bool isGrayscale(int colorType)
-{
-    alias type = colorType;
-    with (colorTypes)
-    {
-        return (type == grayscale || type == grayscaleA) ? true : false;
-    }
-}
-
-ref auto load(ref Header header, string filename)
-{
-    if (!exists(filename))
-        throw new Exception("Not found the file.");
-    ubyte[][][] rgb, joinRGB;
-
-    Decode decode = new Decode(header);
-    auto data = decode.parse(filename);
-    header = decode.hdr;
-    if (header.colorType.isGrayscale)
-    {
-        alias grayscale = data;
-        return Pixel(grayscale);
-    }
-
-    data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
-    rgb.each!(a => joinRGB ~= a.joinVertical);
-    auto pix = joinRGB.transposed;
-    ubyte[][] R = pix[R].array.to!(ubyte[][]);
-    ubyte[][] G = pix[G].array.to!(ubyte[][]);
-    ubyte[][] B = pix[B].array.to!(ubyte[][]);
-    ubyte[][] A = pix[A].array.to!(ubyte[][]);
-
-    return (header.colorType.isColorNoneAlpha) ? Pixel(R, G, B) : Pixel(R, G, B, A);
-}
-
-bool save(ref Header header, ref Pixel pix, string filename)
-{
-
-    Encode encode = new Encode(header, pix);
-    ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ encode.makeIEND;
-    auto file = File(filename, "w");
-    file.rawWrite(data);
-    file.flush();
-
-    return true;
-}
-
-bool save(ref Header header, ref Pixel pix, string filename, ubyte[] ancillary_chunks)
-{
-    Encode encode = new Encode(header, pix);
-    ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT ~ encode.makeIEND;
-    auto file = File(filename, "w");
-    file.rawWrite(data);
-    file.flush();
-
-    return true;
-}
-
-// Canny Edge Detection (Defective)
-auto canny(T)(T[][] actualData, int tMin, int tMax)
-{
-    double[][] gaussian = [[0.0625, 0.125, 0.0625], [0.125, 0.25, 0.125], [0.0625, 0.125, 0.0625]];
-    double[][] sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
-    double[][] sobelY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
-
-    auto G = actualData.differential(gaussian);
-    auto Gx = G.differential(sobelX);
-    auto Gy = G.differential(sobelY);
-    double[][] Gr = minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
-    double[][] Gth = minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
-
-    foreach (idx; 0 .. Gx.length)
-    {
-        foreach (edx; 0 .. Gx[0].length)
+        alias type = colorType;
+        with (colorTypes)
         {
-            Gr[idx][edx] = sqrt(Gx[idx][edx].pow(2) + Gy[idx][edx].pow(2));
-            Gth[idx][edx] = ((atan2(Gy[idx][edx], Gx[idx][edx]) * 180) / PI);
+            return (type == trueColor || type == indexColor) ? true : false;
         }
     }
 
-    auto approximateG = Gr.gradient(Gth);
-    auto edge = approximateG.hysteresis(tMin, tMax);
-
-    return edge;
-}
-
-ref auto rgbToGrayscale(ref Header header, ref Pixel pix, bool fastMode = false)
-{
-    ubyte[][][] color;
-    with (header) with (colorTypes)
+    @property bool isGrayscale(int colorType)
     {
-        if (colorType != trueColor && colorType != trueColorA)
-            throw new Exception("invalid format.");
-        pix.Pixel.each!(n => color ~= n.chunks(lengthPerPixel).array);
-        if (colorType == trueColorA)
-            color.each!((idx, a) => a.each!((edx, b) => color[idx][edx] = b.remove(3)));
-    }
-
-    return (fastMode == true) ? color.toGrayscale(fastMode) : color.toGrayscale;
-}
-
-Complex!(double)[][] dft(T)(T[][] data, Header hdr, bool isDFT = true)
-{
-
-    Complex!(double)[][] dft_matrix;
-    dft_matrix.length = hdr.height;
-    Fourier fourier = new Fourier(hdr);
-
-    for (int i = 0; i < hdr.height; i++)
-    {
-        dft_matrix[i] = fourier.dft(data[i].to!(Complex!(double)[]), isDFT);
-    }
-    dft_matrix = fourier.transpose(dft_matrix);
-
-    for (int i = 0; i < hdr.height; i++)
-    {
-        dft_matrix[i] = fourier.dft(dft_matrix[i], isDFT);
-    }
-    dft_matrix = fourier.transpose(dft_matrix);
-    return dft_matrix;
-}
-
-Complex!(double)[][] lpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
-{
-    Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
-    int center = hdr.height / 2;
-    for (int i = 0; i < hdr.height; i++)
-    {
-        for (int j = 0; j < hdr.width; j++)
+        alias type = colorType;
+        with (colorTypes)
         {
-            if ((i - center) * (i - center) + (j - center) * (j - center) < radius * radius)
-            {
-                dest[i][j] = dft_matrix[i][j];
-            }
-            else
-            {
-                dest[i][j] = complex(0, 0);
-            }
+            return (type == grayscale || type == grayscaleA) ? true : false;
         }
     }
-    return dest;
-}
 
-Complex!(double)[][] hpf(Complex!(double)[][] dft_matrix, Header hdr, int radius = 50)
-{
-    Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
-    int center = hdr.height / 2;
-    for (int i = 0; i < hdr.height; i++)
+    ref auto load(string filename)
     {
-        for (int j = 0; j < hdr.width; j++)
+        if (!exists(filename))
+            throw new Exception("Not found the file.");
+        ubyte[][][] rgb, joinRGB;
+
+        Decode decode = new Decode(this.header);
+        auto data = decode.parse(filename);
+        this.header = decode.header;
+        if (this.isGrayscale(this.header.colorType))
         {
-            if ((i - center) * (i - center) + (j - center) * (j - center) < radius * radius)
+            alias grayscale = data;
+            return Pixel(grayscale);
+        }
+
+        data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
+        rgb.each!(a => joinRGB ~= a.joinVertical);
+        auto pix = joinRGB.transposed;
+        ubyte[][] R = pix[R].array.to!(ubyte[][]);
+        ubyte[][] G = pix[G].array.to!(ubyte[][]);
+        ubyte[][] B = pix[B].array.to!(ubyte[][]);
+        ubyte[][] A = pix[A].array.to!(ubyte[][]);
+
+        return (this.isColorNoneAlpha(this.header.colorType)) ? Pixel(R, G, B) : Pixel(R, G, B, A);
+    }
+
+    bool save(ref Pixel pix, string filename)
+    {
+
+        Encode encode = new Encode(this.header, pix);
+        ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ encode.makeIEND;
+        auto file = File(filename, "w");
+        file.rawWrite(data);
+        file.flush();
+
+        return true;
+    }
+
+    bool save(ref Pixel pix, string filename, ubyte[] ancillary_chunks)
+    {
+        Encode encode = new Encode(this.header, pix);
+        ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT ~ encode.makeIEND;
+        auto file = File(filename, "w");
+        file.rawWrite(data);
+        file.flush();
+
+        return true;
+    }
+
+    // Canny Edge Detection (Defective)
+    auto canny(T)(T[][] actualData, int tMin, int tMax)
+    {
+        double[][] gaussian = [
+            [0.0625, 0.125, 0.0625
+        ], [0.125, 0.25, 0.125], [0.0625, 0.125, 0.0625]];
+        double[][] sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+        double[][] sobelY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+
+        auto G = actualData.differential(gaussian);
+        auto Gx = G.differential(sobelX);
+        auto Gy = G.differential(sobelY);
+        double[][] Gr = minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
+        double[][] Gth = minimallyInitializedArray!(double[][])(Gx.length, Gx[0].length);
+
+        foreach (idx; 0 .. Gx.length)
+        {
+            foreach (edx; 0 .. Gx[0].length)
             {
-                dest[i][j] = complex(0, 0);
-            }
-            else
-            {
-                dest[i][j] = dft_matrix[i][j];
+                Gr[idx][edx] = sqrt(Gx[idx][edx].pow(2) + Gy[idx][edx].pow(2));
+                Gth[idx][edx] = ((atan2(Gy[idx][edx], Gx[idx][edx]) * 180) / PI);
             }
         }
+
+        auto approximateG = Gr.gradient(Gth);
+        auto edge = approximateG.hysteresis(tMin, tMax);
+
+        return edge;
     }
-    return dest;
-}
 
-Complex!(double)[][] bpf(Complex!(double)[][] dft_matrix, Header hdr,
-        int radius_low = 20, int radius_high = 50)
-{
-    Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(hdr.height, hdr.width);
-
-    int center = hdr.height / 2;
-    for (int i = 0; i < hdr.height; i++)
+    ref auto rgbToGrayscale(ref Pixel pix, bool fastMode = false)
     {
-        for (int j = 0; j < hdr.width; j++)
+        ubyte[][][] color;
+        with (this.header) with (colorTypes)
         {
-            auto r_circle = (i - center) * (i - center) + (j - center) * (j - center);
-            if ((r_circle < radius_high * radius_high) & (r_circle > radius_low * radius_low))
-            {
-                dest[i][j] = dft_matrix[i][j];
-            }
-            else
-            {
-                dest[i][j] = complex(0, 0);
-            }
+            if (colorType != trueColor && colorType != trueColorA)
+                throw new Exception("invalid format.");
+            pix.Pixel.each!(n => color ~= n.chunks(lengthPerPixel).array);
+            if (colorType == trueColorA)
+                color.each!((idx, a) => a.each!((edx, b) => color[idx][edx] = b.remove(3)));
         }
+
+        return (fastMode == true) ? color.toGrayscale(fastMode) : color.toGrayscale;
     }
-    return dest;
 
-}
-
-// deprecated (take a lot of time because of using dft)
-ubyte[][] psd(Complex!(double)[][] dft_matrix, ref Header hdr)
-{
-    ubyte[][] dest = uninitializedArray!(ubyte[][])(hdr.height, hdr.width);
-    for (int i = 0; i < hdr.height; ++i)
+    Complex!(double)[][] dft(T)(T[][] data, bool isDFT = true)
     {
-        for (int j = 0; j < hdr.width; ++j)
+
+        Complex!(double)[][] dft_matrix;
+        dft_matrix.length = this.header.height;
+        Fourier fourier = new Fourier(this.header);
+
+        for (int i = 0; i < this.header.height; i++)
         {
-            double _power_spectrum = (10 * floor(log(dft_matrix[i][j].abs)));
-            ubyte power_spectrum;
-            if (_power_spectrum < 0)
-            {
-                power_spectrum = 0;
-            }
-            else if (_power_spectrum > 255)
-            {
-                power_spectrum = 255;
-            }
-            else
-            {
-                power_spectrum = _power_spectrum.to!ubyte;
-            }
-            dest[i][j] = power_spectrum;
+            dft_matrix[i] = fourier.dft(data[i].to!(Complex!(double)[]), isDFT);
         }
-    }
-    Fourier fourier = new Fourier(hdr);
-    return fourier.shift(dest);
-}
+        dft_matrix = fourier.transpose(dft_matrix);
 
-pure auto toBinary(T)(ref T[][] gray, T threshold = 127)
-{
-    // Simple thresholding 
-
-    T[][] bin;
-    gray.each!(a => bin ~= a.map!(b => b < threshold ? 0 : 255).array);
-    return bin;
-}
-
-pure auto toBinary(T)(T[][] array)
-{
-    uint imageH = array.length;
-    uint imageW = array[0].length;
-    int vicinityH = 3;
-    int vicinityW = 3;
-    int h = vicinityH / 2;
-    int w = vicinityW / 2;
-
-    auto output = minimallyInitializedArray!(typeof(array))(imageH, imageW);
-    output.each!(a => fill(a, 0));
-
-    foreach (i; h .. imageH - h)
-    {
-        foreach (j; w .. imageW - w)
+        for (int i = 0; i < this.header.height; i++)
         {
-            int t = 0;
-            foreach (m; 0 .. vicinityH)
+            dft_matrix[i] = fourier.dft(dft_matrix[i], isDFT);
+        }
+        dft_matrix = fourier.transpose(dft_matrix);
+        return dft_matrix;
+    }
+
+    Complex!(double)[][] lpf(Complex!(double)[][] dft_matrix, int radius = 50)
+    {
+        Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(
+                this.header.height, this.header.width);
+        int center = this.header.height / 2;
+        for (int i = 0; i < this.header.height; i++)
+        {
+            for (int j = 0; j < this.header.width; j++)
             {
-                foreach (n; 0 .. vicinityW)
+                if ((i - center) * (i - center) + (j - center) * (j - center) < radius * radius)
                 {
-                    t += array[i - h + m][j - w + n];
+                    dest[i][j] = dft_matrix[i][j];
+                }
+                else
+                {
+                    dest[i][j] = complex(0, 0);
                 }
             }
-            if ((t / (vicinityH * vicinityW)) < array[i][j])
-                output[i][j] = 255;
         }
+        return dest;
     }
-    return output;
-}
 
-pure auto differ(T)(ref T[][] origin, ref T[][] target)
-{
-    T[][] diff;
-    origin.each!((idx, a) => diff ~= (target[idx][] -= a[]).map!(b => abs(b)).array);
-
-    return diff;
-}
-
-pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)
-{
-    T[][] masked;
-    masked.length = gray.length;
-    gray.each!((idx, a) => a.each!((edx, b) => masked[idx] ~= b == 255
-            ? colorTarget[idx][edx] : [0, 0, 0]));
-
-    return masked;
-}
-
-int[ubyte] pixelHistgram(ubyte[][] data)
-{
-    ubyte[] joined_data = data.join;
-    int[ubyte] hist;
-    foreach (idx, h; joined_data)
+    Complex!(double)[][] hpf(Complex!(double)[][] dft_matrix, int radius = 50)
     {
-        hist[h]++;
-    }
-    return hist;
-}
-
-ubyte[][] gammaCorrection(Header hdr, ubyte[][] data, double gamma)
-{
-    double pixel_max = data.join.maxElement.to!double;
-
-    for (int i = 0; i < hdr.height; i++)
-    {
-        for (int j = 0; j < hdr.width; j++)
+        Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(
+                this.header.height, this.header.width);
+        int center = this.header.height / 2;
+        for (int i = 0; i < this.header.height; i++)
         {
-            data[i][j] = floor(pixel_max * pow(data[i][j].to!double / pixel_max, 1 / gamma))
-                .to!ubyte;
+            for (int j = 0; j < this.header.width; j++)
+            {
+                if ((i - center) * (i - center) + (j - center) * (j - center) < radius * radius)
+                {
+                    dest[i][j] = complex(0, 0);
+                }
+                else
+                {
+                    dest[i][j] = dft_matrix[i][j];
+                }
+            }
         }
+        return dest;
     }
-    return data;
-}
 
-auto rectangle(ref ubyte[][] src, int[] pos, int[] size)
-{
-    for (int i = pos[0]; i < pos[0] + size[0]; i++)
+    Complex!(double)[][] bpf(Complex!(double)[][] dft_matrix, int radius_low = 20,
+            int radius_high = 50)
     {
-        for (int j = pos[1]; j < pos[1] + size[1]; j++)
+        Complex!(double)[][] dest = uninitializedArray!(Complex!(double)[][])(
+                this.header.height, this.header.width);
+
+        int center = this.header.height / 2;
+        for (int i = 0; i < this.header.height; i++)
         {
-            src[pos[0]][j] = 255;
-            src[pos[0] + size[1]][j] = 255;
-            src[i][pos[1]] = 255;
-            src[i][pos[1] + size[1]] = 255;
+            for (int j = 0; j < this.header.width; j++)
+            {
+                auto r_circle = (i - center) * (i - center) + (j - center) * (j - center);
+                if ((r_circle < radius_high * radius_high) & (r_circle > radius_low * radius_low))
+                {
+                    dest[i][j] = dft_matrix[i][j];
+                }
+                else
+                {
+                    dest[i][j] = complex(0, 0);
+                }
+            }
+        }
+        return dest;
+
+    }
+
+    // deprecated (take a lot of time because of using dft)
+    ubyte[][] psd(Complex!(double)[][] dft_matrix)
+    {
+        ubyte[][] dest = uninitializedArray!(ubyte[][])(this.header.height, this.header.width);
+        for (int i = 0; i < this.header.height; ++i)
+        {
+            for (int j = 0; j < this.header.width; ++j)
+            {
+                double _power_spectrum = (10 * floor(log(dft_matrix[i][j].abs)));
+                ubyte power_spectrum;
+                if (_power_spectrum < 0)
+                {
+                    power_spectrum = 0;
+                }
+                else if (_power_spectrum > 255)
+                {
+                    power_spectrum = 255;
+                }
+                else
+                {
+                    power_spectrum = _power_spectrum.to!ubyte;
+                }
+                dest[i][j] = power_spectrum;
+            }
+        }
+        Fourier fourier = new Fourier(this.header);
+        return fourier.shift(dest);
+    }
+
+    pure auto toBinary(T)(ref T[][] gray, T threshold = 127)
+    {
+        // Simple thresholding 
+
+        T[][] bin;
+        gray.each!(a => bin ~= a.map!(b => b < threshold ? 0 : 255).array);
+        return bin;
+    }
+
+    pure auto toBinary(T)(T[][] array)
+    {
+        uint imageH = array.length;
+        uint imageW = array[0].length;
+        int vicinityH = 3;
+        int vicinityW = 3;
+        int h = vicinityH / 2;
+        int w = vicinityW / 2;
+
+        auto output = minimallyInitializedArray!(typeof(array))(imageH, imageW);
+        output.each!(a => fill(a, 0));
+
+        foreach (i; h .. imageH - h)
+        {
+            foreach (j; w .. imageW - w)
+            {
+                int t = 0;
+                foreach (m; 0 .. vicinityH)
+                {
+                    foreach (n; 0 .. vicinityW)
+                    {
+                        t += array[i - h + m][j - w + n];
+                    }
+                }
+                if ((t / (vicinityH * vicinityW)) < array[i][j])
+                    output[i][j] = 255;
+            }
+        }
+        return output;
+    }
+
+    pure auto differ(T)(ref T[][] origin, ref T[][] target)
+    {
+        T[][] diff;
+        origin.each!((idx, a) => diff ~= (target[idx][] -= a[]).map!(b => abs(b)).array);
+
+        return diff;
+    }
+
+    pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)
+    {
+        T[][] masked;
+        masked.length = gray.length;
+        gray.each!((idx, a) => a.each!((edx, b) => masked[idx] ~= b == 255
+                ? colorTarget[idx][edx] : [0, 0, 0]));
+
+        return masked;
+    }
+
+    int[ubyte] pixelHistgram(ubyte[][] data)
+    {
+        ubyte[] joined_data = data.join;
+        int[ubyte] hist;
+        foreach (idx, h; joined_data)
+        {
+            hist[h]++;
+        }
+        return hist;
+    }
+
+    ubyte[][] gammaCorrection(ubyte[][] data, double gamma)
+    {
+        double pixel_max = data.join.maxElement.to!double;
+
+        for (int i = 0; i < this.header.height; i++)
+        {
+            for (int j = 0; j < this.header.width; j++)
+            {
+                data[i][j] = floor(pixel_max * pow(data[i][j].to!double / pixel_max, 1 / gamma))
+                    .to!ubyte;
+            }
+        }
+        return data;
+    }
+
+    auto rectangle(ref ubyte[][] src, int[] pos, int[] size)
+    {
+        for (int i = pos[0]; i < pos[0] + size[0]; i++)
+        {
+            for (int j = pos[1]; j < pos[1] + size[1]; j++)
+            {
+                src[pos[0]][j] = 255;
+                src[pos[0] + size[1]][j] = 255;
+                src[i][pos[1]] = 255;
+                src[i][pos[1] + size[1]] = 255;
+            }
         }
     }
-}
 
-enum MatchingType
-{
-    SSD,
-    SAD,
-    NCC,
-    ZNCC,
-}
-
-auto templateMatching(Header templateHeader, Header inputHeader,
-        ubyte[][] templateImage, ubyte[][] inputImage, MatchingType type)
-{
-    TemplateMatching template_matching = new TemplateMatching(templateHeader,
-            inputHeader, templateImage, inputImage);
-    int[] pos;
-    switch (type) with (MatchingType)
+    enum MatchingType
     {
-    case SSD:
-        pos = template_matching.SSD();
-        break;
-    case SAD:
-        pos = template_matching.SAD();
-        break;
-    case NCC:
-        pos = template_matching.NCC();
-        break;
-    case ZNCC:
-        pos = template_matching.ZNCC();
-        break;
-    default:
-        break;
+        SSD,
+        SAD,
+        NCC,
+        ZNCC,
     }
-    return pos;
-}
 
-enum QualityEvaluationType
-{
-    MSE,
-    NormalizedMSE,
-    SNR,
-    PSNR,
-}
-
-auto qualityEvaluation(Header hdr, ubyte[][] img_reference,
-        ubyte[][] img_evaluation, QualityEvaluationType type)
-{
-    QualityEvaluation quality_evaluation = new QualityEvaluation(hdr, img_reference, img_evaluation);
-    double score;
-    switch (type) with (QualityEvaluationType)
+    auto templateMatching(Header templateHeader, Header inputHeader,
+            ubyte[][] templateImage, ubyte[][] inputImage, MatchingType type)
     {
-    case MSE:
-        score = quality_evaluation.MSE;
-        break;
-    case NormalizedMSE:
-        score = quality_evaluation.NormalizedMSE;
-        break;
-    case SNR:
-        score = quality_evaluation.SNR;
-        break;
-    case PSNR:
-        score = quality_evaluation.PSNR;
-        break;
-    default:
-        break;
+        TemplateMatching template_matching = new TemplateMatching(templateHeader,
+                inputHeader, templateImage, inputImage);
+        int[] pos;
+        switch (type) with (MatchingType)
+        {
+        case SSD:
+            pos = template_matching.SSD();
+            break;
+        case SAD:
+            pos = template_matching.SAD();
+            break;
+        case NCC:
+            pos = template_matching.NCC();
+            break;
+        case ZNCC:
+            pos = template_matching.ZNCC();
+            break;
+        default:
+            break;
+        }
+        return pos;
     }
-    return score;
 
+    enum QualityEvaluationType
+    {
+        MSE,
+        NormalizedMSE,
+        SNR,
+        PSNR,
+    }
+
+    auto qualityEvaluation(ubyte[][] img_reference, ubyte[][] img_evaluation,
+            QualityEvaluationType type)
+    {
+        QualityEvaluation quality_evaluation = new QualityEvaluation(this.header,
+                img_reference, img_evaluation);
+        double score;
+        switch (type) with (QualityEvaluationType)
+        {
+        case MSE:
+            score = quality_evaluation.MSE;
+            break;
+        case NormalizedMSE:
+            score = quality_evaluation.NormalizedMSE;
+            break;
+        case SNR:
+            score = quality_evaluation.SNR;
+            break;
+        case PSNR:
+            score = quality_evaluation.PSNR;
+            break;
+        default:
+            break;
+        }
+        return score;
+
+    }
 }
