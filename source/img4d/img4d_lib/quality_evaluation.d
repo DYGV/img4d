@@ -14,10 +14,6 @@ class QualityEvaluation
 		this.img_evaluation = img_evaluation;
 	}
 
-	this()
-	{
-	}
-
 	double Mean(double[] data)
 	{
 		double sum = 0;
