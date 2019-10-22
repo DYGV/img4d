@@ -162,7 +162,7 @@ calculate squared sum of each pixel
 Squared Error
 -  **double MSE()**  
 Mean Squared Error
--  **double NormalizedMSE()** 
+-  **double NormalizedMSE()**  
 Normalized Squared Error
 -  **double SNR()**  
 Signal-to-Noise Ratio
