@@ -1,7 +1,7 @@
 module img4d.img4d;
 
-import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter,
-    img4d_lib.color_space, img4d_lib.edge, img4d_lib.template_matching;
+import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter, img4d_lib.color_space,
+    img4d_lib.edge, img4d_lib.template_matching, img4d_lib.quality_evaluation;
 
 import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range, std.file : exists;
 import img4d_lib.fourier;
@@ -585,7 +585,7 @@ enum MatchingType
 }
 
 auto templateMatching(Header templateHeader, Header inputHeader,
-        ubyte[][] templateImage, ubyte[][] inputImage, int type)
+        ubyte[][] templateImage, ubyte[][] inputImage, MatchingType type)
 {
     TemplateMatching template_matching = new TemplateMatching(templateHeader,
             inputHeader, templateImage, inputImage);
@@ -608,4 +608,38 @@ auto templateMatching(Header templateHeader, Header inputHeader,
         break;
     }
     return pos;
+}
+
+enum QualityEvaluationType
+{
+    MSE,
+    NormalizedMSE,
+    SNR,
+    PSNR,
+}
+
+auto qualityEvaluation(Header hdr, ubyte[][] img_reference,
+        ubyte[][] img_evaluation, QualityEvaluationType type)
+{
+    QualityEvaluation quality_evaluation = new QualityEvaluation(hdr, img_reference, img_evaluation);
+    double score;
+    switch (type) with (QualityEvaluationType)
+    {
+    case MSE:
+        score = quality_evaluation.MSE;
+        break;
+    case NormalizedMSE:
+        score = quality_evaluation.NormalizedMSE;
+        break;
+    case SNR:
+        score = quality_evaluation.SNR;
+        break;
+    case PSNR:
+        score = quality_evaluation.PSNR;
+        break;
+    default:
+        break;
+    }
+    return score;
+
 }
