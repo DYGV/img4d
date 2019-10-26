@@ -147,9 +147,13 @@ Convert to grayscale by weighting
 ## img4d_lib.template_matching
 -  **this(Header templateHeader, Header inputHeader, ubyte[][] templateImage, ubyte[][] inputImage)**  
 -  **int[] SSD**  
+Sum of Squared Difference
 -  **int[] SAD**  
+Sum of Absolute Difference
 -  **int[] NCC**  
+Normalized Cross Correlation
 -  **int[] ZNCC**  
+Zero means Normalized Cross Correlation
 
 ## img4d_lib.quality_evaluation
 -  **this(Header hdr, ubyte[][] img_reference, ubyte[][] img_evaluation)**  
