@@ -165,5 +165,5 @@ Normalized Squared Error
 Signal-to-Noise Ratio
 -  **double PSNR()**  
 Peak signal-to-noise ratio
--  **auto ESSIM()**  
+-  **auto MSSIM()**  
 Mean Structural SIMilarity
