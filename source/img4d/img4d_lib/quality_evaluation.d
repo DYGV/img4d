@@ -98,7 +98,7 @@ class QualityEvaluation
 	/*
 	 *	Normalized Squared Error
 	 */
-	double NormalizedMSE()
+	double NMSE()
 	{
 		return this.SE / PixelSquare(this.img_evaluation);
 	}

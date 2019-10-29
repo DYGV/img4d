@@ -622,7 +622,7 @@ class Img4d
     enum QualityEvaluationType
     {
         MSE,
-        NormalizedMSE,
+        NMSE,
         SNR,
         PSNR,
         MSSIM,
@@ -639,8 +639,8 @@ class Img4d
         case MSE:
             score = quality_evaluation.MSE;
             break;
-        case NormalizedMSE:
-            score = quality_evaluation.NormalizedMSE;
+        case NMSE:
+            score = quality_evaluation.NMSE;
             break;
         case SNR:
             score = quality_evaluation.SNR;
