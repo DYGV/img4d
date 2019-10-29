@@ -96,7 +96,7 @@ class QualityEvaluation
 	}
 
 	/*
-	 *	Normalized Squared Error
+	 *	Normalized Mean Squared Error
 	 */
 	double NMSE()
 	{
