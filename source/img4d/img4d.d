@@ -545,13 +545,15 @@ class Img4d
         return masked;
     }
 
-    int[ubyte] pixelHistgram(ubyte[][] data)
+    int[] pixelHistgram(ubyte[][] data)
     {
         ubyte[] joined_data = data.join;
-        int[ubyte] hist;
-        foreach (idx, h; joined_data)
+        int[] hist;
+        hist.length = ubyte.max + 1;
+        for (int i = 0; i < joined_data.length; i++)
         {
-            hist[h]++;
+            int pix = joined_data[i];
+            hist[pix] += 1;
         }
         return hist;
     }
