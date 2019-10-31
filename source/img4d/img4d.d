@@ -1,7 +1,7 @@
 module img4d.img4d;
 
-import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter, img4d_lib.color_space,
-    img4d_lib.edge, img4d_lib.template_matching, img4d_lib.quality_evaluation;
+import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter, img4d_lib.color_space, img4d_lib.edge,
+    img4d_lib.template_matching, img4d_lib.quality_evaluation, img4d_lib.threshold;
 
 import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range, std.file : exists;
 import img4d_lib.fourier;
@@ -487,44 +487,24 @@ class Img4d
         return fourier.shift(dest);
     }
 
-    pure auto toBinary(T)(ref T[][] gray, T threshold = 127)
+    enum ThresholdType
     {
-        // Simple thresholding 
-
-        T[][] bin;
-        gray.each!(a => bin ~= a.map!(b => b < threshold ? 0 : 255).array);
-        return bin;
+        simple,// adaptive,
     }
 
-    pure auto toBinary(T)(T[][] array)
+    auto threshold(ubyte[][] grayscale, ThresholdType type, int thresholdValue = 127)
     {
-        uint imageH = array.length;
-        uint imageW = array[0].length;
-        int vicinityH = 3;
-        int vicinityW = 3;
-        int h = vicinityH / 2;
-        int w = vicinityW / 2;
-
-        auto output = minimallyInitializedArray!(typeof(array))(imageH, imageW);
-        output.each!(a => fill(a, 0));
-
-        foreach (i; h .. imageH - h)
+        Threshold t = new Threshold(this.header, grayscale);
+        ubyte[][] result_threshold;
+        with (ThresholdType) switch (type)
         {
-            foreach (j; w .. imageW - w)
-            {
-                int t = 0;
-                foreach (m; 0 .. vicinityH)
-                {
-                    foreach (n; 0 .. vicinityW)
-                    {
-                        t += array[i - h + m][j - w + n];
-                    }
-                }
-                if ((t / (vicinityH * vicinityW)) < array[i][j])
-                    output[i][j] = 255;
-            }
+        case simple:
+            result_threshold = t.simple(thresholdValue);
+            break;
+        default:
+            break;
         }
-        return output;
+        return result_threshold;
     }
 
     pure auto differ(T)(ref T[][] origin, ref T[][] target)
