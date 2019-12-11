@@ -255,12 +255,12 @@ class Img4d
 {
     Header header;
 
-    bool isColorNoneAlpha(int colorType)
+    bool isAlpha(int colorType)
     {
         alias type = colorType;
         with (colorTypes)
         {
-            return (type == trueColor || type == indexColor) ? true : false;
+            return (type == trueColor || type == indexColor) ? false : true;
         }
     }
 
@@ -287,19 +287,37 @@ class Img4d
             alias grayscale = data;
             return Pixel(grayscale);
         }
+        ubyte[][] R;
+        ubyte[][] G;
+        ubyte[][] B;
+        ubyte[][] A;
+        R.length = data.length;
+        G.length = data.length;
+        B.length = data.length;
+        A.length = data.length;
+        bool isAlpha = this.isAlpha(this.header.colorType);
 
-        data.each!(a => rgb ~= [a.chunks(lengthPerPixel).array]);
-        rgb.each!(a => joinRGB ~= a.joinVertical);
-        auto pix = joinRGB.transposed;
-        ubyte[][] R = pix[R].array.to!(ubyte[][]);
-        ubyte[][] G = pix[G].array.to!(ubyte[][]);
-        ubyte[][] B = pix[B].array.to!(ubyte[][]);
-        ubyte[][] A = pix[A].array.to!(ubyte[][]);
+        for (int i = 0; i < data.length; i++)
+        {
+            ulong len = data[i].length;
+            while (data[i].length > 0)
+            {
+                R[i] ~= data[i][0];
+                G[i] ~= data[i][1];
+                B[i] ~= data[i][2];
+                data[i] = data[i][3 .. $];
+                if (isAlpha)
+                {
+                    A[i] ~= data[i][0];
+                    data[i] = data[i][1 .. $];
+                }
+            }
+        }
 
-        return (this.isColorNoneAlpha(this.header.colorType)) ? Pixel(R, G, B) : Pixel(R, G, B, A);
+        return (isAlpha) ? Pixel(R, G, B, A) : Pixel(R, G, B);
     }
 
-    bool save(ref Pixel pix, string filename)
+    bool save(ref Pixel pix, in string filename)
     {
 
         Encode encode = new Encode(this.header, pix);
@@ -311,7 +329,7 @@ class Img4d
         return true;
     }
 
-    bool save(ref Pixel pix, string filename, ubyte[] ancillary_chunks)
+    bool save(ref Pixel pix, in string filename, in ubyte[] ancillary_chunks)
     {
         Encode encode = new Encode(this.header, pix);
         ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT ~ encode.makeIEND;
@@ -489,7 +507,7 @@ class Img4d
 
     enum ThresholdType
     {
-        simple,// adaptive,
+        simple, // adaptive,
     }
 
     auto threshold(ubyte[][] grayscale, ThresholdType type, int thresholdValue = 127)
@@ -538,7 +556,7 @@ class Img4d
         return hist;
     }
 
-    ubyte[][] gammaCorrection(ubyte[][] data, double gamma)
+    void gammaCorrection(ref ubyte[][] data, in double gamma)
     {
         double pixel_max = data.join.maxElement.to!double;
 
@@ -550,10 +568,9 @@ class Img4d
                     .to!ubyte;
             }
         }
-        return data;
     }
 
-    auto rectangle(ref ubyte[][] src, int[] pos, int[] size)
+    void rectangle(ref ubyte[][] src, int[] pos, int[] size)
     {
         for (int i = pos[0]; i < pos[0] + size[0]; i++)
         {
