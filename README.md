@@ -28,7 +28,7 @@ Pixel grayPix = img.rgbToGrayscale(colorPix, true);
 ### 
 ### save(encode)
 ```D
- bool encodedData = img.save(grayPix, "png_img/encoded_lena_1.png", chunk);
+ bool encodedData = img.save(grayPix, "png_img/encoded_lena_1.png");
 ```    
 # Package  
  [img4d](https://github.com/DYGV/img4d/blob/master/README.md#img4d)  
