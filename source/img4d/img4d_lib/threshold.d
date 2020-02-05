@@ -1,4 +1,4 @@
-module img4d_lib.threshold;
+module img4d.img4d_lib.threshold;
 import img4d;
 
 class Threshold

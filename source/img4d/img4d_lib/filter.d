@@ -1,4 +1,4 @@
-module img4d_lib.filter;
+module img4d.img4d_lib.filter;
 
 import std.stdio, std.array, std.conv, std.algorithm, std.range;
 import std.parallelism : parallel;

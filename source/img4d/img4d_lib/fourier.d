@@ -1,4 +1,4 @@
-module img4d_lib.fourier;
+module img4d.img4d_lib.fourier;
 
 import img4d;
 import std.stdio, std.array, std.conv, std.range, std.algorithm, std.math, std.complex;

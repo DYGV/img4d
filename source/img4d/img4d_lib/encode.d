@@ -1,6 +1,6 @@
-module img4d_lib.encode;
+module img4d.img4d_lib.encode;
 
-import img4d, img4d_lib.decode, img4d_lib.filter;
+import img4d, img4d.img4d_lib.decode, img4d.img4d_lib.filter;
 import std.stdio, std.array, std.bitmanip, std.conv, std.zlib, std.digest,
     std.digest.crc, std.range, std.algorithm;
 import std.parallelism : parallel;

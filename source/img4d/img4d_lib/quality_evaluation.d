@@ -1,4 +1,4 @@
-module img4d_lib.quality_evaluation;
+module img4d.img4d_lib.quality_evaluation;
 import std.stdio, std.math;
 import img4d;
 

@@ -1,4 +1,4 @@
-module img4d_lib.template_matching;
+module img4d.img4d_lib.template_matching;
 
 import img4d;
 import std.stdio, std.array, std.math,std.algorithm.iteration;

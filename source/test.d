@@ -1,6 +1,6 @@
 import img4d;
-import img4d_lib.decode, img4d_lib.encode, img4d_lib.filter,
-    img4d_lib.color_space, img4d_lib.edge;
+import img4d.img4d_lib.decode, img4d.img4d_lib.encode, img4d.img4d_lib.filter,
+    img4d.img4d_lib.color_space, img4d.img4d_lib.edge;
 
 import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range,
     std.math, std.string, std.range.primitives, std.algorithm.mutation,

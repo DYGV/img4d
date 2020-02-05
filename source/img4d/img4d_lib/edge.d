@@ -1,4 +1,4 @@
-module img4d_lib.edge;
+module img4d.img4d_lib.edge;
 
 import std.stdio, std.array, std.conv, std.algorithm, std.range, std.math;
 import std.range.primitives;

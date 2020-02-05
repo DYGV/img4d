@@ -1,4 +1,4 @@
-module img4d_lib.color_space;
+module img4d.img4d_lib.color_space;
 
 import img4d, std.stdio, std.array, std.conv, std.algorithm, std.range;
 

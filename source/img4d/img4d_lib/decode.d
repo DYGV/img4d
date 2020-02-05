@@ -1,10 +1,10 @@
-module img4d_lib.decode;
+module img4d.img4d_lib.decode;
 
-import img4d, img4d_lib.filter;
+import img4d, img4d.img4d_lib.filter;
 import std.file : read;
 import std.digest.crc : CRC32, crc32Of;
 import std.stdio, std.array, std.bitmanip, std.zlib, std.conv, std.algorithm,
-    std.range, img4d_lib.encode;
+    std.range, img4d.img4d_lib.encode;
 
 class Decode
 {
