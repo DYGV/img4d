@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/affine
+affine.so
+affine.dylib
+affine.dll
+affine.a
+affine.lib
+affine-test-*
+*.exe
+*.o
+*.obj
+*.lst

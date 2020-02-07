@@ -655,4 +655,29 @@ class Img4d
         return score;
 
     }
+
+	Pixel rotate(ubyte[][] img, int degrees){
+		int h = this.header.height;
+		int w = this.header.width;
+		int half_h = h / 2;
+		int half_w = w / 2;
+		double sin_theta = sin(degrees * (PI / 180));
+		double cos_theta = cos(degrees * (PI / 180));
+		ubyte[][] transformed  = minimallyInitializedArray!(ubyte[][])(h, w);
+
+		for(int i=0; i<h; i++){
+			for(int j=0; j<w; j++){
+				int center_w = j-half_w;
+				int center_h = i-half_h;
+				int x_ = round((center_w*cos_theta) - (center_h*sin_theta) + half_w).to!int;
+				int y_ = round((center_w*sin_theta) + (center_h*cos_theta) + half_h).to!int;
+				if((x_ >= 0) && (y_ >= 0) && (x_ < h) && (y_ < w)){
+					transformed[i][j] = img[y_][x_];
+				}else{
+					transformed[i][j] = 0;
+				}
+			}
+		}
+		return Pixel(transformed);
+	}
 }
