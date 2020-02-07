@@ -5,5 +5,4 @@ d:
 
 script:
   - dub test -b unittest-cov --compiler=${DC}
-  - dub run
 
