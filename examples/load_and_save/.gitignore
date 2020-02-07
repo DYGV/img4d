@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/load_and_save
+load_and_save.so
+load_and_save.dylib
+load_and_save.dll
+load_and_save.a
+load_and_save.lib
+load_and_save-test-*
+*.exe
+*.o
+*.obj
+*.lst

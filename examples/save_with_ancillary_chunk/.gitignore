@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/save_with_ancillary_chunk
+save_with_ancillary_chunk.so
+save_with_ancillary_chunk.dylib
+save_with_ancillary_chunk.dll
+save_with_ancillary_chunk.a
+save_with_ancillary_chunk.lib
+save_with_ancillary_chunk-test-*
+*.exe
+*.o
+*.obj
+*.lst

@@ -1,5 +1,5 @@
 import img4d;
-import std.stdio, std.datetime.systime, img4d.img4d_lib.filter, img4d.img4d_lib.encode;
+import std.stdio, std.datetime.systime, img4d.img4d_lib.encode;
 mixin bitOperator;
 mixin makeChunk;
 
@@ -7,29 +7,16 @@ int main()
 {
   Img4d img = new Img4d();
   // start decode
-  Pixel colorPix = img.load("png_img/lena.png");
-  if (colorPix.Pixel.length == 0)
-  {
-    return 0;
-  }
-
+  Pixel colorPix = img.load("../../png_img/lena.png");
   writefln("Width  %8d\nHeight  %7d", img.header.width, img.header.height);
   writefln("Bit Depth  %4d\nColor Type  %3d\n", img.header.bitDepth, img.header.colorType);
-
-  Pixel grayPix = img.rgbToGrayscale(colorPix, true);
 
   // start encode (you can save image with ancillary chunks)
   ubyte[] chunk_type = [116, 73, 77, 69]; // "tIME"
   SysTime date = Clock.currTime();
   // date.timeToChunkFormat.writeln;
   ubyte[] chunk = chunk_type.makeChunk(date.timeToChunkFormat);
-  bool encodedData = img.save(grayPix, "png_img/encoded_lena_1.png", chunk);
-
-  //read encoded file
-  Pixel encodedDataToDecode = img.load("png_img/encoded_lena_1.png");
-  Header afterEncode = img.header;
-  writefln("Width  %8d\nHeight  %7d", afterEncode.width, afterEncode.height);
-  writefln("Bit Depth  %4d\nColor Type  %3d\n", afterEncode.bitDepth, afterEncode.colorType);
+  bool encodedData = img.save(colorPix, "../../png_img/encoded_lena_1.png", chunk);
 
   return 0;
 }

@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/template_matching
+template_matching.so
+template_matching.dylib
+template_matching.dll
+template_matching.a
+template_matching.lib
+template_matching-test-*
+*.exe
+*.o
+*.obj
+*.lst

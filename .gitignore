@@ -15,6 +15,7 @@ img4d-test-*
 *.un~
 *.swp
 *d~
+*.json~
 *.gitignore~
 *.travis.yml~
 *.git
