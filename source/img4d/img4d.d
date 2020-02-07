@@ -656,7 +656,7 @@ class Img4d
 
     }
 
-	Pixel rotate(ubyte[][] img, int degrees){
+    Pixel rotate(ubyte[][] img, int degrees){
 		int h = this.header.height;
 		int w = this.header.width;
 		int half_h = h / 2;
@@ -666,11 +666,13 @@ class Img4d
 		ubyte[][] transformed  = minimallyInitializedArray!(ubyte[][])(h, w);
 
 		for(int i=0; i<h; i++){
+			int center_h = i - half_h;
+			double center_h_sin_theta = center_h * sin_theta;
+			double center_h_cos_theta = center_h * cos_theta;
 			for(int j=0; j<w; j++){
-				int center_w = j-half_w;
-				int center_h = i-half_h;
-				int x_ = round((center_w*cos_theta) - (center_h*sin_theta) + half_w).to!int;
-				int y_ = round((center_w*sin_theta) + (center_h*cos_theta) + half_h).to!int;
+				int center_w = j - half_w;
+				int x_ = round((center_w * cos_theta) - center_h_sin_theta + half_w).to!int;
+				int y_ = round((center_w * sin_theta) + center_h_cos_theta + half_h).to!int;
 				if((x_ >= 0) && (y_ >= 0) && (x_ < h) && (y_ < w)){
 					transformed[i][j] = img[y_][x_];
 				}else{
