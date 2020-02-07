@@ -4,7 +4,7 @@
 	],
 	"description": "A minimal D application.",
 	"license": "proprietary",
-	"name": "affine",
+	"name": "rotation",
 	"dependencies": {
         "img4d": {
             "path": "../../"
