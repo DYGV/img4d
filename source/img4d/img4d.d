@@ -682,4 +682,23 @@ class Img4d
 		}
 		return Pixel(transformed);
 	}
+
+    Pixel translate(ubyte[][] img, int transition_x, int transition_y){
+		int h = this.header.height;
+		int w = this.header.width;
+		ubyte[][] transformed  = minimallyInitializedArray!
+				(ubyte[][])(this.header.height, this.header.width);
+		for(int i=0; i<h; i++){
+			int y_ = h - i - transition_y;
+			for(int j=0; j<w; j++){
+				int x_ = w - j + transition_x;
+				if((x_ > 0) && (y_ > 0) && (x_ < h) && (y_ < w)){
+					transformed[i][j] = img[h-y_][w-x_];
+				}else{
+					transformed[i][j] = 0;
+				}
+			}
+		}
+		return Pixel(transformed);
+	}
 }

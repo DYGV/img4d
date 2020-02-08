@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/scaling
+scaling.so
+scaling.dylib
+scaling.dll
+scaling.a
+scaling.lib
+scaling-test-*
+*.exe
+*.o
+*.obj
+*.lst

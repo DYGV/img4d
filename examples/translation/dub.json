@@ -1,0 +1,13 @@
+{
+	"authors": [
+		"eisuke"
+	],
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"name": "translation",
+	"dependencies": {
+        "img4d": {
+            "path": "../../"
+		}
+	}
+}
