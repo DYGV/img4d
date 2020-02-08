@@ -133,18 +133,17 @@ class Decode
             case Average:
                 uint upIdx = (idx - 1).to!uint;
                 ubyte[][] up = actualData[upIdx].chunks(lengthPerPixel).array;
-                ubyte[][][] current = scanline.chunks(lengthPerPixel).array;
                 if (gray)
                 {
-                    scanline.front.popFront;
-                    auto sc = scanline.join;
-                    temp ~= up.front.front / 2;
+                    ubyte[] sc = scanline.join;
+                    temp ~= (this.normalizePixelValue((up.front.front / 2) + sc[0])).to!ubyte;
                     up.front[1 .. $].each!((o,
-                            n) => temp ~= [this.normalizePixelValue((temp[o] + n) / 2 + sc[o])].to!(
+                            n) => temp ~= [this.normalizePixelValue(((temp[o] + n) / 2) + sc[o+1])].to!(
                             ubyte[]));
                 }
                 else
                 {
+                	ubyte[][][] current = scanline.chunks(lengthPerPixel).array;
                     scanline.popFront;
                     ubyte[] sc = scanline.join;
 
