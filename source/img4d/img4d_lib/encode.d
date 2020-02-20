@@ -173,7 +173,7 @@ class Encode
                     R = tmpR.up;
                     G = tmpG.up;
                     B = tmpB.up;
-                    A = tmpA.up;
+                    A = tmpA.length==0 ? [] : tmpA.up;
                     filteredUp = Pixel(R, G, B, A).Pixel;
 
                     R = tmpR.ave;

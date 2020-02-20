@@ -15,41 +15,24 @@ pure ref auto inverseSub(ref ubyte[][] scanline, bool gray)
     .join.transposed;
 }
 
-ref auto ubyte[][] sub(ref ubyte[][] src)
-{
-  ubyte[][] output;
-  output.length = src.length;
-  foreach (idx, scanline; src.parallel)
-  {
-    foreach (edx, sc; scanline)
-    {
-      if (edx == 0)
-      {
-        output[idx] ~= sc;
-      }
-      else
-      {
-        output[idx] ~= (sc - scanline[edx - 1]).normalizePixelValue;
-      }
-    }
-  }
-  return output;
+auto sub(R)(R input){
+  return input.map!(a => a.slide(2))
+			.map!(b => b.front.front ~ b.map!(c => c.front - c.back)
+			.map!(d => d > 0 ? 256 - d : d.abs).array).array.to!(ubyte[][]);
 }
 
-ref auto ubyte[][] up(ref ubyte[][] src)
-{
-  ubyte[][] output;
-  output.length = src.length;
-  foreach (idx, scanline; src.parallel)
-  {
-    if (idx == 0)
-    {
-      output[idx] ~= scanline;
-    }
-    else
-    {
-      scanline.each!((edx, a) => output[idx] ~= (a - src[idx - 1][edx])
-          .normalizePixelValue.to!ubyte);
+auto up(R)(R input){
+  return input.front.walkLength.iota
+	.map!(i => transversal(input, i).array)
+	.sub.transpose;
+}
+
+auto transpose(R)(R input){
+  R output;
+  output.length = input.front.length;
+  for(int i=0; i<input.length; i++){
+    for(int j=0; j<input.front.length; j++){
+       output[j] ~= input[i][j];
     }
   }
   return output;
