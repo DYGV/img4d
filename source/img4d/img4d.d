@@ -673,7 +673,7 @@ class Img4d
 				int center_w = j - half_w;
 				int x_ = round((center_w * cos_theta) - center_h_sin_theta + half_w).to!int;
 				int y_ = round((center_w * sin_theta) + center_h_cos_theta + half_h).to!int;
-				if((x_ >= 0) && (y_ >= 0) && (x_ < h) && (y_ < w)){
+				if((x_ >= 0) && (y_ >= 0) && (x_ < w) && (y_ < h)){
 					transformed[i][j] = img[y_][x_];
 				}else{
 					transformed[i][j] = 0;
@@ -693,7 +693,7 @@ class Img4d
 			for(int j=0; j<w; j++){
 				int x_ = w - j + transition_x;
 				if((x_ > 0) && (y_ > 0) && (x_ < h) && (y_ < w)){
-					transformed[i][j] = img[h-y_][w-x_];
+					transformed[i][j] = img[w-y_][h-x_];
 				}else{
 					transformed[i][j] = 0;
 				}
