@@ -37,18 +37,6 @@ auto transpose(R)(R input){
 }
 
 /**
- *  Calculate difference neighbor pixel.
- */
-ref auto neighborDifference(ref ubyte[][] src){
-	return src.map!(a => a.slide(2))
-		.map!(b => b.front.front ~ b.map!(c => c.front - c.back)
-				.map!(d => d > 0 ? 256 - d : d.abs)
-				.array
-				.to!(ubyte[]))
-		.array;
-}
-
-/**
  *  To vertical array 
  */
 pure ref auto T[][] joinVertical(T)(ref T[][] src){
