@@ -104,16 +104,6 @@ unittest{
 	assert(horizontal.joinVertical.equal(vertical));
 }
 
-// neighborDifference
-unittest{
-	ubyte[][] beforeCalculateDiff = [[1, 2, 3], [9, 3, 0]];
-	assert(beforeCalculateDiff.map!(a => a.slide(2).array).equal([[[1, 2], [2,
-				3]], [[9, 3], [3, 0]]])); // front - back < 0 => abs(front - back)
-	// front - back > 0 => 256 - (front - back)
-	ubyte[][] diff = [[1, 1, 1], [9, 250, 253]];
-	assert(beforeCalculateDiff.neighborDifference.equal(diff));
-}
-
 // inverseSub
 unittest{
 	ubyte[][] filtered = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
