@@ -136,13 +136,26 @@ class Encode{
 		with (this.header){
 			with (colorTypes){
 				if (colorType == grayscale || colorType == grayscaleA){
-					filteredNone = this.pixel.grayscale;
-					filteredSub = this.pixel.grayscale.sub;
-					filteredUp = this.pixel.grayscale.up;
-					filteredAve = this.pixel.grayscale.ave!("-", "src");
-					filteredPaeth = this.pixel.grayscale.paeth!("-", "src");
-				}
-				else{
+					ubyte[][] grayNone = this.pixel.grayscale;
+					ubyte[][] NoneA = tmpA;
+					filteredNone = Pixel(grayNone, NoneA).Pixel;
+
+					ubyte[][] graySub = this.pixel.grayscale.sub;
+					ubyte[][] SubA = tmpA.sub;
+					filteredSub = Pixel(graySub, SubA).Pixel;
+
+					ubyte[][] grayUp = this.pixel.grayscale.up;
+					ubyte[][] UpA = tmpA.length==0 ? [] : tmpA.up;
+					filteredUp = Pixel(grayUp, UpA).Pixel;
+
+					ubyte[][] grayAve = this.pixel.grayscale.ave!("-", "src");
+					ubyte[][] AveA = tmpA.ave!("-", "src");
+					filteredAve = Pixel(grayAve, AveA).Pixel;
+
+					ubyte[][] grayPaeth = this.pixel.grayscale.paeth!("-", "src");
+					ubyte[][] PaethA = tmpA.paeth!("-", "src");
+					filteredPaeth = Pixel(grayPaeth, PaethA).Pixel;
+				}else{
 					filteredNone = this.pixel.Pixel;
 
 					R = tmpR.sub;

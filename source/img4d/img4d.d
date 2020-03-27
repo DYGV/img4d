@@ -7,8 +7,6 @@ import img4d.img4d_lib.fourier;
 import std.complex;
 import std.math;
 
-int lengthPerPixel;
-
 enum{
 	R,
 	G,
@@ -124,6 +122,7 @@ struct Pixel{
 		_R = R;
 		_G = G;
 		_B = B;
+		type = "RGB";
 	}
 
 	this(ref ubyte[][] R, ref ubyte[][] G, ref ubyte[][] B, ref ubyte[][] A){
@@ -131,15 +130,18 @@ struct Pixel{
 		_G = G;
 		_B = B;
 		_A = A;
+		type = "RGBA";
 	}
 
 	this(ref ubyte[][] grayscale){
 		_grayscale = grayscale;
+		type = "gray";
 	}
 
 	this(ref ubyte[][] grayscale, ref ubyte[][] A){
 		_grayscale = grayscale;
 		_A = A;
+		type = "grayA";
 	}
 
 	@property{
@@ -179,34 +181,49 @@ struct Pixel{
 			return _A;
 		}
 
-		ref ubyte[][] Pixel(){
-			if(!_RGB.empty) return _RGB;
-			_RGB.length = R.length;
-			if(A.empty){
-				foreach (idx; 0 .. R.length){
-					foreach (edx; 0 .. R.front.length){
-						_RGB[idx] ~= [R[idx][edx]] ~ [G[idx][edx]] ~ [B[idx][edx]];
-					}
-				}
-			}
-			else{
-				foreach (idx; 0 .. R.length){
-					foreach (edx; 0 .. R.front.length){
-						_RGB[idx] ~= [R[idx][edx]] ~ [G[idx][edx]] ~ [B[idx][edx]] ~ [A[idx][edx]];
-					}
-				}
-			}
-			return _RGB;
-		}
-
 		pure ref ubyte[][] grayscale(){
 			return _grayscale;
 		}
+
+		ref ubyte[][] Pixel(){
+			switch(type){
+				case "RGB":
+					_RGB = combine(R, G, B);
+					break;
+				case "RGBA":
+					_RGB = combine(R, G, B, A);
+					break;
+				case "gray":
+					_RGB = combine(grayscale);
+					break;
+				case "grayA":
+					_RGB = combine(grayscale, A);
+					break;
+				default:
+					break;
+			}
+			return _RGB;
+		}
 	}
+		auto combine(ubyte[][] type_1, ubyte[][] type_2=[], 
+				ubyte[][] type_3=[], ubyte[][] type_4=[]){
+			ubyte[][] combined;
+			combined.length = type_1.length;
+			for(int i; i<type_1.length; i++){
+				for(int j=0; j<type_1.front.length; j++){
+					combined[i] ~= type_1[i][j];
+					if(!type_2.empty) combined[i] ~= type_2[i][j];
+					if(!type_3.empty) combined[i] ~= type_3[i][j];
+					if(!type_4.empty) combined[i] ~= type_4[i][j];
+				}
+			}
+			return combined;
+		}
 
 	private:
 	ubyte[][] _R, _G, _B, _A, _RGB, _grayscale;
 	ubyte[] _tmp;
+	string type;
 }
 
 class Img4d{
@@ -279,17 +296,25 @@ class Img4d{
 		return edge;
 	}
 
-	ref auto rgbToGrayscale(ref Pixel pix, bool fastMode = false){
-		ubyte[][][] color;
+	Pixel rgbToGrayscale(Pixel pix){
 		with (this.header) with (colorTypes){
 			if (colorType != trueColor && colorType != trueColorA)
-				throw new Exception("invalid format.");
-			pix.Pixel.each!(n => color ~= n.chunks(lengthPerPixel).array);
-			if(colorType == trueColorA)
-				color.each!((idx, a) => a.each!((edx, b) => color[idx][edx] = b.remove(3)));
+				throw new Exception("The color type must be true color.");
 		}
-		this.header.colorType = colorTypes.grayscale;
-		return (fastMode == true) ? color.toGrayscale(fastMode) : color.toGrayscale;
+		ubyte[][] gray;
+		gray.length = this.header.height;
+		for(int i=0; i<this.header.height;i++){
+			for(int j=0; j<this.header.width; j++){
+				gray[i] ~= (pix.R[i][j] + pix.G[i][j] + pix.B[i][j]) / 3;
+			}
+		}
+		if(pix.A.empty){
+			this.header.colorType = colorTypes.grayscale;
+			return Pixel(gray);
+		}else{
+			this.header.colorType = colorTypes.grayscaleA;
+			return Pixel(gray, pix.A);
+		}	
 	}
 
 	Complex!(double)[][] dft(T)(T[][] data, bool isDFT = true){

@@ -32,27 +32,6 @@ class Decode{
 				header[16], // interlaceMethod
 				header[17 .. 21] // crc
 				);
-
-		switch(this.header.colorType) with (colorTypes){
-			case grayscale:
-				lengthPerPixel = this.header.width;
-				break;
-			case trueColor:
-				lengthPerPixel = 3;
-				break;
-			case indexColor:
-				lengthPerPixel = 3;
-				break;
-			case grayscaleA:
-				lengthPerPixel = this.header.width * 2;
-				break;
-			case trueColorA:
-				lengthPerPixel = 4;
-				break;
-			default:
-				break;
-		}
-
 		crcCheck(this.header.crc, chunk);
 		return this.header;
 	}
