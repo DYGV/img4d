@@ -23,7 +23,7 @@ Pixel colorPix = img.load("png_img/lena.png");
 ```
 ### rgb to grayscale
 ```D
-Pixel grayPix = img.rgbToGrayscale(colorPix, true);
+Pixel grayPix = img.rgbToGrayscale(colorPix);
 ```
 ### 
 ### save(encode)
@@ -36,9 +36,7 @@ Pixel grayPix = img.rgbToGrayscale(colorPix, true);
  [img4d_lib.decode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libdecode)  
  
  [img4d_lib.encode](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libencode)  
- 
- [img4d_lib.color_space](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libcolor_space)  
- 
+  
  [img4d_lib.edge](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libedge)  
  
  [img4d_lib.fourier](https://github.com/DYGV/img4d/blob/master/README.md#img4d_libfourier) 
@@ -52,11 +50,8 @@ Pixel grayPix = img.rgbToGrayscale(colorPix, true);
 -  **ubyte[] save(ref Pixel pix, string filename)**  
 -  **bool save(ref Pixel pix, string filename, ubyte[] ancillary_chunks)** 
 -  **bool isGrayscale(int colorType)**
--  **bool isColorNoneAlpha(int colorType)**
 -  **auto canny(T)(T[][] actualData, int tMin, int tMax)**  
 -  **ref auto rgbToGrayscale(T)(ref Pixel pix, bool fastMode=false)**  
--  **pure auto toBinary(T)(ref T[][] gray, T threshold=127)**  
--  **pure auto toBinary(T)(T[][] array)**  
 -  **pure auto differ(T)(ref T[][] origin, ref T[][] target)**  
 -  **pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray)**  
 -  **Complex!(double)[][] dft(ubyte[][] data, Header hdr)** 
@@ -122,18 +117,14 @@ Choose optimal filter and Return filtered pixel
 
 ## img4d_lib.filter  
 - **pure ref auto inverseSub(ref ubyte[][] scanline)**  
-- **ref auto inverseSub(ref ubyte[][] scanline, bool gray)**
 - **pure ubyte[][] sub(ref ubyte[][] src)**  
 Calculate and Return Sub filter(Difference from left pixel)
 - **pure ubyte[][] up(ref ubyte[][] src)**  
-- **pure ubyte[][] neighborDifference(ubyte[][] src)**  
-Calculate difference neighbor pixel
+- **ubyte[][] ave(string op, string variable)(ubyte[][] src)**  
+- **ubyte[][] paeth(string op, string variable)(ubyte[][] src)**  
 - **pure ref auto joinVertical(T)(ref T[][] src)**  
 Make array vertical
- 
-## img4d_lib.color_space  
-- **ref auto toGrayscale(T)(ref T[][][] color)**  
-Convert to grayscale by weighting  
+   
 ## img4d_lib.edge  
 - **auto differential(T)(T[][] array, T[][] filter)**  
 - **auto gradient(T)(T[][] Gr, T[][] Gth)**  

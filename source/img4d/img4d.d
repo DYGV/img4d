@@ -1,6 +1,6 @@
 module img4d.img4d;
 
-import img4d.img4d_lib.decode, img4d.img4d_lib.encode, img4d.img4d_lib.filter, img4d.img4d_lib.color_space, img4d.img4d_lib.edge, img4d.img4d_lib.template_matching, img4d.img4d_lib.quality_evaluation, img4d.img4d_lib.threshold;
+import img4d.img4d_lib.decode, img4d.img4d_lib.encode, img4d.img4d_lib.filter, img4d.img4d_lib.edge, img4d.img4d_lib.template_matching, img4d.img4d_lib.quality_evaluation, img4d.img4d_lib.threshold;
 
 import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range, std.file : exists;
 import img4d.img4d_lib.fourier;
