@@ -26,19 +26,10 @@ unittest{  // decode.d{
 	// readIHDR
 	hdr = decode.readIHDR(headers);
 
-	// parse
-	ubyte[][] colorPix = decode.parse("png_img/lena.png");
-	string origin = readText("png_img/rgb_lena.txt");
-	assert(origin == colorPix.join.map!(a => a.to!(string)).join);
-
 	// crcCheck
 	ubyte[] crc = [2, 13, 177, 178];
 	ubyte[] data = [0x49, 0x48, 0x44, 0x52, 0x0, 0x0, 0x0, 0x5, 0x0, 0x0, 0x0, 0x5, 0x8, 0x2, 0x0, 0x0, 0x0];
 	assert(decode.crcCheck(crc, data));
-
-	// normalizePixelValue
-	assert(decode.normalizePixelValue(100) == 100); // 100 < 256 => 100 
-	assert(decode.normalizePixelValue(300) == 44); // 300 > 256 => 300 - 256 = 44
 }
 
 unittest{  // encode.d{
@@ -102,25 +93,6 @@ unittest{
 	ubyte[][] horizontal = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
 	ubyte[][] vertical = [[1, 4, 7], [2, 5, 8], [3, 6, 9]];
 	assert(horizontal.joinVertical.equal(vertical));
-}
-
-// inverseSub
-unittest{
-	ubyte[][] filtered = [[1, 1, 255], [255, 2, 3], [3, 2, 1]];
-	ubyte[][] unFilter = [[1, 1, 255], [0, 3, 2], [3, 5, 3]];
-	/*
-	   sub filter
-	   the first pixel is intact  =>                1,1,1
-
-	   1 + 255 = 256 >= 256     =>  256 - 256 = 0  => 0
-	   1 +   2 =   3 <  256     =>                    3
-	   255 +   3 = 258 >  256     =>  258 - 256 = 2  => 2
-
-	   0 +   3 =   3 <  256     =>                    3
-	   3 +   2 =   5 <  256     =>                    5
-	   2 +   1 =   3 <  256     =>                    3
-	 */
-	filtered.inverseSub.each!((idx, a) => assert(a.equal(unFilter[idx])));
 }
 
 // sub

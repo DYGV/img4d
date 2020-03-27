@@ -137,6 +137,11 @@ struct Pixel{
 		_grayscale = grayscale;
 	}
 
+	this(ref ubyte[][] grayscale, ref ubyte[][] A){
+		_grayscale = grayscale;
+		_A = A;
+	}
+
 	@property{
 		pure void R(ref ubyte[][] R){
 			_R = R;
@@ -224,39 +229,10 @@ class Img4d{
 	ref auto load(string filename){
 		if(!exists(filename))
 			throw new Exception("Not found the file.");
-		ubyte[][][] rgb, joinRGB;
-
 		Decode decode = new Decode(this.header);
 		auto data = decode.parse(filename);
 		this.header = decode.header;
-		if(this.isGrayscale(this.header.colorType)){
-			alias grayscale = data;
-			return Pixel(grayscale);
-		}
-		ubyte[][] R;
-		ubyte[][] G;
-		ubyte[][] B;
-		ubyte[][] A;
-		R.length = data.length;
-		G.length = data.length;
-		B.length = data.length;
-		A.length = data.length;
-		bool isAlpha = this.isAlpha(this.header.colorType);
-
-		for (int i = 0; i < data.length; i++){
-			ulong len = data[i].length;
-			while (data[i].length > 0){
-				R[i] ~= data[i][0];
-				G[i] ~= data[i][1];
-				B[i] ~= data[i][2];
-				data[i] = data[i][3 .. $];
-				if (isAlpha){
-					A[i] ~= data[i][0];
-					data[i] = data[i][1 .. $];
-				}
-			}
-		}
-		return (isAlpha) ? Pixel(R, G, B, A) : Pixel(R, G, B);
+		return data;
 	}
 
 	bool save(ref Pixel pix, in string filename){
@@ -309,7 +285,7 @@ class Img4d{
 			if (colorType != trueColor && colorType != trueColorA)
 				throw new Exception("invalid format.");
 			pix.Pixel.each!(n => color ~= n.chunks(lengthPerPixel).array);
-			if (colorType == trueColorA)
+			if(colorType == trueColorA)
 				color.each!((idx, a) => a.each!((edx, b) => color[idx][edx] = b.remove(3)));
 		}
 		this.header.colorType = colorTypes.grayscale;

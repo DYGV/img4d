@@ -139,8 +139,8 @@ class Encode{
 					filteredNone = this.pixel.grayscale;
 					filteredSub = this.pixel.grayscale.sub;
 					filteredUp = this.pixel.grayscale.up;
-					filteredAve = this.pixel.grayscale.ave;
-					filteredPaeth = this.pixel.grayscale.paeth;
+					filteredAve = this.pixel.grayscale.ave!("-", "src");
+					filteredPaeth = this.pixel.grayscale.paeth!("-", "src");
 				}
 				else{
 					filteredNone = this.pixel.Pixel;
@@ -157,16 +157,16 @@ class Encode{
 					A = tmpA.length==0 ? [] : tmpA.up;
 					filteredUp = Pixel(R, G, B, A).Pixel;
 
-					R = tmpR.ave;
-					G = tmpG.ave;
-					B = tmpB.ave;
-					A = tmpA.ave;
+					R = tmpR.ave!("-", "src");
+					G = tmpG.ave!("-", "src");
+					B = tmpB.ave!("-", "src");
+					A = tmpA.ave!("-", "src");
 					filteredAve = Pixel(R, G, B, A).Pixel;
 
-					R = tmpR.paeth;
-					G = tmpG.paeth;
-					B = tmpB.paeth;
-					A = tmpA.paeth;
+					R = tmpR.paeth!("-", "src");
+					G = tmpG.paeth!("-", "src");
+					B = tmpB.paeth!("-", "src");
+					A = tmpA.paeth!("-", "src");
 					filteredPaeth = Pixel(R, G, B, A).Pixel;
 				}
 			}
