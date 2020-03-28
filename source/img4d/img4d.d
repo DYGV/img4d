@@ -122,7 +122,7 @@ struct Pixel{
 		_R = R;
 		_G = G;
 		_B = B;
-		type = "RGB";
+		type = colorTypes.trueColor;
 	}
 
 	this(ref ubyte[][] R, ref ubyte[][] G, ref ubyte[][] B, ref ubyte[][] A){
@@ -130,18 +130,18 @@ struct Pixel{
 		_G = G;
 		_B = B;
 		_A = A;
-		type = "RGBA";
+		type = colorTypes.trueColorA;
 	}
 
 	this(ref ubyte[][] grayscale){
 		_grayscale = grayscale;
-		type = "gray";
+		type = colorTypes.grayscale;
 	}
 
 	this(ref ubyte[][] grayscale, ref ubyte[][] A){
 		_grayscale = grayscale;
 		_A = A;
-		type = "grayA";
+		type = colorTypes.grayscaleA;
 	}
 
 	@property{
@@ -186,18 +186,18 @@ struct Pixel{
 		}
 
 		ref ubyte[][] Pixel(){
-			switch(type){
-				case "RGB":
-					_RGB = combine(R, G, B);
+			switch(type) with(colorTypes){
+				case trueColor:
+					_RGB = combine(_R, _G, _B);
 					break;
-				case "RGBA":
-					_RGB = combine(R, G, B, A);
+				case trueColorA:
+					_RGB = combine(_R, _G, _B, _A);
 					break;
-				case "gray":
-					_RGB = combine(grayscale);
+				case grayscale:
+					_RGB = combine(_grayscale);
 					break;
-				case "grayA":
-					_RGB = combine(grayscale, A);
+				case grayscaleA:
+					_RGB = combine(_grayscale, _A);
 					break;
 				default:
 					break;
@@ -205,25 +205,26 @@ struct Pixel{
 			return _RGB;
 		}
 	}
-		auto combine(ubyte[][] type_1, ubyte[][] type_2=[], 
-				ubyte[][] type_3=[], ubyte[][] type_4=[]){
-			ubyte[][] combined;
-			combined.length = type_1.length;
-			for(int i; i<type_1.length; i++){
-				for(int j=0; j<type_1.front.length; j++){
-					combined[i] ~= type_1[i][j];
-					if(!type_2.empty) combined[i] ~= type_2[i][j];
-					if(!type_3.empty) combined[i] ~= type_3[i][j];
-					if(!type_4.empty) combined[i] ~= type_4[i][j];
-				}
+
+	auto combine(ubyte[][] type_1, ubyte[][] type_2=[], 
+			ubyte[][] type_3=[], ubyte[][] type_4=[]){
+		ubyte[][] combined;
+		combined.length = type_1.length;
+		for(int i; i<type_1.length; i++){
+			for(int j=0; j<type_1.front.length; j++){
+				combined[i] ~= type_1[i][j];
+				if(!type_2.empty) combined[i] ~= type_2[i][j];
+				if(!type_3.empty) combined[i] ~= type_3[i][j];
+				if(!type_4.empty) combined[i] ~= type_4[i][j];
 			}
-			return combined;
 		}
+		return combined;
+	}
 
 	private:
 	ubyte[][] _R, _G, _B, _A, _RGB, _grayscale;
 	ubyte[] _tmp;
-	string type;
+	ubyte type;
 }
 
 class Img4d{
@@ -253,6 +254,7 @@ class Img4d{
 	}
 
 	bool save(ref Pixel pix, in string filename){
+		this.header.colorType = pix.type;
 		Encode encode = new Encode(this.header, pix);
 		ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ encode.makeIEND;
 		auto file = File(filename, "w");
@@ -262,6 +264,7 @@ class Img4d{
 	}
 
 	bool save(ref Pixel pix, in string filename, in ubyte[] ancillary_chunks){
+		this.header.colorType = pix.type;
 		Encode encode = new Encode(this.header, pix);
 		ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT ~ encode.makeIEND;
 		auto file = File(filename, "w");
