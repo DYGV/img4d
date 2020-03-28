@@ -59,36 +59,37 @@ class Decode{
 		return true;
 	}
 
-	ref auto ubyte[][] inverseFiltering(ubyte[][] data, ubyte[] filters){
-		for(int i=0; i<filters.length; i++){
-			switch (filters[i]) with (filterTypes){
-				case None:
-					break;
+	ref auto ubyte[][] inverseFiltering(ubyte[][] data, ubyte[] filters, int i=0){
+		if(filters.length == 0) return data;
+		ubyte filter = filters.front;
+		filters.popFront;
+		switch (filter) with (filterTypes){
+			case None:
+				break;
 
-				case Sub:
-					data[i] = [data[i]].array.inverseSub.join.to!(ubyte[]);
-					break;
+			case Sub:
+				data[i] = [data[i]].array.inverseSub.join.to!(ubyte[]);
+				break;
 
-				case Up:
-					data[i] = (data[i][] += data[i-1][])
-						.map!(a => a.normalizePixelValue)
-						.array
-						.to!(ubyte[]);
-					break;
+			case Up:
+				data[i] = (data[i][] += data[i-1][])
+					.map!(a => a.normalizePixelValue)
+					.array
+					.to!(ubyte[]);
+				break;
 
-				case Average:
-					data[i] = data[i-1 .. i+1].ave!("+", "output").back;
-					break;
+			case Average:
+				data[i] = data[i-1 .. i+1].ave!("+", "output").back;
+				break;
 
-				case Paeth:
-					data[i] =  data[i-1 .. i+1].paeth!("+", "output").back;
-					break;
+			case Paeth:
+				data[i] =  data[i-1 .. i+1].paeth!("+", "output").back;
+				break;
 
-				default:
-					break;
-			}
+			default:
+				break;
 		}
-		return data;
+		return inverseFiltering(data, filters, ++i);
 	}
 
 	auto parse(string filename){
