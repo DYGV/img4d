@@ -263,15 +263,23 @@ class Img4d{
 
 	Pixel setEachChannelsToPixel(ubyte[][][] channels, bool isGray, bool isAlpha){
 		if(isGray){
-			ubyte[][] gray = channels[0];
-			ubyte[][] A = channels[1];
-			return (isAlpha) ? Pixel(gray, A) : Pixel(gray);
+			return isAlpha
+				? Pixel(channels[0], channels[1]) // gray, alpha
+				: Pixel(channels[0]); // gray
 		}else{
-			ubyte[][] R = channels[0];
-			ubyte[][] G = channels[1];
-			ubyte[][] B = channels[2];
-			ubyte[][] A = channels[3];
-			return (isAlpha) ? Pixel(R, G, B, A) : Pixel(R, G, B);
+			return isAlpha
+				? Pixel(channels[0], channels[1], channels[2], channels[3]) // RGBA
+				: Pixel(channels[0], channels[1], channels[2]); // RGB
+		}
+	}
+
+	auto getChannels(Pixel pixel){
+		if(pixel.isGray){
+			return pixel.isAlpha ? [pixel.grayscale, pixel.A] : [pixel.grayscale];
+		}else{
+			return pixel.isAlpha
+				? [pixel.R, pixel.G, pixel.B, pixel.A]
+				: [pixel.R, pixel.G, pixel.B];
 		}
 	}
 
@@ -571,49 +579,59 @@ class Img4d{
 		return score;
 	}
 
-	Pixel rotate(ubyte[][] img, int degrees){
+	Pixel rotate(Pixel pixel, int degrees){
 		int h = this.header.height;
 		int w = this.header.width;
 		int half_h = h / 2;
 		int half_w = w / 2;
 		double sin_theta = sin(degrees * (PI / 180));
 		double cos_theta = cos(degrees * (PI / 180));
-		ubyte[][] transformed = new ubyte[][](this.header.height, this.header.width);
 
-		for(int i=0; i<h; i++){
-			int center_h = i - half_h;
-			double center_h_sin_theta = center_h * sin_theta;
-			double center_h_cos_theta = center_h * cos_theta;
-			for(int j=0; j<w; j++){
-				int center_w = j - half_w;
-				int x_ = round((center_w * cos_theta) - center_h_sin_theta + half_w).to!int;
-				int y_ = round((center_w * sin_theta) + center_h_cos_theta + half_h).to!int;
-				if((x_ >= 0) && (y_ >= 0) && (x_ < w) && (y_ < h)){
-					transformed[i][j] = img[y_][x_];
-				}else{
-					transformed[i][j] = 0;
+		auto channels = getChannels(pixel);
+		ubyte[][][] transformed = new ubyte[][][]
+			(channels.length, this.header.height, this.header.width);
+		for(int c=0; c<channels.length; c++){
+			ubyte[][] img = channels[c];
+			for(int i=0; i<h; i++){
+				int center_h = i - half_h;
+				double center_h_sin_theta = center_h * sin_theta;
+				double center_h_cos_theta = center_h * cos_theta;
+				for(int j=0; j<w; j++){
+					int center_w = j - half_w;
+					int x_ = round((center_w * cos_theta) - center_h_sin_theta + half_w).to!int;
+					int y_ = round((center_w * sin_theta) + center_h_cos_theta + half_h).to!int;
+					if((x_ >= 0) && (y_ >= 0) && (x_ < w) && (y_ < h)){
+						transformed[c][i][j] = img[y_][x_];
+					}else{
+						transformed[c][i][j] = 0;
+					}
 				}
 			}
 		}
-		return Pixel(transformed);
+		return setEachChannelsToPixel(transformed, pixel.isGray, pixel.isAlpha);
 	}
 
-	Pixel translate(ubyte[][] img, int transition_x, int transition_y){
+	Pixel translate(Pixel pixel, int transition_x, int transition_y){
 		int h = this.header.height;
 		int w = this.header.width;
-		ubyte[][] transformed = new ubyte[][](this.header.height, this.header.width);
-		for(int i=0; i<h; i++){
-			int y_ = h - i - transition_y;
-			for(int j=0; j<w; j++){
-				int x_ = w - j + transition_x;
-				if((x_ > 0) && (y_ > 0) && (x_ < h) && (y_ < w)){
-					transformed[i][j] = img[w-y_][h-x_];
-				}else{
-					transformed[i][j] = 0;
+		auto channels = getChannels(pixel);
+		ubyte[][][] transformed = new ubyte[][][]
+			(channels.length, this.header.height, this.header.width);
+		for(int c=0; c<channels.length; c++){
+			ubyte[][] img = channels[c];
+			for(int i=0; i<h; i++){
+				int y_ = h - i - transition_y;
+				for(int j=0; j<w; j++){
+					int x_ = w - j + transition_x;
+					if((x_ > 0) && (y_ > 0) && (x_ < h) && (y_ < w)){
+						transformed[c][i][j] = img[w-y_][h-x_];
+					}else{
+						transformed[c][i][j] = 0;
+					}
 				}
 			}
 		}
-		return Pixel(transformed);
+		return setEachChannelsToPixel(transformed, pixel.isGray, pixel.isAlpha);
 	}
 }
 
