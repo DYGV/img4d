@@ -125,7 +125,7 @@ class Encode{
 	ref auto ubyte[][] chooseFilterType(){
 		int[] sumNone, sumSub, sumUp, sumAve, sumPaeth;
 
-		ubyte[][] R, G, B, A, actualData, filteredNone, filteredSub,
+		ubyte[][] R, G, B, A, filteredNone, filteredSub,
 			filteredUp, filteredAve, filteredPaeth;
 
 		/* begin comparison with none, sub, up, ave and paeth*/
@@ -191,31 +191,32 @@ class Encode{
 		sumPaeth = this.sumScanline(filteredPaeth);
 
 		int[][] sums = [sumNone, sumSub, sumUp, sumAve, sumPaeth];
-		int[] minIndex = sums.joinVertical
+		ubyte[] minIndex = sums.front.walkLength
+			.iota.map!(i => transversal(sums, i))
 			.map!(minIndex)
 			.array
-			.to!(int[]);
+			.to!(ubyte[]);
 
-		actualData.length = filteredNone.length;
+		ubyte[][] actualData = new ubyte[][](filteredNone.length);
 
 		with (filterTypes){
-			foreach (idx, min; minIndex.array.to!(ubyte[]).parallel){
-
+			foreach (idx, min; minIndex.parallel){
+				actualData[idx] ~= min;
 				switch (min){
 					case None:
-						actualData[idx] = min ~ filteredNone[idx];
+						actualData[idx] ~= filteredNone[idx];
 						break;
 					case Sub:
-						actualData[idx] = min ~ filteredSub[idx];
+						actualData[idx] ~= filteredSub[idx];
 						break;
 					case Up:
-						actualData[idx] = min ~ filteredUp[idx];
+						actualData[idx] ~= filteredUp[idx];
 						break;
 					case Average:
-						actualData[idx] = min ~ filteredAve[idx];
+						actualData[idx] ~= filteredAve[idx];
 						break;
 					case Paeth:
-						actualData[idx] = min ~ filteredPaeth[idx];
+						actualData[idx] ~= filteredPaeth[idx];
 						break;
 					default:
 						break;

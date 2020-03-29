@@ -6,7 +6,7 @@ import std.digest.crc : CRC32, crc32Of;
 import std.stdio, std.array, std.bitmanip, std.zlib, std.conv, std.algorithm,
 	   std.range, img4d.img4d_lib.encode;
 
-class Decode{
+class Decode: Img4d{
 	mixin bitOperator;
 	Header header;
 	this(ref Header header){
@@ -39,7 +39,7 @@ class Decode{
 	/**
 	 *  Cast array to string
 	 */
-	string byteToString(ubyte[] data){
+	string byteToString(in ubyte[] data){
 		return cast(string) data;
 	}
 
@@ -59,8 +59,8 @@ class Decode{
 		return true;
 	}
 
-	ref auto ubyte[][] inverseFiltering(ubyte[][] data, ubyte[] filters, int i=0){
-		if(filters.length == 0) return data;
+	void inverseFiltering(ref ubyte[][] data, ubyte[] filters, int i=0){
+		if(filters.length == 0) return;
 		ubyte filter = filters.front;
 		filters.popFront;
 		switch (filter) with (filterTypes){
@@ -89,7 +89,7 @@ class Decode{
 			default:
 				break;
 		}
-		return inverseFiltering(data, filters, ++i);
+		inverseFiltering(data, filters, ++i);
 	}
 
 	auto parse(string filename){
@@ -194,19 +194,9 @@ class Decode{
 		auto channels = isGray ? [gray, A] : [R, G, B, A];
 		for(int i=0; i<channels.length; i++){
 			if(channels[i].empty) continue;
-			channels[i] = this.inverseFiltering(channels[i], filters);
+			this.inverseFiltering(channels[i], filters);
 		}
-		if(isGray){
-			gray = channels[0];
-			A = channels[1];
-			return (isAlpha) ? Pixel(gray, A) : Pixel(gray);
-		}else{
-			R = channels[0];
-			G = channels[1];
-			B = channels[2];
-			A = channels[3];
-			return (isAlpha) ? Pixel(R, G, B, A) : Pixel(R, G, B);
-		}
+		return setEachChannelsToPixel(channels, isGray, isAlpha);
 	}
 }
 

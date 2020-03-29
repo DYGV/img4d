@@ -1,11 +1,23 @@
 module img4d.img4d;
 
-import img4d.img4d_lib.decode, img4d.img4d_lib.encode, img4d.img4d_lib.filter, img4d.img4d_lib.edge, img4d.img4d_lib.template_matching, img4d.img4d_lib.quality_evaluation, img4d.img4d_lib.threshold;
+import img4d.img4d_lib.decode,
+	   img4d.img4d_lib.encode,
+	   img4d.img4d_lib.filter,
+	   img4d.img4d_lib.edge,
+	   img4d.img4d_lib.template_matching,
+	   img4d.img4d_lib.quality_evaluation,
+	   img4d.img4d_lib.threshold,
+	   img4d.img4d_lib.fourier;
 
-import std.stdio, std.array, std.bitmanip, std.conv, std.algorithm, std.range, std.file : exists;
-import img4d.img4d_lib.fourier;
-import std.complex;
-import std.math;
+import std.stdio,
+	   std.array,
+	   std.bitmanip,
+	   std.conv,
+	   std.algorithm,
+	   std.range,
+	   std.complex,
+	   std.math,
+	   std.file : exists;
 
 enum{
 	R,
@@ -131,17 +143,21 @@ struct Pixel{
 		_B = B;
 		_A = A;
 		type = colorTypes.trueColorA;
+		isAlpha = true;
 	}
 
 	this(ref ubyte[][] grayscale){
 		_grayscale = grayscale;
 		type = colorTypes.grayscale;
+		isGray = true;
 	}
 
 	this(ref ubyte[][] grayscale, ref ubyte[][] A){
 		_grayscale = grayscale;
 		_A = A;
 		type = colorTypes.grayscaleA;
+		isGray = true;
+		isAlpha = true;
 	}
 
 	@property{
@@ -208,8 +224,7 @@ struct Pixel{
 
 	auto combine(ubyte[][] type_1, ubyte[][] type_2=[], 
 			ubyte[][] type_3=[], ubyte[][] type_4=[]){
-		ubyte[][] combined;
-		combined.length = type_1.length;
+		ubyte[][] combined = new ubyte[][](type_1.length);
 		for(int i; i<type_1.length; i++){
 			for(int j=0; j<type_1.front.length; j++){
 				combined[i] ~= type_1[i][j];
@@ -222,9 +237,11 @@ struct Pixel{
 	}
 
 	private:
-	ubyte[][] _R, _G, _B, _A, _RGB, _grayscale;
-	ubyte[] _tmp;
-	ubyte type;
+		ubyte[][] _R, _G, _B, _A, _RGB, _grayscale;
+		ubyte[] _tmp;
+		ubyte type;
+		bool isGray = false, 
+			 isAlpha = false;
 }
 
 class Img4d{
@@ -241,6 +258,20 @@ class Img4d{
 		alias type = colorType;
 		with (colorTypes){
 			return (type == grayscale || type == grayscaleA) ? true : false;
+		}
+	}
+
+	Pixel setEachChannelsToPixel(ubyte[][][] channels, bool isGray, bool isAlpha){
+		if(isGray){
+			ubyte[][] gray = channels[0];
+			ubyte[][] A = channels[1];
+			return (isAlpha) ? Pixel(gray, A) : Pixel(gray);
+		}else{
+			ubyte[][] R = channels[0];
+			ubyte[][] G = channels[1];
+			ubyte[][] B = channels[2];
+			ubyte[][] A = channels[3];
+			return (isAlpha) ? Pixel(R, G, B, A) : Pixel(R, G, B);
 		}
 	}
 
@@ -304,8 +335,7 @@ class Img4d{
 			if (colorType != trueColor && colorType != trueColorA)
 				throw new Exception("The color type must be true color.");
 		}
-		ubyte[][] gray;
-		gray.length = this.header.height;
+		ubyte[][] gray = new ubyte[][](this.header.height);
 		for(int i=0; i<this.header.height;i++){
 			for(int j=0; j<this.header.width; j++){
 				gray[i] ~= (pix.R[i][j] + pix.G[i][j] + pix.B[i][j]) / 3;
@@ -548,7 +578,7 @@ class Img4d{
 		int half_w = w / 2;
 		double sin_theta = sin(degrees * (PI / 180));
 		double cos_theta = cos(degrees * (PI / 180));
-		ubyte[][] transformed	= minimallyInitializedArray!(ubyte[][])(h, w);
+		ubyte[][] transformed = new ubyte[][](this.header.height, this.header.width);
 
 		for(int i=0; i<h; i++){
 			int center_h = i - half_h;
@@ -571,8 +601,7 @@ class Img4d{
 	Pixel translate(ubyte[][] img, int transition_x, int transition_y){
 		int h = this.header.height;
 		int w = this.header.width;
-		ubyte[][] transformed = minimallyInitializedArray!(ubyte[][])
-			(this.header.height, this.header.width);
+		ubyte[][] transformed = new ubyte[][](this.header.height, this.header.width);
 		for(int i=0; i<h; i++){
 			int y_ = h - i - transition_y;
 			for(int j=0; j<w; j++){

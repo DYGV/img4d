@@ -87,13 +87,6 @@ unittest{  // encode.d{
 	assert(encode.makeCrc(crc) == [174, 66, 96, 130]);
 }
 
-// joinVertical
-unittest{
-	ubyte[][] horizontal = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
-	ubyte[][] vertical = [[1, 4, 7], [2, 5, 8], [3, 6, 9]];
-	assert(horizontal.joinVertical.equal(vertical));
-}
-
 // sub
 unittest{
 	ubyte[][] beforeCalculateSub = [[1, 2, 3], [9, 3, 0]];

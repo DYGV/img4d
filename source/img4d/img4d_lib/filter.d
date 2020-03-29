@@ -21,8 +21,7 @@ auto up(R)(R input){
 }
 
 auto transpose(R)(R input){
-	R output;
-	output.length = input.front.length;
+	R output = new R(input.front.length);
 	for(int i=0; i<input.length; i++){
 		for(int j=0; j<input.front.length; j++){
 			output[j] ~= input[i][j];
@@ -32,20 +31,12 @@ auto transpose(R)(R input){
 }
 
 /**
- *  To vertical array 
- */
-pure ref auto T[][] joinVertical(T)(ref T[][] src){
-	return src.front.walkLength.iota.map!(i => transversal(src, i).array).array;
-}
-
-/**
  *  Average(x) = Raw(x) - floor((Raw(x-bpp)+Prior(x))/2)
  */
 ubyte[][] ave(string op, string variable)(ubyte[][] src){
 	if (src.length == 0)
 		return src;
-	ubyte[][] output;
-	output.length = src.length;
+	ubyte[][] output = new ubyte[][](src.length);
 	output.front = src.front;
 
 	enum string former_stmt = "a" ~ op ~ "(" ~ variable ~ "[idx].front / 2)";
@@ -68,8 +59,7 @@ ubyte[][] ave(string op, string variable)(ubyte[][] src){
 ubyte[][] paeth(string op, string variable)(ubyte[][] src){
 	if (src.length == 0)
 		return src;
-	ubyte[][] output;
-	output.length = src.length;
+	ubyte[][] output = new ubyte[][](src.length);
 	output.front = src.front;
 
 	enum string former_stmt = "a" ~ op ~ variable ~ "[idx][edx]";
@@ -77,7 +67,7 @@ ubyte[][] paeth(string op, string variable)(ubyte[][] src){
 		~ variable ~ "[idx][edx]," 
 		~ variable ~ "[idx + 1][edx - 1]," 
 		~ variable ~ "[idx][edx - 1])";
-	foreach(idx, ubyte[] scanline; src[1 .. $]){
+	foreach(idx, ubyte[] scanline; src[1 .. $].parallel){
         scanline.each!((edx, a) => 
 				output[idx + 1] ~= 
 				(edx == 0 
