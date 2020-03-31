@@ -2,7 +2,7 @@ module img4d.img4d_lib.encode;
 
 import img4d, img4d.img4d_lib.decode, img4d.img4d_lib.filter;
 import std.stdio, std.array, std.bitmanip, std.conv, std.zlib, std.digest,
-	   std.digest.crc, std.range, std.algorithm;
+	   std.digest.crc, std.range, std.algorithm, std.functional;
 import std.parallelism : parallel;
 
 mixin template bitOperator(){
@@ -136,51 +136,32 @@ class Encode{
 		with (this.header){
 			with (colorTypes){
 				if (colorType == grayscale || colorType == grayscaleA){
-					ubyte[][] grayNone = this.pixel.grayscale;
-					ubyte[][] NoneA = tmpA;
-					filteredNone = Pixel(grayNone, NoneA).Pixel;
+					filteredNone = Pixel(this.pixel.grayscale, tmpA).Pixel;
 
-					ubyte[][] graySub = this.pixel.grayscale.sub;
-					ubyte[][] SubA = tmpA.sub;
-					filteredSub = Pixel(graySub, SubA).Pixel;
+					auto f = [this.pixel.grayscale, tmpA]
+						.map!(a =>
+							a.adjoin!(sub, up, ave!("-", "src"), paeth!("-", "src")).array)
+						.array;
 
-					ubyte[][] grayUp = this.pixel.grayscale.up;
-					ubyte[][] UpA = tmpA.length==0 ? [] : tmpA.up;
-					filteredUp = Pixel(grayUp, UpA).Pixel;
-
-					ubyte[][] grayAve = this.pixel.grayscale.ave!("-", "src");
-					ubyte[][] AveA = tmpA.ave!("-", "src");
-					filteredAve = Pixel(grayAve, AveA).Pixel;
-
-					ubyte[][] grayPaeth = this.pixel.grayscale.paeth!("-", "src");
-					ubyte[][] PaethA = tmpA.paeth!("-", "src");
-					filteredPaeth = Pixel(grayPaeth, PaethA).Pixel;
+					// f = [[gray(sub), A(sub)],
+					//		[gray(up), A(up)], ...]
+					filteredSub = Pixel(f[0][0], f[1][0]).Pixel;
+					filteredUp = Pixel(f[0][1], f[1][1]).Pixel;
+					filteredAve = Pixel(f[0][2], f[1][2]).Pixel;
+					filteredPaeth = Pixel(f[0][3], f[1][3]).Pixel;
 				}else{
 					filteredNone = this.pixel.Pixel;
+					auto f = [tmpR, tmpG, tmpB, tmpA]
+						.map!(a =>
+							a.adjoin!(sub, up, ave!("-", "src"), paeth!("-", "src")).array)
+						.array;
 
-					R = tmpR.sub;
-					G = tmpG.sub;
-					B = tmpB.sub;
-					A = tmpA.sub;
-					filteredSub = Pixel(R, G, B, A).Pixel;
-
-					R = tmpR.up;
-					G = tmpG.up;
-					B = tmpB.up;
-					A = tmpA.length==0 ? [] : tmpA.up;
-					filteredUp = Pixel(R, G, B, A).Pixel;
-
-					R = tmpR.ave!("-", "src");
-					G = tmpG.ave!("-", "src");
-					B = tmpB.ave!("-", "src");
-					A = tmpA.ave!("-", "src");
-					filteredAve = Pixel(R, G, B, A).Pixel;
-
-					R = tmpR.paeth!("-", "src");
-					G = tmpG.paeth!("-", "src");
-					B = tmpB.paeth!("-", "src");
-					A = tmpA.paeth!("-", "src");
-					filteredPaeth = Pixel(R, G, B, A).Pixel;
+					// f = [[R(sub), G(sub), B(sub), A(sub)],
+					//		[R(up), G(up), B(up), A(up)], ...]
+					filteredSub = Pixel(f[0][0], f[1][0], f[2][0], f[3][0]).Pixel;
+					filteredUp = Pixel(f[0][1], f[1][1], f[2][1], f[3][1]).Pixel;
+					filteredAve = Pixel(f[0][2], f[1][2], f[2][2], f[3][2]).Pixel;
+					filteredPaeth = Pixel(f[0][3], f[1][3], f[2][3], f[3][3]).Pixel;
 				}
 			}
 		}

@@ -15,6 +15,7 @@ auto sub(R)(R input){
 }
 
 auto up(R)(R input){
+	if(input.length == 0) return input;
 	return input.front.walkLength.iota
 		.map!(i => transversal(input, i).array)
 		.sub.transpose;
