@@ -6,14 +6,14 @@ import std.stdio, std.array, std.bitmanip, std.conv, std.zlib, std.digest,
 import std.parallelism : parallel;
 
 mixin template bitOperator(){
-	void set32bitInt(ref ubyte[4] buf, uint data){
+	void set32bitInt(ref ubyte[4] buf, uint data) @nogc {
 		buf = [(data >> 24) & 0xff, (data >> 16) & 0xff, (data >> 8) & 0xff, (data >> 0) & 0xff];
 	}
-	void set32bitInt(ref ubyte[2] buf, uint data){
+	void set32bitInt(ref ubyte[2] buf, uint data) @nogc {
 		buf = [(data >> 8) & 0xff, (data >> 0) & 0xff];
 	}
 
-	uint read32bitInt(in ubyte[] buf){
+	uint read32bitInt(in ubyte[] buf) @nogc {
 		return ((buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | (buf[3] << 0));
 	}
 }
@@ -33,7 +33,7 @@ mixin template makeChunk(){
 	 *  Calculate from chunk data. 
 	 */
 	auto makeCrc(ubyte[] data){
-		ubyte[4] crc;
+		ubyte[] crc = new ubyte[](4);
 		data.crc32Of.each!((idx, a) => crc[3 - idx] = a);
 		return crc;
 	}
@@ -77,22 +77,26 @@ class Encode{
 
 	ref auto ubyte[] makeIDAT(){
 		Compress cmps = new Compress(HeaderFormat.deflate);
-		ubyte[] beforeCmpsData, idatData, chunkData, IDAT;
+		ubyte[] beforeCmpsData, chunkData;
+		Appender!(ubyte[]) idatData, IDAT;
 		uint chunkSize;
 		ubyte[][] byteData;
 		const ubyte[] chunkType = [0x49, 0x44, 0x41, 0x54];
 		ubyte[] bodyLenIDAT = [0x0, 0x0, 0x0, 0x0];
 
 		beforeCmpsData = this.chooseFilterType.join;
-		idatData ~= cast(ubyte[]) cmps.compress(beforeCmpsData);
-		idatData ~= cast(ubyte[]) cmps.flush();
-		chunkSize = idatData.length.to!uint;
+		idatData.put(cast(ubyte[]) cmps.compress(beforeCmpsData));
+		idatData.put(cast(ubyte[]) cmps.flush());
+		chunkSize = idatData.data.length.to!uint;
 
 		set32bitInt(bodyLenIDAT[0 .. 4], chunkSize);
-		chunkData = chunkType ~ idatData;
-		IDAT = bodyLenIDAT ~ chunkData ~ makeCrc(chunkData);
+		chunkData = chunkType ~ idatData.array;
 
-		return IDAT;
+		IDAT.put(bodyLenIDAT);
+		IDAT.put(chunkData);
+		IDAT.put(makeCrc(chunkData));
+
+		return IDAT.array;
 	}
 
 	auto makeAncillary(int chunk_length, ubyte[] chunk_type, ubyte[] chunk_data){
@@ -178,26 +182,27 @@ class Encode{
 			.array
 			.to!(ubyte[]);
 
-		ubyte[][] actualData = new ubyte[][](filteredNone.length);
+		//ubyte[][] actualData = new ubyte[][](filteredNone.length);
+		auto  actualData = appender!(ubyte[][]); // maybe faster than normal array
 
 		with (filterTypes){
-			foreach (idx, min; minIndex.parallel){
-				actualData[idx] ~= min;
+			foreach (idx, min; minIndex){
+				actualData.put([min]);
 				switch (min){
 					case None:
-						actualData[idx] ~= filteredNone[idx];
+						actualData.put(filteredNone[idx]);
 						break;
 					case Sub:
-						actualData[idx] ~= filteredSub[idx];
+						actualData.put(filteredSub[idx]);
 						break;
 					case Up:
-						actualData[idx] ~= filteredUp[idx];
+						actualData.put(filteredUp[idx]);
 						break;
 					case Average:
-						actualData[idx] ~= filteredAve[idx];
+						actualData.put(filteredAve[idx]);
 						break;
 					case Paeth:
-						actualData[idx] ~= filteredPaeth[idx];
+						actualData.put(filteredPaeth[idx]);
 						break;
 					default:
 						break;
@@ -205,7 +210,7 @@ class Encode{
 			}
 		}
 		/* end comparison with none, sub, up, ave and paeth*/
-		return actualData;
+		return actualData.array;
 	}
 
 }

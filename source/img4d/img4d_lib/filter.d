@@ -80,7 +80,7 @@ ubyte[][] paeth(string op, string variable)(ubyte[][] src){
 	return output;
 }
 
-int predictor(int upper, int left = 0, int upperLeft = 0){
+int predictor(int upper, int left = 0, int upperLeft = 0) @nogc {
 		int paeth = left + upper - upperLeft;
 		int paethLeft = (paeth - left).abs;
 		int paethUpper = (paeth - upper).abs;
@@ -92,19 +92,19 @@ int predictor(int upper, int left = 0, int upperLeft = 0){
 		return upperLeft;
 }
 
-ubyte normalizePixelValue(int value){
+ubyte normalizePixelValue(int value) @nogc {
 	if (value < 0){
 		value += 256;
 	}
 	else if (value >= 256){
 		value -= 256;
 	}
-	return value.to!ubyte;
+	return cast(ubyte)value;
 }
 
 /**
  * calculate absolute value by using bitshift
  */
-int abs(int num){
+int abs(int num) @nogc {
 	return (num ^ (num >> 31)) - (num >> 31);
 }
