@@ -68,7 +68,7 @@ class Decode: Img4d{
 				break;
 
 			case Sub:
-				data[i] = [data[i]].array.inverseSub.join.to!(ubyte[]);
+				data[i] = [data[i]].array.inverseSub.transposed.join.to!(ubyte[]);
 				break;
 
 			case Up:

@@ -210,7 +210,7 @@ class Encode{
 			}
 		}
 		/* end comparison with none, sub, up, ave and paeth*/
-		return actualData.array;
+		return actualData[];
 	}
 
 }

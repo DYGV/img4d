@@ -4,8 +4,8 @@ import std.stdio, std.array, std.conv, std.algorithm, std.range;
 import std.parallelism : parallel;
 
 pure ref auto inverseSub(ubyte[][] scanline){
-	return [scanline.map!(.cumulativeFold!((a, b) => a + b < 256 ? a + b : a + b - 256))]
-		.join.transposed;
+	return [scanline
+		.map!(.cumulativeFold!((a, b) => a + b < 256 ? a + b : a + b - 256))].join;
 }
 
 auto sub(R)(R input){
