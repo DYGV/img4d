@@ -161,43 +161,43 @@ struct Pixel{
 	}
 
 	@property{
-		pure void R(ref ubyte[][] R){
+		pure void R(ref ubyte[][] R) @nogc {
 			_R = R;
 		}
 
-		pure void G(ref ubyte[][] G){
+		pure void G(ref ubyte[][] G) @nogc {
 			_G = G;
 		}
 
-		pure void B(ref ubyte[][] B){
+		pure void B(ref ubyte[][] B) @nogc {
 			_B = B;
 		}
 
-		pure void A(ref ubyte[][] A){
+		pure void A(ref ubyte[][] A) @nogc {
 			_A = A;
 		}
 
-		pure void grayscale(ref ubyte[][] grayscale){
+		pure void grayscale(ref ubyte[][] grayscale) @nogc {
 			_grayscale = grayscale;
 		}
 
-		pure ref ubyte[][] R(){
+		pure ref ubyte[][] R() @nogc {
 			return _R;
 		}
 
-		pure ref ubyte[][] G(){
+		pure ref ubyte[][] G() @nogc {
 			return _G;
 		}
 
-		pure ref ubyte[][] B(){
+		pure ref ubyte[][] B() @nogc {
 			return _B;
 		}
 
-		pure ref ubyte[][] A(){
+		pure ref ubyte[][] A() @nogc {
 			return _A;
 		}
 
-		pure ref ubyte[][] grayscale(){
+		pure ref ubyte[][] grayscale() @nogc {
 			return _grayscale;
 		}
 
@@ -224,16 +224,17 @@ struct Pixel{
 
 	auto combine(ubyte[][] type_1, ubyte[][] type_2=[], 
 			ubyte[][] type_3=[], ubyte[][] type_4=[]){
-		ubyte[][] combined = new ubyte[][](type_1.length);
+		auto combined = [appender!(ubyte[])];
+		combined.length = type_1.length;
 		for(int i; i<type_1.length; i++){
 			for(int j=0; j<type_1.front.length; j++){
-				combined[i] ~= type_1[i][j];
-				if(!type_2.empty) combined[i] ~= type_2[i][j];
-				if(!type_3.empty) combined[i] ~= type_3[i][j];
-				if(!type_4.empty) combined[i] ~= type_4[i][j];
+				combined[][i].put(type_1[i][j]);
+				if(!type_2.empty) combined[][i].put(type_2[i][j]);
+				if(!type_3.empty) combined[][i].put(type_3[i][j]);
+				if(!type_4.empty) combined[][i].put(type_4[i][j]);
 			}
 		}
-		return combined;
+		return combined.map!(a=> a[]).array;
 	}
 
 	private:

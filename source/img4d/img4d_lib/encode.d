@@ -96,7 +96,7 @@ class Encode{
 		IDAT.put(chunkData);
 		IDAT.put(makeCrc(chunkData));
 
-		return IDAT.array;
+		return IDAT[];
 	}
 
 	auto makeAncillary(int chunk_length, ubyte[] chunk_type, ubyte[] chunk_data){
