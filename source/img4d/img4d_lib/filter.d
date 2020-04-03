@@ -99,6 +99,17 @@ int predictor(int upper=0, int left = 0, int upperLeft = 0) @nogc {
 		return upperLeft;
 }
 
+auto transpose(int[][] input){
+	auto output = [appender!(int[])];
+	output.length = input.front.length;
+	for(int i=0; i<input.length; i++){
+		for(int j=0; j<input.front.length; j++){
+			output[][j].put(input[i][j]);
+		}
+	}
+	return output.map!(a=> a[]).array;
+}
+
 ubyte normalizePixelValue(int value) @nogc {
 	if (value < 0){
 		value += 256;

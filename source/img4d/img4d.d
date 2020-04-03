@@ -16,8 +16,10 @@ import std.stdio,
 	   std.algorithm,
 	   std.range,
 	   std.complex,
-	   std.math,
-	   std.file : exists;
+	   std.math;
+
+import std.file : exists;
+import std.parallelism : parallel;
 
 enum{
 	R,
@@ -226,7 +228,7 @@ struct Pixel{
 			ubyte[][] type_3=[], ubyte[][] type_4=[]){
 		auto combined = [appender!(ubyte[])];
 		combined.length = type_1.length;
-		for(int i; i<type_1.length; i++){
+		foreach(i; type_1.length.iota.parallel){
 			for(int j=0; j<type_1.front.length; j++){
 				combined[][i].put(type_1[i][j]);
 				if(!type_2.empty) combined[][i].put(type_2[i][j]);
@@ -296,9 +298,11 @@ class Img4d{
 	bool save(ref Pixel pix, in string filename){
 		this.header.colorType = pix.type;
 		Encode encode = new Encode(this.header, pix);
-		ubyte[] data = encode.makeIHDR ~ encode.makeIDAT ~ encode.makeIEND;
+		auto data = appender(encode.makeIHDR);
+		data.put(encode.makeIDAT);
+		data.put(encode.makeIEND);
 		auto file = File(filename, "w");
-		file.rawWrite(data);
+		file.rawWrite(data[]);
 		file.flush();
 		return true;
 	}
@@ -306,9 +310,13 @@ class Img4d{
 	bool save(ref Pixel pix, in string filename, in ubyte[] ancillary_chunks){
 		this.header.colorType = pix.type;
 		Encode encode = new Encode(this.header, pix);
-		ubyte[] data = encode.makeIHDR ~ ancillary_chunks ~ encode.makeIDAT ~ encode.makeIEND;
+		auto data = appender(encode.makeIHDR);
+		data.put(ancillary_chunks);
+		data.put(encode.makeIDAT);
+		data.put(encode.makeIEND);
+
 		auto file = File(filename, "w");
-		file.rawWrite(data);
+		file.rawWrite(data[]);
 		file.flush();
 		return true;
 	}
@@ -591,8 +599,7 @@ class Img4d{
 		auto channels = getChannels(pixel);
 		ubyte[][][] transformed = new ubyte[][][]
 			(channels.length, this.header.height, this.header.width);
-		for(int c=0; c<channels.length; c++){
-			ubyte[][] img = channels[c];
+		foreach(c, img; channels.parallel){
 			for(int i=0; i<h; i++){
 				int center_h = i - half_h;
 				double center_h_sin_theta = center_h * sin_theta;
@@ -618,14 +625,13 @@ class Img4d{
 		auto channels = getChannels(pixel);
 		ubyte[][][] transformed = new ubyte[][][]
 			(channels.length, this.header.height, this.header.width);
-		for(int c=0; c<channels.length; c++){
-			ubyte[][] img = channels[c];
+		foreach(c, img; channels.parallel){
 			for(int i=0; i<h; i++){
 				int y_ = h - i - transition_y;
 				for(int j=0; j<w; j++){
 					int x_ = w - j + transition_x;
-					if((x_ > 0) && (y_ > 0) && (x_ < h) && (y_ < w)){
-						transformed[c][i][j] = img[w-y_][h-x_];
+					if((x_ > 0) && (y_ > 0) && (y_ < h) && (x_ < w)){
+						transformed[c][i][j] = img[i][j];
 					}else{
 						transformed[c][i][j] = 0;
 					}

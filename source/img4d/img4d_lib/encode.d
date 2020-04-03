@@ -149,6 +149,7 @@ class Encode{
 
 					// f = [[gray(sub), A(sub)],
 					//		[gray(up), A(up)], ...]
+
 					filteredSub = Pixel(f[0][0], f[1][0]).Pixel;
 					filteredUp = Pixel(f[0][1], f[1][1]).Pixel;
 					filteredAve = Pixel(f[0][2], f[1][2]).Pixel;
@@ -169,6 +170,7 @@ class Encode{
 				}
 			}
 		}
+
 		sumNone = this.sumScanline(filteredNone);
 		sumSub = this.sumScanline(filteredSub);
 		sumUp = this.sumScanline(filteredUp);
@@ -176,11 +178,7 @@ class Encode{
 		sumPaeth = this.sumScanline(filteredPaeth);
 
 		int[][] sums = [sumNone, sumSub, sumUp, sumAve, sumPaeth];
-		ubyte[] minIndex = sums.front.walkLength
-			.iota.map!(i => transversal(sums, i))
-			.map!(minIndex)
-			.array
-			.to!(ubyte[]);
+		ubyte[] minIndex = sums.transpose.map!(minIndex).array.to!(ubyte[]);
 
 		//ubyte[][] actualData = new ubyte[][](filteredNone.length);
 		auto  actualData = appender!(ubyte[][]); // maybe faster than normal array
