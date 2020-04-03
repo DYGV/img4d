@@ -352,10 +352,10 @@ class Img4d{
 			if (colorType != trueColor && colorType != trueColorA)
 				throw new Exception("The color type must be true color.");
 		}
-		ubyte[][] gray = new ubyte[][](this.header.height);
-		for(int i=0; i<this.header.height;i++){
+		ubyte[][] gray = new ubyte[][](this.header.height, this.header.width);
+		foreach(i; pix.R.length.iota.parallel){
 			for(int j=0; j<this.header.width; j++){
-				gray[i] ~= (pix.R[i][j] + pix.G[i][j] + pix.B[i][j]) / 3;
+				gray[i][j] = (pix.R[i][j] + pix.G[i][j] + pix.B[i][j]) / 3;
 			}
 		}
 		if(pix.A.empty){
@@ -364,7 +364,7 @@ class Img4d{
 		}else{
 			this.header.colorType = colorTypes.grayscaleA;
 			return Pixel(gray, pix.A);
-		}	
+		}
 	}
 
 	Complex!(double)[][] dft(T)(T[][] data, bool isDFT = true){

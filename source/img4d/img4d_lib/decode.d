@@ -5,6 +5,7 @@ import std.file : read;
 import std.digest.crc : CRC32, crc32Of;
 import std.stdio, std.array, std.bitmanip, std.zlib, std.conv, std.algorithm,
 	   std.range, img4d.img4d_lib.encode;
+import std.parallelism : parallel;
 
 class Decode: Img4d{
 	mixin bitOperator;
@@ -150,11 +151,7 @@ class Decode: Img4d{
 		ubyte[] filters = data.map!(sc => sc.front).array;
 		data = data.map!((a)=> a.remove(0)).array;
 
-		ubyte[][] R;
-		ubyte[][] G;
-		ubyte[][] B;
-		ubyte[][] A;
-		ubyte[][] gray;
+		Appender!(ubyte[])[] R, G, B, A, gray;
 		R.length = data.length;
 		G.length = data.length;
 		B.length = data.length;
@@ -173,28 +170,31 @@ class Decode: Img4d{
 			ulong len = data[i].length;
 			while (data[i].length > 0){
 				if(isGray){
-					gray[i] ~= data[i][0];
+					gray[][i].put(data[i][0]);
 					data[i] = data[i][1 .. $];
 					if(isAlpha){
-						A[i] ~= data[i][0];
+						A[][i].put(data[i][0]);
 						data[i] = data[i][1 .. $];
 					}
 				}else{ // true color
-					R[i] ~= data[i][0];
-					G[i] ~= data[i][1];
-					B[i] ~= data[i][2];
+					R[][i].put(data[i][0]);
+					G[][i].put(data[i][1]);
+					B[][i].put(data[i][2]);
 					data[i] = data[i][3 .. $];
 					if (isAlpha){
-						A[i] ~= data[i][0];
+						A[][i].put(data[i][0]);
 						data[i] = data[i][1 .. $];
 					}
 				}
 			}
 		}
-		auto channels = isGray ? [gray, A] : [R, G, B, A];
-		for(int i=0; i<channels.length; i++){
-			if(channels[i].empty) continue;
-			this.inverseFiltering(channels[i], filters);
+		auto channels = isGray 
+			? [gray.map!(a=> a[]).array, A.map!(a=> a[]).array] 
+			: [R.map!(a=> a[]).array, G.map!(a=> a[]).array, 
+				B.map!(a=> a[]).array, A.map!(a=> a[]).array];
+		foreach(i, ref channel; channels.parallel){
+			if(channel.empty) continue;
+			this.inverseFiltering(channel, filters);
 		}
 		return setEachChannelsToPixel(channels, isGray, isAlpha);
 	}
