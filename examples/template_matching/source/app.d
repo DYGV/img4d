@@ -17,6 +17,11 @@ int main(){
 	auto ssd = original_img.templateMatching(template_img.header, original_img.header, 
 				  template_pix.grayscale, original_pix.grayscale, original_img.MatchingType.SSD);
 	"SSD calculation is done.".writeln;
+
+	auto sad = original_img.templateMatching(template_img.header, original_img.header, 
+				  template_pix.grayscale, original_pix.grayscale, original_img.MatchingType.SAD);
+	"SAD calculation is done.".writeln;
+
 	auto ncc = original_img.templateMatching(template_img.header, original_img.header, 
 				  template_pix.grayscale, original_pix.grayscale, original_img.MatchingType.NCC);
 	"NCC calculation is done.".writeln;
@@ -25,6 +30,7 @@ int main(){
 	"ZNCC calculation is done.".writeln;
 
 	"SSD:\t".writeln(ssd);
+	"SAD:\t".writeln(sad);
 	"NCC:\t".writeln(ncc);
 	"ZNCC:\t".writeln(zncc);
 	

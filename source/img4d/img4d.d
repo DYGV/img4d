@@ -462,42 +462,15 @@ class Img4d{
 		// adaptive,
 	}
 
-	auto threshold(ubyte[][] grayscale, ThresholdType type, int thresholdValue = 127){
-		Threshold t = new Threshold(this.header, grayscale);
-		ubyte[][] result_threshold;
+	void threshold(Pixel pixel, int type, int thresholdValue = 127){
+		Threshold t = new Threshold(this.header);
 		with (ThresholdType) switch (type){
 			case simple:
-				result_threshold = t.simple(thresholdValue);
+				t.simple(pixel.grayscale, thresholdValue);
 				break;
 			default:
 				break;
 		}
-		return result_threshold;
-	}
-
-	pure auto differ(T)(ref T[][] origin, ref T[][] target){
-		T[][] diff;
-		origin.each!((idx, a) => diff ~= (target[idx][] -= a[]).map!(b => abs(b)).array);
-		return diff;
-	}
-
-	pure auto mask(T)(ref T[][][] colorTarget, ref T[][] gray){
-		T[][] masked;
-		masked.length = gray.length;
-		gray.each!((idx, a) => a.each!((edx, b) => masked[idx] ~= b == 255
-					? colorTarget[idx][edx] : [0, 0, 0]));
-		return masked;
-	}
-
-	int[] pixelHistgram(ubyte[][] data){
-		ubyte[] joined_data = data.join;
-		int[] hist;
-		hist.length = ubyte.max + 1;
-		for (int i = 0; i < joined_data.length; i++){
-			int pix = joined_data[i];
-			hist[pix] += 1;
-		}
-		return hist;
 	}
 
 	void gammaCorrection(ref ubyte[][] data, in double gamma){
