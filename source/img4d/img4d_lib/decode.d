@@ -7,8 +7,40 @@ import std.stdio, std.array, std.bitmanip, std.zlib, std.conv, std.algorithm,
 	   std.range, img4d.img4d_lib.encode;
 import std.parallelism : parallel;
 
+
+mixin template palette(){
+	PLTE[] setPLTE(ubyte[] plte_chunk){
+		ulong plte_len = plte_chunk.length;
+		if(plte_len%3 != 0)
+			throw new Exception("The length of PLTE chunks must be divisible by 3");
+		ulong plte_size = plte_len / 3;
+		PLTE[] plte = new PLTE[](plte_size);
+		for(int i=0; i<plte_size; i++){
+			plte[i].R = plte_chunk[0];
+			plte[i].G = plte_chunk[1];
+			plte[i].B = plte_chunk[2];
+			plte_chunk.popFrontN(3);
+		}
+		return plte;
+	}
+
+	ubyte[][] getCoresspondingPLTE(PLTE[] plte, ubyte[][] idat){
+		ubyte[][] output = new ubyte[][](idat.length);
+		for(int i=0; i<idat.length; i++){
+			for(int j=0; j<idat.front.length; j++){
+				PLTE p = plte[idat[i][j]];
+				output[i] ~= p.R;
+				output[i] ~= p.G;
+				output[i] ~= p.B;
+			}
+		}
+		return output;
+	}
+
+}
 class Decode: Img4d{
 	mixin bitOperator;
+	mixin palette;
 	Header header;
 	this(ref Header header){
 		this.header = header;
@@ -107,6 +139,7 @@ class Decode: Img4d{
 		int chunkDataSize;
 		string chunkType;
 		ubyte[] uncIDAT;
+		PLTE[] plte;
 		const string[] ancillaryChunks = [
 			"tRNS", "gAMA", "cHRM", "sRGB", "iCCP", "tEXt", "zTXt", "iTXt",
 			"bKGD", "pHYs", "vpAg", "sBIT", "sPLT", "hIST", "tIME", "fRAc",
@@ -135,6 +168,13 @@ class Decode: Img4d{
 					uncIDAT ~= cast(ubyte[]) uc.uncompress(idat.dup);
 					break;
 
+				case "PLTE":
+					int endIdx = chunkDataSize;
+					idx += chunkTypeSize;
+					ubyte[] plte_chunk = data_[idx ..endIdx+idx];
+					plte = setPLTE(plte_chunk);
+					idx += chunkCrcSize + endIdx;
+					break;
 				case "IEND":
 					idx = -1; // To end while() loop
 					break;
@@ -150,53 +190,28 @@ class Decode: Img4d{
 		auto data = uncIDAT.chunks(numScanline).array;
 		ubyte[] filters = data.map!(sc => sc.front).array;
 		data = data.map!((a)=> a.remove(0)).array;
-
-		Appender!(ubyte[])[] R, G, B, A, gray;
-		R.length = data.length;
-		G.length = data.length;
-		B.length = data.length;
-		A.length = data.length;
-		gray.length = data.length;
-
 		bool isAlpha = false;
 		bool isGray = false;
-		with (colorTypes) with (this.header){
+		with(colorTypes) with(this.header){
 			if((colorType == grayscaleA) || (colorType == trueColorA))
 				isAlpha = true;
 			if((colorType == grayscale) || (colorType == grayscaleA))
 				isGray = true;
-		}
-		for(int i = 0; i < data.length; i++){
-			ulong len = data[i].length;
-			while (data[i].length > 0){
-				if(isGray){
-					gray[][i].put(data[i][0]);
-					data[i] = data[i][1 .. $];
-					if(isAlpha){
-						A[][i].put(data[i][0]);
-						data[i] = data[i][1 .. $];
-					}
-				}else{ // true color
-					R[][i].put(data[i][0]);
-					G[][i].put(data[i][1]);
-					B[][i].put(data[i][2]);
-					data[i] = data[i][3 .. $];
-					if (isAlpha){
-						A[][i].put(data[i][0]);
-						data[i] = data[i][1 .. $];
-					}
+
+			if(colorType != indexColor){
+				auto channels = disassembleEachChannel(data, isGray, isAlpha);
+				foreach(i, ref channel; channels.parallel){
+					if(channel.empty) continue;
+					this.inverseFiltering(channel, filters);
 				}
+				return setEachChannelsToPixel(channels, isGray, isAlpha);
 			}
+			// index color
+			this.inverseFiltering(data, filters);
+			data = this.getCoresspondingPLTE(plte, data);
+			auto channels = disassembleEachChannel(data, isGray, isAlpha);
+			return setEachChannelsToPixel(channels, isGray, isAlpha);
 		}
-		auto channels = isGray 
-			? [gray.map!(a=> a[]).array, A.map!(a=> a[]).array] 
-			: [R.map!(a=> a[]).array, G.map!(a=> a[]).array, 
-				B.map!(a=> a[]).array, A.map!(a=> a[]).array];
-		foreach(i, ref channel; channels.parallel){
-			if(channel.empty) continue;
-			this.inverseFiltering(channel, filters);
-		}
-		return setEachChannelsToPixel(channels, isGray, isAlpha);
 	}
 }
 

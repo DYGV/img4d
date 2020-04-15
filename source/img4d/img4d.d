@@ -130,6 +130,12 @@ struct Header{
 	ubyte[] _crc;
 }
 
+struct PLTE{
+	ubyte R;
+	ubyte G;
+	ubyte B;
+}
+
 struct Pixel{
 
 	this(ref ubyte[][] R, ref ubyte[][] G, ref ubyte[][] B){
@@ -274,6 +280,43 @@ class Img4d{
 				? Pixel(channels[0], channels[1], channels[2], channels[3]) // RGBA
 				: Pixel(channels[0], channels[1], channels[2]); // RGB
 		}
+	}
+
+	auto  disassembleEachChannel(ubyte[][] data, bool isGray, bool isAlpha){
+		Appender!(ubyte[])[] R, G, B, A, gray;
+		R.length = data.length;
+		G.length = data.length;
+		B.length = data.length;
+		A.length = data.length;
+		gray.length = data.length;
+
+		for(int i = 0; i < data.length; i++){
+			ulong len = data[i].length;
+			while (data[i].length > 0){
+				if(isGray){
+					gray[][i].put(data[i][0]);
+					data[i] = data[i][1 .. $];
+					if(isAlpha){
+						A[][i].put(data[i][0]);
+						data[i] = data[i][1 .. $];
+					}
+				}else{ // true color
+					R[][i].put(data[i][0]);
+					G[][i].put(data[i][1]);
+					B[][i].put(data[i][2]);
+					data[i] = data[i][3 .. $];
+					if (isAlpha){
+						A[][i].put(data[i][0]);
+						data[i] = data[i][1 .. $];
+					}
+				}
+			}
+		}
+		auto channels = isGray 
+			? [gray.map!(a=> a[]).array, A.map!(a=> a[]).array] 
+			: [R.map!(a=> a[]).array, G.map!(a=> a[]).array, 
+				B.map!(a=> a[]).array, A.map!(a=> a[]).array];
+		return channels;
 	}
 
 	auto getChannels(Pixel pixel){
