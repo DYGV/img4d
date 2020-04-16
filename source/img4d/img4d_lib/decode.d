@@ -24,23 +24,50 @@ mixin template palette(){
 		return plte;
 	}
 
-	ubyte[][] getCoresspondingPLTE(PLTE[] plte, ubyte[][] idat){
-		ubyte[][] output = new ubyte[][](idat.length);
+	ubyte[][] getCoresspondingPLTE(PLTE[] plte, ubyte[][] idat, ref Header header){
+		auto output = new Appender!(ubyte[])[](idat.length);
+		header.colorType = colorTypes.trueColor;
 		for(int i=0; i<idat.length; i++){
 			for(int j=0; j<idat.front.length; j++){
 				PLTE p = plte[idat[i][j]];
-				output[i] ~= p.R;
-				output[i] ~= p.G;
-				output[i] ~= p.B;
+				output[][i].put(p.R);
+				output[][i].put(p.G);
+				output[][i].put(p.B);
 			}
 		}
-		return output;
+		return output.map!(a => a[]).array;
 	}
-
 }
+
+
+
+mixin template transparency(){
+	void insertAlpha(ubyte[] trns, ref Header header,
+			ref ubyte[][] img, ubyte[][] idat){
+		with(colorTypes)
+			if(header.colorType == indexColor || header.colorType == trueColor){
+				header.colorType = trueColorA;
+			}
+		ubyte opacity = 255;
+		auto chunked_img = img.map!(a => a.chunks(3).array).array;
+
+		for(int i=0; i<chunked_img.length; i++){
+			for(int j=0; j<chunked_img.front.length; j++){
+					if(idat[i][j] < trns.length){
+						chunked_img[i][j] ~= trns[idat[i][j]];
+					}else{
+						chunked_img[i][j] ~= opacity;
+					}
+			}
+		}
+		img = chunked_img.map!join.array;
+	}
+}
+
 class Decode: Img4d{
 	mixin bitOperator;
 	mixin palette;
+	mixin transparency;
 	Header header;
 	this(ref Header header){
 		this.header = header;
@@ -140,10 +167,11 @@ class Decode: Img4d{
 		string chunkType;
 		ubyte[] uncIDAT;
 		PLTE[] plte;
+		ubyte[] trns;
 		const string[] ancillaryChunks = [
-			"tRNS", "gAMA", "cHRM", "sRGB", "iCCP", "tEXt", "zTXt", "iTXt",
-			"bKGD", "pHYs", "vpAg", "sBIT", "sPLT", "hIST", "tIME", "fRAc",
-			"gIFg", "gIFt", "gIFx", "oFFs", "pCAL", "sCAL"
+			"gAMA", "cHRM", "sRGB", "iCCP", "tEXt", "zTXt", "iTXt",
+			"bKGD", "pHYs", "vpAg", "sBIT", "sPLT", "hIST", "tIME",
+			"gIFg", "gIFt", "gIFx", "oFFs", "pCAL", "sCAL", "fRAc"
 		];
 
 		idx += sigSize;
@@ -175,6 +203,14 @@ class Decode: Img4d{
 					plte = setPLTE(plte_chunk);
 					idx += chunkCrcSize + endIdx;
 					break;
+
+				case "tRNS":
+					int endIdx = chunkDataSize;
+					idx += chunkTypeSize;
+					trns = data_[idx ..endIdx+idx];
+					idx += chunkCrcSize + endIdx;
+					break;
+
 				case "IEND":
 					idx = -1; // To end while() loop
 					break;
@@ -193,7 +229,7 @@ class Decode: Img4d{
 		bool isAlpha = false;
 		bool isGray = false;
 		with(colorTypes) with(this.header){
-			if((colorType == grayscaleA) || (colorType == trueColorA))
+			if((colorType == grayscaleA) || (colorType == trueColorA) || !trns.empty)
 				isAlpha = true;
 			if((colorType == grayscale) || (colorType == grayscaleA))
 				isGray = true;
@@ -208,7 +244,11 @@ class Decode: Img4d{
 			}
 			// index color
 			this.inverseFiltering(data, filters);
-			data = this.getCoresspondingPLTE(plte, data);
+			ubyte[][] data_temp = data;
+			data = this.getCoresspondingPLTE(plte, data, this.header);
+			if(isAlpha){
+				insertAlpha(trns, this.header, data, data_temp);
+			}
 			auto channels = disassembleEachChannel(data, isGray, isAlpha);
 			return setEachChannelsToPixel(channels, isGray, isAlpha);
 		}
